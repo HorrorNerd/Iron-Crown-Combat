@@ -1,6 +1,6 @@
 const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
 const fighterSheet = "Fighter Tracker";
-const eventSheet = "Event Tracker";
+const eventSheet = "Event Results";
 
 // Convert to usable JSON via opensheet.vercel.app
 const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fighterSheet)}`;
