@@ -33,15 +33,25 @@ function openModal(fighterName) {
   const modal = document.getElementById("modal");
   const content = document.getElementById("modal-content");
 
+  // Blank bios for now:
   const bios = {
-    "Master Bo Quin": "A 65-year-old Wing Chun master known for ruthless counters and the mythical Five Point Exploding Heart Palm Strike.",
-    "Ayame Kurogane": "A fiery New Yorker with a sharp wit and a sharper striking game, Ayame blends modern MMA with street toughness.",
-    "Reiko Draven": "Silent but savage, Reiko carves her legacy with cold precision and crushing submissions. The mat is her kingdom.",
-    "Jakob Rivera": "A tactical wrestler with quick grappling skills and a rising star in the league.",
-    "Johnny Decade": "A veteran brawler known for his resilience and knockout power.",
-    "Ind V": "Part of a dynamic tag team, known for high-energy offense and teamwork.",
-    "Harlem Hustle": "Tag team specialists with a flair for showmanship and ruthless tactics.",
-    "Darius Max": "A dominant tag division fighter, relying on power and ring intelligence.",
+    "Reiko Draven": "",
+    "Brielle Fontaine": "",
+    "Dante Marcheli": "",
+    "Malik Carter": "",
+    "Logan Briggs": "",
+    "Kai Lawson": "",
+    "Igor": "",
+    "Kumari Twins": "",
+    "Cole Maddox": "",
+    "Master Bo Quin": "",
+    "Marcus Graves": "",
+    "Eli Blackfox": "",
+    "Veronica Kane": "",
+    "Shiv": "",
+    "The Executioner": "",
+    "Sophia Rodriques": "",
+    "Abigail Jones": ""
   };
 
   const history = eventData.filter(e =>
@@ -57,8 +67,15 @@ function openModal(fighterName) {
     const payout = rating * 100;
     const winner = match.Winner;
     const isDraw = winner === "Draw";
-    const bonusType = match.Bonus?.trim();
-    const hasBonus = ["KO of the Night", "Submission of the Night", "Fight of the Night"].includes(bonusType);
+
+    const bonusTypeRaw = match["Bonus Type"]?.trim().toLowerCase();
+    const bonusMap = {
+      "ko of the night": "KO of the Night",
+      "submission of the night": "Submission of the Night",
+      "fight of the night": "Fight of the Night"
+    };
+    const bonusType = bonusMap[bonusTypeRaw] || null;
+    const hasBonus = bonusType !== null;
     const bonusAmount = hasBonus ? 5000 : 0;
 
     let earnings = 0;
@@ -83,7 +100,7 @@ function openModal(fighterName) {
       <strong>Earnings:</strong> $${earnings.toLocaleString()}</li>`;
   }).join("");
 
-  const bio = bios[fighterName] || "This fighter’s story is still being written.";
+  const bio = bios[fighterName] || "";
 
   content.innerHTML = `
     <h2>${fighterName}</h2>
@@ -132,8 +149,15 @@ async function loadEvents() {
       const fighterA = match["Fighter A"];
       const fighterB = match["Fighter B"];
       const winner = match.Winner;
-      const bonusType = match.Bonus?.trim();
-      const hasBonus = ["KO of the Night", "Submission of the Night", "Fight of the Night"].includes(bonusType);
+
+      const bonusTypeRaw = match["Bonus Type"]?.trim().toLowerCase();
+      const bonusMap = {
+        "ko of the night": "KO of the Night",
+        "submission of the night": "Submission of the Night",
+        "fight of the night": "Fight of the Night"
+      };
+      const bonusType = bonusMap[bonusTypeRaw] || null;
+      const hasBonus = bonusType !== null;
       const bonusAmount = hasBonus ? 5000 : 0;
 
       let fighterAEarnings = 0;
