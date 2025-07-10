@@ -74,10 +74,12 @@ function openModal(fighterName) {
 
     if (hasBonus) bonuses++;
 
+    total += earnings;
+
     return `<li>${match["Fighter A"]} vs ${match["Fighter B"]} - 
       <strong>Winner:</strong> ${match.Winner} | 
       <strong>Rating:</strong> ${match["Match Rating"]} | 
-      <strong>Bonus:</strong> ${bonusType || "—"} (${hasBonus ? "$5,000" : "$0"}) | 
+      <strong>Award:</strong> ${hasBonus ? bonusType + " ($5,000)" : "— ($0)"} | 
       <strong>Earnings:</strong> $${earnings.toLocaleString()}</li>`;
   }).join("");
 
@@ -154,7 +156,7 @@ async function loadEvents() {
         <p><strong>${fighterA} vs ${fighterB}</strong></p>
         <p>🏆 Winner: <span class="winner">${winner}</span></p>
         <p>⭐ Rating: <span class="rating">${stars}</span> (${ratingText})</p>
-        <p>🎁 Bonus: ${bonusType || "—"} (${hasBonus ? "$5,000" : "$0"})</p>
+        <p>🎁 Award: ${hasBonus ? bonusType + " ($5,000)" : "— ($0)"}</p>
         <p>💵 ${fighterA}: $${fighterAEarnings.toLocaleString()} | ${fighterB}: $${fighterBEarnings.toLocaleString()}</p>
       `;
       contentDiv.appendChild(matchDiv);
