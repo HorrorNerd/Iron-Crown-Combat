@@ -33,34 +33,18 @@ function openModal(fighterName) {
   const modal = document.getElementById("modal");
   const content = document.getElementById("modal-content");
 
-  // Blank bios for now:
   const bios = {
-    "Reiko Draven": "",
-    "Brielle Fontaine": "",
-    "Dante Marcheli": "",
-    "Malik Carter": "",
-    "Logan Briggs": "",
-    "Kai Lawson": "",
-    "Igor": "",
-    "Kumari Twins": "",
-    "Cole Maddox": "",
-    "Master Bo Quin": "",
-    "Marcus Graves": "",
-    "Eli Blackfox": "",
-    "Veronica Kane": "",
-    "Shiv": "",
-    "The Executioner": "",
-    "Sophia Rodriques": "",
-    "Abigail Jones": ""
+    "Reiko Draven": "", "Brielle Fontaine": "", "Dante Marcheli": "", "Malik Carter": "",
+    "Logan Briggs": "", "Kai Lawson": "", "Igor": "", "Kumari Twins": "", "Cole Maddox": "",
+    "Master Bo Quin": "", "Marcus Graves": "", "Eli Blackfox": "", "Veronica Kane": "",
+    "Shiv": "", "The Executioner": "", "Sophia Rodriques": "", "Abigail Jones": ""
   };
 
   const history = eventData.filter(e =>
     e["Fighter A"] === fighterName || e["Fighter B"] === fighterName
   );
 
-  let total = 0;
-  let wins = 0;
-  let bonuses = 0;
+  let total = 0, wins = 0, bonuses = 0;
 
   const fightList = history.map(match => {
     const rating = parseInt(match["Match Rating"].replace("%", "")) || 0;
@@ -68,8 +52,9 @@ function openModal(fighterName) {
     const winner = match.Winner;
     const isDraw = winner === "Draw";
 
-    const bonusAmount = parseInt(match["Bonus"]) || 0;
-    const bonusTypeRaw = match["Bonus Type"]?.trim() || "";
+    const bonusRaw = match["Bonus"] || "";
+    const bonusAmount = parseInt(bonusRaw.replace(/\$|,/g, "")) || 0;
+    const bonusTypeRaw = (match["Bonus Type"] || "").trim();
     const hasBonus = bonusAmount > 0 && bonusTypeRaw.length > 0;
     const bonusType = hasBonus ? bonusTypeRaw : null;
 
@@ -81,17 +66,16 @@ function openModal(fighterName) {
       earnings = payout + bonusAmount;
       wins++;
     } else {
-      earnings = (payout / 2);
+      earnings = payout / 2;
     }
 
     if (hasBonus) bonuses++;
-
     total += earnings;
 
-    return `<li>${match["Fighter A"]} vs ${match["Fighter B"]} - 
-      <strong>Winner:</strong> ${match.Winner} | 
-      <strong>Rating:</strong> ${match["Match Rating"]} | 
-      <strong>Award:</strong> ${hasBonus ? `${bonusType} ($${bonusAmount.toLocaleString()})` : "— ($0)"} | 
+    return `<li>${match["Fighter A"]} vs ${match["Fighter B"]} -
+      <strong>Winner:</strong> ${match.Winner} |
+      <strong>Rating:</strong> ${match["Match Rating"]} |
+      <strong>Award:</strong> ${hasBonus ? `${bonusType} ($${bonusAmount.toLocaleString()})` : "— ($0)"} |
       <strong>Earnings:</strong> $${earnings.toLocaleString()}</li>`;
   }).join("");
 
@@ -118,7 +102,8 @@ async function loadEvents() {
   const data = await res.json();
   const container = document.getElementById("events-container");
   container.innerHTML = "";
-  let grouped = {};
+
+  const grouped = {};
   data.forEach(row => {
     if (!grouped[row.Event]) grouped[row.Event] = [];
     grouped[row.Event].push(row);
@@ -145,8 +130,9 @@ async function loadEvents() {
       const fighterB = match["Fighter B"];
       const winner = match.Winner;
 
-      const bonusAmount = parseInt(match["Bonus"]) || 0;
-      const bonusTypeRaw = match["Bonus Type"]?.trim() || "";
+      const bonusRaw = match["Bonus"] || "";
+      const bonusAmount = parseInt(bonusRaw.replace(/\$|,/g, "")) || 0;
+      const bonusTypeRaw = (match["Bonus Type"] || "").trim();
       const hasBonus = bonusAmount > 0 && bonusTypeRaw.length > 0;
       const bonusType = hasBonus ? bonusTypeRaw : null;
 
@@ -158,10 +144,10 @@ async function loadEvents() {
         fighterBEarnings = (payout / 2) + (bonusAmount / 2);
       } else if (winner === fighterA) {
         fighterAEarnings = payout + bonusAmount;
-        fighterBEarnings = (payout / 2);
+        fighterBEarnings = payout / 2;
       } else if (winner === fighterB) {
         fighterBEarnings = payout + bonusAmount;
-        fighterAEarnings = (payout / 2);
+        fighterAEarnings = payout / 2;
       }
 
       const matchDiv = document.createElement("div");
