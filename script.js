@@ -42,7 +42,7 @@ function openModal(fighterName) {
     "Ind V": "Part of a dynamic tag team, known for high-energy offense and teamwork.",
     "Harlem Hustle": "Tag team specialists with a flair for showmanship and ruthless tactics.",
     "Darius Max": "A dominant tag division fighter, relying on power and ring intelligence.",
-    // Add more bios if needed
+    // Add more bios as needed
   };
 
   const history = eventData.filter(e =>
@@ -57,10 +57,11 @@ function openModal(fighterName) {
     const rating = parseInt(match["Match Rating"].replace("%", "")) || 0;
     const purse = rating * 100;
     const isWinner = match.Winner === fighterName;
+    const isDraw = match.Winner === "Draw";
     const bonusTypes = ["KO of the Night", "Submission of the Night", "Fight of the Night"];
     const hasBonus = bonusTypes.includes((match.Bonus || "").trim());
     const bonus = hasBonus ? 5000 : 0;
-    const earnings = isWinner ? purse + bonus : purse * 0.5 + bonus;
+    const earnings = isDraw ? (purse / 2 + bonus) : (isWinner ? purse + bonus : purse * 0.5 + bonus);
 
     total += earnings;
     if (isWinner) wins++;
@@ -129,7 +130,11 @@ async function loadEvents() {
 
       let fighterAEarnings = 0;
       let fighterBEarnings = 0;
-      if (winner === fighterA) {
+
+      if (winner === "Draw") {
+        fighterAEarnings = totalPayout / 2 + bonusAmount;
+        fighterBEarnings = totalPayout / 2 + bonusAmount;
+      } else if (winner === fighterA) {
         fighterAEarnings = totalPayout + bonusAmount;
         fighterBEarnings = totalPayout / 2 + bonusAmount;
       } else if (winner === fighterB) {
