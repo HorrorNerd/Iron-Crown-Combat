@@ -1,103 +1,35 @@
-/* Hidden class for collapsibles */
-.hidden {
-  display: none !important;
-}
-
-/* Event Card Styles */
-.event-card {
-  background-color: #121212;
-  border: 2px solid gold;
-  margin-bottom: 1.5em;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.15);
-}
-
-/* Event title (clickable) */
-.event-title {
-  background: #1a1a1a;
-  color: gold;
-  font-size: 1.3em;
-  padding: 1em;
-  margin: 0;
-  cursor: pointer;
-  font-weight: bold;
-  border-bottom: 1px solid gold;
-}
-
-/* Collapsible match content */
+/* Collapsible Content Styling */
 .collapsible-content {
-  background-color: #202020;
-  padding: 1em 1.5em 1.5em;
+  background-color: #181818; /* slightly lighter than outer container */
+  padding: 1.2em 1.5em;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
-/* Match block inside event */
+/* Match Info Block */
 .match {
-  background-color: #2a2a2a;
-  margin: 1em 0;
+  background-color: #252525;
+  margin-bottom: 1em;
   padding: 1em;
   border-left: 5px solid crimson;
   border-radius: 6px;
-  box-shadow: inset 0 0 5px rgba(220, 20, 60, 0.25);
+  box-shadow: inset 0 0 6px rgba(255, 0, 0, 0.2);
+  color: #f5f5f5; /* light readable text */
 }
 
 .match p {
-  margin: 0.5em 0;
-  line-height: 1.5em;
-  color: #f0f0f0;
+  margin: 0.4em 0;
+  font-size: 1em;
+  line-height: 1.4em;
 }
 
-/* Fighter name highlight */
+/* Highlighted Text */
 .winner {
-  color: #ff4d4d;
+  color: #ff5555;
   font-weight: bold;
 }
 
 .rating {
   color: gold;
   font-weight: bold;
-}
-
-/* Fighter bio section in modal */
-#modal-content .bio {
-  font-style: italic;
-  font-size: 1.1em;
-  color: #e0b97d;
-  margin-bottom: 1em;
-}
-
-/* Card styling (Fighter section) */
-.card {
-  background-color: #1c1c1c;
-  border: 2px solid gold;
-  padding: 1.2em;
-  border-radius: 10px;
-  margin-bottom: 1.5em;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
-}
-
-.card h2 {
-  color: gold;
-  margin-bottom: 0.5em;
-}
-
-.card p {
-  color: #e0e0e0;
-  margin: 0.3em 0;
-}
-
-.card button {
-  margin-top: 0.8em;
-  padding: 0.5em 1em;
-  background-color: crimson;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.card button:hover {
-  background-color: darkred;
 }
