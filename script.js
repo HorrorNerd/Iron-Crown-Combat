@@ -7,15 +7,6 @@ const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(e
 
 let eventData = [];
 
-const normalizeBonus = (b) => {
-  if (!b) return null;
-  const bLower = b.trim().toLowerCase();
-  if (bLower.includes("ko of the night")) return "KO of the Night";
-  if (bLower.includes("submission of the night")) return "Submission of the Night";
-  if (bLower.includes("fight of the night")) return "Fight of the Night";
-  return null;
-};
-
 async function loadFighters() {
   const res = await fetch(fighterURL);
   const fighters = await res.json();
@@ -77,9 +68,10 @@ function openModal(fighterName) {
     const winner = match.Winner;
     const isDraw = winner === "Draw";
 
-    const bonusType = normalizeBonus(match["Bonus Type"]);
-    const hasBonus = bonusType !== null;
-    const bonusAmount = hasBonus ? 5000 : 0;
+    const bonusAmount = parseInt(match["Bonus"]) || 0;
+    const bonusTypeRaw = match["Bonus Type"]?.trim() || "";
+    const hasBonus = bonusAmount > 0 && bonusTypeRaw.length > 0;
+    const bonusType = hasBonus ? bonusTypeRaw : null;
 
     let earnings = 0;
 
@@ -89,7 +81,7 @@ function openModal(fighterName) {
       earnings = payout + bonusAmount;
       wins++;
     } else {
-      earnings = (payout / 2) + bonusAmount;
+      earnings = (payout / 2);
     }
 
     if (hasBonus) bonuses++;
@@ -99,7 +91,7 @@ function openModal(fighterName) {
     return `<li>${match["Fighter A"]} vs ${match["Fighter B"]} - 
       <strong>Winner:</strong> ${match.Winner} | 
       <strong>Rating:</strong> ${match["Match Rating"]} | 
-      <strong>Award:</strong> ${hasBonus ? bonusType + " ($5,000)" : "— ($0)"} | 
+      <strong>Award:</strong> ${hasBonus ? `${bonusType} ($${bonusAmount.toLocaleString()})` : "— ($0)"} | 
       <strong>Earnings:</strong> $${earnings.toLocaleString()}</li>`;
   }).join("");
 
@@ -153,9 +145,10 @@ async function loadEvents() {
       const fighterB = match["Fighter B"];
       const winner = match.Winner;
 
-      const bonusType = normalizeBonus(match["Bonus Type"]);
-      const hasBonus = bonusType !== null;
-      const bonusAmount = hasBonus ? 5000 : 0;
+      const bonusAmount = parseInt(match["Bonus"]) || 0;
+      const bonusTypeRaw = match["Bonus Type"]?.trim() || "";
+      const hasBonus = bonusAmount > 0 && bonusTypeRaw.length > 0;
+      const bonusType = hasBonus ? bonusTypeRaw : null;
 
       let fighterAEarnings = 0;
       let fighterBEarnings = 0;
@@ -165,10 +158,10 @@ async function loadEvents() {
         fighterBEarnings = (payout / 2) + (bonusAmount / 2);
       } else if (winner === fighterA) {
         fighterAEarnings = payout + bonusAmount;
-        fighterBEarnings = (payout / 2) + bonusAmount;
+        fighterBEarnings = (payout / 2);
       } else if (winner === fighterB) {
         fighterBEarnings = payout + bonusAmount;
-        fighterAEarnings = (payout / 2) + bonusAmount;
+        fighterAEarnings = (payout / 2);
       }
 
       const matchDiv = document.createElement("div");
@@ -177,7 +170,7 @@ async function loadEvents() {
         <p><strong>${fighterA} vs ${fighterB}</strong></p>
         <p>🏆 Winner: <span class="winner">${winner}</span></p>
         <p>⭐ Rating: <span class="rating">${stars}</span> (${ratingText})</p>
-        <p>🎁 Award: ${hasBonus ? bonusType + " ($5,000)" : "— ($0)"}</p>
+        <p>🎁 Award: ${hasBonus ? `${bonusType} ($${bonusAmount.toLocaleString()})` : "— ($0)"}</p>
         <p>💵 ${fighterA}: $${fighterAEarnings.toLocaleString()} | ${fighterB}: $${fighterBEarnings.toLocaleString()}</p>
       `;
       contentDiv.appendChild(matchDiv);
