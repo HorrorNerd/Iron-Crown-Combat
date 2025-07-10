@@ -5,17 +5,14 @@ const eventSheet = "Event Results";
 const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fighterSheet)}`;
 const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheet)}`;
 
-// Global store
 let eventData = [];
 
-// Load Fighters with modal bios
 async function loadFighters() {
   const res = await fetch(fighterURL);
   const fighters = await res.json();
   const container = document.getElementById("fighters-container");
   container.innerHTML = "";
 
-  // Preload event data for earnings and history
   const eventRes = await fetch(eventURL);
   eventData = await eventRes.json();
 
@@ -32,10 +29,16 @@ async function loadFighters() {
   });
 }
 
-// Modal logic
 function openModal(fighterName) {
   const modal = document.getElementById("modal");
   const content = document.getElementById("modal-content");
+
+  const bios = {
+    "Master Bo Quin": "A 65-year-old Wing Chun master known for ruthless counters and the mythical Five Point Exploding Heart Palm Strike.",
+    "Ayame Kurogane": "A fiery New Yorker with a sharp wit and a sharper striking game, Ayame blends modern MMA with street toughness.",
+    "Reiko Draven": "Silent but savage, Reiko carves her legacy with cold precision and crushing submissions. The mat is her kingdom.",
+    // Add more bios as needed
+  };
 
   const history = eventData.filter(e =>
     e["Fighter A"] === fighterName || e["Fighter B"] === fighterName
@@ -65,8 +68,11 @@ function openModal(fighterName) {
       <strong>Earnings:</strong> $${earnings.toLocaleString()}</li>`;
   }).join("");
 
+  const bio = bios[fighterName] || "This fighter’s story is still being written.";
+
   content.innerHTML = `
     <h2>${fighterName}</h2>
+    <p class="bio">${bio}</p>
     <p><strong>Total Dynamic Earnings:</strong> $${total.toLocaleString()}</p>
     <p><strong>Total Wins:</strong> ${wins} | <strong>Bonuses Earned:</strong> ${bonuses}</p>
     <h3>Fight History:</h3>
@@ -104,17 +110,17 @@ async function loadEvents() {
       const fighterB = match["Fighter B"];
       const bonus = match.Bonus || "—";
       const bonusTypes = ["KO of the Night", "Submission of the Night", "Fight of the Night"];
-      const aBonus = bonusTypes.includes(bonus.trim()) ? 5000 : 0;
-      const bBonus = aBonus;
+      const hasBonus = bonusTypes.includes(bonus.trim());
+      const bonusAmount = hasBonus ? 5000 : 0;
 
       let fighterAEarnings = 0;
       let fighterBEarnings = 0;
       if (winner === fighterA) {
-        fighterAEarnings = totalPayout + aBonus;
-        fighterBEarnings = totalPayout / 2 + bBonus;
+        fighterAEarnings = totalPayout + bonusAmount;
+        fighterBEarnings = totalPayout / 2 + bonusAmount;
       } else if (winner === fighterB) {
-        fighterBEarnings = totalPayout + bBonus;
-        fighterAEarnings = totalPayout / 2 + aBonus;
+        fighterBEarnings = totalPayout + bonusAmount;
+        fighterAEarnings = totalPayout / 2 + bonusAmount;
       }
 
       card.innerHTML += `
