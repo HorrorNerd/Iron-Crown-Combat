@@ -7,6 +7,15 @@ const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(e
 
 let eventData = [];
 
+const normalizeBonus = (b) => {
+  if (!b) return null;
+  const bLower = b.trim().toLowerCase();
+  if (bLower.includes("ko of the night")) return "KO of the Night";
+  if (bLower.includes("submission of the night")) return "Submission of the Night";
+  if (bLower.includes("fight of the night")) return "Fight of the Night";
+  return null;
+};
+
 async function loadFighters() {
   const res = await fetch(fighterURL);
   const fighters = await res.json();
@@ -68,13 +77,7 @@ function openModal(fighterName) {
     const winner = match.Winner;
     const isDraw = winner === "Draw";
 
-    const bonusTypeRaw = match["Bonus Type"]?.trim().toLowerCase();
-    const bonusMap = {
-      "ko of the night": "KO of the Night",
-      "submission of the night": "Submission of the Night",
-      "fight of the night": "Fight of the Night"
-    };
-    const bonusType = bonusMap[bonusTypeRaw] || null;
+    const bonusType = normalizeBonus(match["Bonus Type"]);
     const hasBonus = bonusType !== null;
     const bonusAmount = hasBonus ? 5000 : 0;
 
@@ -150,13 +153,7 @@ async function loadEvents() {
       const fighterB = match["Fighter B"];
       const winner = match.Winner;
 
-      const bonusTypeRaw = match["Bonus Type"]?.trim().toLowerCase();
-      const bonusMap = {
-        "ko of the night": "KO of the Night",
-        "submission of the night": "Submission of the Night",
-        "fight of the night": "Fight of the Night"
-      };
-      const bonusType = bonusMap[bonusTypeRaw] || null;
+      const bonusType = normalizeBonus(match["Bonus Type"]);
       const hasBonus = bonusType !== null;
       const bonusAmount = hasBonus ? 5000 : 0;
 
