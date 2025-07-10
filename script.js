@@ -42,7 +42,7 @@ function openModal(fighterName) {
     "Ind V": "Part of a dynamic tag team, known for high-energy offense and teamwork.",
     "Harlem Hustle": "Tag team specialists with a flair for showmanship and ruthless tactics.",
     "Darius Max": "A dominant tag division fighter, relying on power and ring intelligence.",
-    // Add any more bios as needed
+    // Add more bios if needed
   };
 
   const history = eventData.filter(e =>
