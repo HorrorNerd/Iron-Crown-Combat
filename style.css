@@ -70,4 +70,36 @@
 
 /* Fighter card styling */
 .card {
-  background-color
+  background-color: #1c1c1c;
+  border: 2px solid gold;
+  padding: 1.2em;
+  border-radius: 10px;
+  margin-bottom: 1.5em;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+}
+
+.card h2 {
+  color: gold;
+  margin-bottom: 0.5em;
+}
+
+.card p {
+  color: #e0e0e0;
+  margin: 0.3em 0;
+}
+
+.card button {
+  margin-top: 0.8em;
+  padding: 0.5em 1em;
+  background-color: crimson;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.card button:hover {
+  background-color: darkred;
+}
