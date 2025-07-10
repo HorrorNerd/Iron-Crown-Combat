@@ -42,7 +42,6 @@ function openModal(fighterName) {
     "Ind V": "Part of a dynamic tag team, known for high-energy offense and teamwork.",
     "Harlem Hustle": "Tag team specialists with a flair for showmanship and ruthless tactics.",
     "Darius Max": "A dominant tag division fighter, relying on power and ring intelligence.",
-    // Add more bios as needed
   };
 
   const history = eventData.filter(e =>
@@ -55,22 +54,30 @@ function openModal(fighterName) {
 
   const fightList = history.map(match => {
     const rating = parseInt(match["Match Rating"].replace("%", "")) || 0;
-    const purse = rating * 100;
-    const isWinner = match.Winner === fighterName;
-    const isDraw = match.Winner === "Draw";
-    const bonusTypes = ["KO of the Night", "Submission of the Night", "Fight of the Night"];
-    const hasBonus = bonusTypes.includes((match.Bonus || "").trim());
-    const bonus = hasBonus ? 5000 : 0;
-    const earnings = isDraw ? (purse / 2 + bonus) : (isWinner ? purse + bonus : purse * 0.5 + bonus);
+    const payout = rating * 100;
+    const winner = match.Winner;
+    const isDraw = winner === "Draw";
+    const bonusType = match.Bonus?.trim();
+    const hasBonus = ["KO of the Night", "Submission of the Night", "Fight of the Night"].includes(bonusType);
+    const bonusAmount = hasBonus ? 5000 : 0;
 
-    total += earnings;
-    if (isWinner) wins++;
+    let earnings = 0;
+
+    if (isDraw) {
+      earnings = (payout / 2) + (bonusAmount / 2);
+    } else if (winner === fighterName) {
+      earnings = payout + bonusAmount;
+      wins++;
+    } else {
+      earnings = (payout / 2) + bonusAmount;
+    }
+
     if (hasBonus) bonuses++;
 
     return `<li>${match["Fighter A"]} vs ${match["Fighter B"]} - 
       <strong>Winner:</strong> ${match.Winner} | 
       <strong>Rating:</strong> ${match["Match Rating"]} | 
-      <strong>Bonus:</strong> ${match.Bonus || "—"} | 
+      <strong>Bonus:</strong> ${bonusType || "—"} (${hasBonus ? "$5,000" : "$0"}) | 
       <strong>Earnings:</strong> $${earnings.toLocaleString()}</li>`;
   }).join("");
 
@@ -119,27 +126,26 @@ async function loadEvents() {
       const ratingText = match["Match Rating"] || "0%";
       const ratingValue = parseInt(ratingText.replace("%", "")) || 0;
       const stars = "★★★★★☆☆☆☆☆".slice(5 - Math.round(ratingValue / 20), 10 - Math.round(ratingValue / 20));
-      const totalPayout = ratingValue * 100;
-      const winner = match.Winner;
+      const payout = ratingValue * 100;
       const fighterA = match["Fighter A"];
       const fighterB = match["Fighter B"];
-      const bonus = match.Bonus || "—";
-      const bonusTypes = ["KO of the Night", "Submission of the Night", "Fight of the Night"];
-      const hasBonus = bonusTypes.includes(bonus.trim());
+      const winner = match.Winner;
+      const bonusType = match.Bonus?.trim();
+      const hasBonus = ["KO of the Night", "Submission of the Night", "Fight of the Night"].includes(bonusType);
       const bonusAmount = hasBonus ? 5000 : 0;
 
       let fighterAEarnings = 0;
       let fighterBEarnings = 0;
 
       if (winner === "Draw") {
-        fighterAEarnings = totalPayout / 2 + bonusAmount;
-        fighterBEarnings = totalPayout / 2 + bonusAmount;
+        fighterAEarnings = (payout / 2) + (bonusAmount / 2);
+        fighterBEarnings = (payout / 2) + (bonusAmount / 2);
       } else if (winner === fighterA) {
-        fighterAEarnings = totalPayout + bonusAmount;
-        fighterBEarnings = totalPayout / 2 + bonusAmount;
+        fighterAEarnings = payout + bonusAmount;
+        fighterBEarnings = (payout / 2) + bonusAmount;
       } else if (winner === fighterB) {
-        fighterBEarnings = totalPayout + bonusAmount;
-        fighterAEarnings = totalPayout / 2 + bonusAmount;
+        fighterBEarnings = payout + bonusAmount;
+        fighterAEarnings = (payout / 2) + bonusAmount;
       }
 
       const matchDiv = document.createElement("div");
@@ -148,7 +154,7 @@ async function loadEvents() {
         <p><strong>${fighterA} vs ${fighterB}</strong></p>
         <p>🏆 Winner: <span class="winner">${winner}</span></p>
         <p>⭐ Rating: <span class="rating">${stars}</span> (${ratingText})</p>
-        <p>🎁 Bonus: ${bonus}</p>
+        <p>🎁 Bonus: ${bonusType || "—"} (${hasBonus ? "$5,000" : "$0"})</p>
         <p>💵 ${fighterA}: $${fighterAEarnings.toLocaleString()} | ${fighterB}: $${fighterBEarnings.toLocaleString()}</p>
       `;
       contentDiv.appendChild(matchDiv);
