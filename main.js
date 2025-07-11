@@ -1,12 +1,9 @@
-// main.js (Final Version)
+// main.js (Final Corrected Version)
 
 // --- CONFIGURATION ---
 const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-const fighterSheet = "Fighter Tracker";
-const eventSheet = "Event Results";
-
-const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fighterSheet)}`;
-const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheet)}`;
+// We only need the main ID now, as we will fetch all sheets at once.
+const spreadsheetURL = `https://opensheet.vercel.app/${sheetID}`;
 
 // --- GLOBAL DATA STORE ---
 let eventData = [];
@@ -49,24 +46,34 @@ function calculateMatchEarnings(match, fighterName = null) {
 }
 
 
-// --- DATA FETCHING ---
+// --- DATA FETCHING (Corrected) ---
 async function loadAllData() {
   if (dataLoaded) return;
   try {
-    const [fighterRes, eventRes] = await Promise.all([
-      fetch(fighterURL),
-      fetch(eventURL)
-    ]);
-    fightersData = await fighterRes.json();
-    eventData = await eventRes.json();
+    // **FIX:** Fetch the entire spreadsheet just once.
+    const response = await fetch(spreadsheetURL);
+    if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+    }
+    const allSheets = await response.json();
+
+    // **FIX:** Assign the correct sheet data from the returned object.
+    fightersData = allSheets['Fighter Tracker'];
+    eventData = allSheets['Event Results'];
+
+    if (!fightersData || !eventData) {
+        console.error("Could not find 'Fighter Tracker' or 'Event Results' sheets in the data.", allSheets);
+        return;
+    }
+    
     dataLoaded = true;
-    console.log("All data loaded successfully.");
+    console.log("All data loaded and assigned correctly.");
   } catch (error) {
-    console.error("Failed to load spreadsheet data:", error);
+    console.error("Failed to load or parse spreadsheet data:", error);
   }
 }
 
-// --- PAGE-SPECIFIC RENDER FUNCTIONS ---
+// --- PAGE-SPECIFIC RENDER FUNCTIONS (No changes needed here) ---
 
 async function displayFighters() {
   await loadAllData();
@@ -97,7 +104,7 @@ async function displayFighters() {
 async function displayEvents() {
   await loadAllData();
   const container = document.getElementById("events-container");
-  if (!container) return;
+  if (!container || !eventData) return;
   container.innerHTML = "";
 
   const groupedByEvent = eventData.reduce((acc, match) => {
@@ -142,13 +149,12 @@ async function displayEvents() {
   });
 }
 
-// --- MODAL LOGIC ---
+// --- MODAL LOGIC (No changes needed here) ---
 function openModal(fighterName) {
   const modal = document.getElementById("modal");
   const content = document.getElementById("modal-content");
   
   const fightHistory = eventData.filter(e => e["Fighter A"] === fighterName || e["Fighter B"] === fighterName);
-
   let totalEarnings = 0, wins = 0, bonuses = 0;
 
   const fightListHTML = fightHistory.map(match => {
