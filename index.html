@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Iron Crown Combat Fighters & Events</title>
+  <title>Iron Crown Combat</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
   <header>
     <h1>Iron Crown Combat</h1>
     <nav>
@@ -28,35 +27,33 @@
     </section>
   </main>
 
-  <!-- Modal -->
   <div id="modal" class="modal hidden-section">
     <div class="modal-content" id="modal-content"></div>
   </div>
 
   <script src="script.js"></script>
   <script>
-    // Navigation toggles
-    const fightersSection = document.getElementById("fighters-section");
-    const eventsSection = document.getElementById("events-section");
     const showFightersBtn = document.getElementById("show-fighters");
     const showEventsBtn = document.getElementById("show-events");
+    const fightersSection = document.getElementById("fighters-section");
+    const eventsSection = document.getElementById("events-section");
     const modal = document.getElementById("modal");
 
-    showFightersBtn.addEventListener("click", () => {
+    showFightersBtn.onclick = () => {
       fightersSection.classList.add("active-section");
       fightersSection.classList.remove("hidden-section");
       eventsSection.classList.add("hidden-section");
       eventsSection.classList.remove("active-section");
-      closeModal();
-    });
+      modal.classList.add("hidden-section");
+    };
 
-    showEventsBtn.addEventListener("click", () => {
+    showEventsBtn.onclick = () => {
       eventsSection.classList.add("active-section");
       eventsSection.classList.remove("hidden-section");
       fightersSection.classList.add("hidden-section");
       fightersSection.classList.remove("active-section");
-      closeModal();
-    });
+      modal.classList.add("hidden-section");
+    };
 
     function closeModal() {
       modal.classList.add("hidden-section");
