@@ -130,3 +130,10 @@ nav button:hover {
   font-style: italic;
   color: #e0c06f;
 }
+.collapsible-content {
+  display: none;
+}
+
+.collapsible-content.show {
+  display: block;
+}
