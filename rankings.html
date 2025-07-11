@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iron Crown Combat - Rankings</title>
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #000; color: #f5f5f5; line-height: 1.6; }
+        header { background-color: #111; padding: 1em; border-bottom: 3px solid gold; text-align: center; }
+        .logo { color: gold; font-size: 2em; font-weight: bold; margin: 0; }
+        nav a { margin: 0 1em; color: #cc0000; text-decoration: none; font-size: 1.1em; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        main { padding: 2em 1em; max-width: 1200px; margin: 0 auto; }
+        /* --- NEW STYLES --- */
+        .champion-section {
+            background-color: #1a1a1a;
+            border: 1px solid gold;
+            text-align: center;
+            padding: 1.5em;
+            margin-bottom: 2.5em;
+            border-radius: 8px;
+        }
+        .champion-section h2 {
+            margin: 0 0 0.5em 0;
+            color: #ccc;
+            font-size: 1.2em;
+            text-transform: uppercase;
+        }
+        #champion-name {
+            color: gold;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        .rankings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
+        .ranking-list h2 { color: gold; border-bottom: 2px solid gold; padding-bottom: 0.5em; }
+        .ranking-list ol { list-style: none; padding: 0; margin: 0; counter-reset: rank-counter; }
+        .ranking-list li { background-color: #1a1a1a; border: 1px solid #333; margin-bottom: 0.8em; border-radius: 5px; }
+        .ranking-list li a { /* Styling the link itself */
+            display: flex;
+            align-items: center;
+            padding: 1em;
+            text-decoration: none;
+            color: #f5f5f5;
+            transition: background-color 0.2s;
+        }
+        .ranking-list li a:hover { background-color: #252525; }
+        .ranking-list li a::before {
+            counter-increment: rank-counter;
+            content: counter(rank-counter);
+            color: gold;
+            font-weight: bold;
+            font-size: 1.5em;
+            margin-right: 0.8em;
+            min-width: 2ch;
+            text-align: right;
+        }
+        .fighter-name { font-weight: bold; }
+        .fighter-stat { margin-left: auto; color: #ccc; }
+        @media (max-width: 768px) { .rankings-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo">Iron Crown Combat</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="fighters.html">Fighters</a>
+            <a href="events.html">Events</a>
+            <a href="rankings.html">Rankings</a>
+        </nav>
+    </header>
+    <main>
+        <!-- ** NEW CHAMPION SECTION ** -->
+        <div class="champion-section">
+            <h2>Current Champion</h2>
+            <p id="champion-name">TBD</p>
+        </div>
+
+        <div class="rankings-grid" id="rankings-container">
+            <div class="ranking-list" id="top-wins-container">
+                <h2>Top Fighters (by Wins)</h2>
+                <p>Loading rankings...</p>
+            </div>
+            <div class="ranking-list" id="top-earners-container">
+                <h2>Top Earners (by Prize Money)</h2>
+                <p>Loading rankings...</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+            const fighterSheetName = "Fighter Tracker";
+            const eventSheetName = "Event Results";
+            const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fighterSheetName)}`;
+            const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheetName)}`;
+            const BONUS_VALUE = 5000;
+            const IGNORED_BONUS_TEXT = new Set(['tournament', 'non tournament']);
+            const calculateFighterStats = (fighterName, allEvents) => {
+                const history = allEvents.filter(e => e["Fighter A"]?.trim() === fighterName || e["Fighter B"]?.trim() === fighterName);
+                let totalEarnings = 0;
+                history.forEach(match => {
+                    const purse = parseInt(match["Match Rating"]?.replace('%', '')) * 100 || 0;
+                    const winner = match.Winner?.trim();
+                    const isWinner = winner === fighterName;
+                    const originalBonusType = (match["Bonus Type"] || match["bonus type"] || "").trim();
+                    const cleanBonusType = originalBonusType.toLowerCase();
+                    let currentBonus = 0;
+                    if (!IGNORED_BONUS_TEXT.has(cleanBonusType) && cleanBonusType) {
+                        if (cleanBonusType.includes('fight') || cleanBonusType.includes('match')) {
+                            currentBonus = BONUS_VALUE;
+                        } else if (cleanBonusType.includes('ko') || cleanBonusType.includes('submission')) {
+                            if (isWinner) currentBonus = BONUS_VALUE;
+                        }
+                    }
+                    const earnings = (isWinner || winner === 'Draw') ? (purse + currentBonus) : (purse / 2 + currentBonus);
+                    totalEarnings += earnings;
+                });
+                return totalEarnings;
+            };
+            const loadRankings = async () => {
+                const winsContainer = document.getElementById('top-wins-container');
+                const earnersContainer = document.getElementById('top-earners-container');
+                try {
+                    const [fighterRes, eventRes] = await Promise.all([fetch(fighterURL), fetch(eventURL)]);
+                    if (!fighterRes.ok || !eventRes.ok) throw new Error("Failed to fetch spreadsheet data.");
+                    const fightersData = await fighterRes.json();
+                    const eventData = await eventRes.json();
+                    const rankedFighters = fightersData.map(fighter => {
+                        if (!fighter.Fighter) return null;
+                        return { name: fighter.Fighter, wins: parseInt(fighter.Wins, 10) || 0, totalEarnings: calculateFighterStats(fighter.Fighter, eventData) };
+                    }).filter(Boolean);
+                    const sortedByWins = [...rankedFighters].sort((a, b) => b.wins - a.wins);
+                    const sortedByEarnings = [...rankedFighters].sort((a, b) => b.totalEarnings - a.totalEarnings);
+                    displayRankings(winsContainer, sortedByWins, 'wins');
+                    displayRankings(earnersContainer, sortedByEarnings, 'earnings');
+                } catch (error) {
+                    winsContainer.innerHTML = `<p style="color: red;">Error loading rankings.</p>`;
+                    earnersContainer.innerHTML = `<p style="color: red;">Error loading rankings.</p>`;
+                }
+            };
+            const displayRankings = (container, data, type) => {
+                const title = container.querySelector('h2').outerHTML;
+                const list = document.createElement('ol');
+                data.forEach(fighter => {
+                    const item = document.createElement('li');
+                    const stat = type === 'wins' ? `${fighter.wins} Wins` : `$${fighter.totalEarnings.toLocaleString()}`;
+                    // ** NEW: Name is wrapped in a link that points to fighters.html **
+                    item.innerHTML = `<a href="fighters.html?fighter=${encodeURIComponent(fighter.name)}"><span class="fighter-name">${fighter.name}</span><span class="fighter-stat">${stat}</span></a>`;
+                    list.appendChild(item);
+                });
+                container.innerHTML = title;
+                container.appendChild(list);
+            };
+            loadRankings();
+        });
+    </script>
+</body>
+</html>
