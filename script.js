@@ -27,7 +27,6 @@ function calculateFighterStats(fighterName, allEvents) {
         const isWinner = winner === trimmedFighterName;
         const bonusType = (match["bonus type"] || "").trim().toLowerCase();
         
-        // ** FINAL MATH FIX: Simplified and corrected bonus logic **
         let currentBonus = 0;
         if (SHARED_BONUSES.includes(bonusType)) {
             currentBonus = BONUS_VALUE;
@@ -109,7 +108,6 @@ async function loadEvents() {
                 let fighterAEarnings = (winner === fighterA || winner === "Draw") ? purse : purse / 2;
                 let fighterBEarnings = (winner === fighterB || winner === "Draw") ? purse : purse / 2;
                 
-                // ** FINAL MATH FIX: Simplified and corrected bonus logic **
                 let isActualBonus = false;
                 if (SHARED_BONUSES.includes(bonusType)) {
                     fighterAEarnings += BONUS_VALUE;
