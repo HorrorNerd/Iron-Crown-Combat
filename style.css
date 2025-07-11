@@ -137,3 +137,6 @@ nav button:hover {
 .collapsible-content.show {
   display: block;
 }
+.event-title {
+  cursor: pointer;
+}
