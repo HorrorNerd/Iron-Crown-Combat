@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iron Crown Combat - Events</title>
+    
+    <!-- ALL CSS IS NOW INSIDE THIS FILE -->
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #000; color: #f5f5f5; }
+        header { background-color: #111; padding: 1em; border-bottom: 3px solid gold; text-align: center; }
+        h1 { color: gold; }
+        nav a { margin: 0 1em; color: red; text-decoration: none; font-size: 1.1em; }
+        nav a:hover { text-decoration: underline; }
+        main { padding: 1em; max-width: 900px; margin: 0 auto; }
+        .card, .event-card { background-color: #111; border: 1px solid gold; margin-bottom: 1em; padding: 1em; border-radius: 8px; }
+        .event-title { color: gold; font-size: 1.3em; margin: 0 0 0.5em 0; border-bottom: 1px solid gold; padding-bottom: 0.3em; cursor: pointer; }
+        .event-title:hover { color: #fff; }
+        .matches-container { display: none; }
+        .match { background-color: #1b1b1b; padding: 0.8em; margin-top: 0.5em; border-left: 3px solid red; border-radius: 4px; }
+        .winner { color: red; font-weight: bold; }
+        .rating { color: gold; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Event Cards</h1>
+        <nav>
+            <a href="https://horrornerd.github.io/Iron-Crown-Combat/index.html">Home</a>
+            <a href="https://horrornerd.github.io/Iron-Crown-Combat/fighters.html">Fighters</a>
+        </nav>
+    </header>
+    <main id="events-container">
+        <p style="text-align: center; font-size: 1.2em;">Loading events...</p>
+    </main>
+
+    <!-- ALL JAVASCRIPT IS NOW INSIDE THIS FILE -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+            const eventSheet = "Event Results";
+            const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheet)}`;
+            const BONUS_VALUE = 5000;
+            
+            // These are the ONLY valid bonus texts, converted to a Set for fast lookups.
+            const WINNER_BONUSES = new Set(['ko of the night', 'submission of the night']);
+            const SHARED_BONUSES = new Set(['fight of the night', 'match of the night']);
+
+            const loadEvents = async () => {
+                const container = document.getElementById("events-container");
+                try {
+                    const res = await fetch(eventURL);
+                    if (!res.ok) throw new Error(`Network response was not ok. Status: ${res.status}`);
+                    
+                    const data = await res.json();
+                    container.innerHTML = ""; // Clear loading message
+
+                    // Self-Diagnosis: Check if we got data and what the headers are
+                    if(data.length === 0) {
+                        console.error("DEBUG: Fetched data is empty. Check sheet permissions or if the sheet is empty.");
+                        container.innerHTML = `<p style="color: red;">Error: Could not retrieve any data from the spreadsheet.</p>`;
+                        return;
+                    }
+                    console.log("DEBUG: The first row of data from your sheet is:", data[0]);
+
+                    const groupedByEvent = data.reduce((acc, row) => {
+                        const eventName = row.Event?.trim();
+                        if (eventName) {
+                            if (!acc[eventName]) acc[eventName] = [];
+                            acc[eventName].push(row);
+                        }
+                        return acc;
+                    }, {});
+
+                    Object.keys(groupedByEvent).forEach(eventName => {
+                        const eventCard = document.createElement("div");
+                        eventCard.className = "event-card";
+                        
+                        const title = document.createElement("h2");
+                        title.className = "event-title";
+                        title.innerHTML = `🔥 ${eventName}`;
+                        
+                        const matchesContainer = document.createElement("div");
+                        matchesContainer.className = "matches-container";
+
+                        groupedByEvent[eventName].forEach(match => {
+                            const ratingText = match["Match Rating"] || "0%";
+                            const ratingValue = parseInt(ratingText.replace("%", "")) || 0;
+                            const stars = "★★★★★☆☆☆☆☆".slice(5 - Math.round(ratingValue / 20), 10 - Math.round(ratingValue / 20));
+                            
+                            const winner = match.Winner?.trim();
+                            const fighterA = match["Fighter A"]?.trim();
+                            const fighterB = match["Fighter B"]?.trim();
+                            
+                            // This is the definitive, corrected bonus logic.
+                            const originalBonusType = (match["bonus type"] || "").trim();
+                            const cleanBonusType = originalBonusType.toLowerCase();
+                            
+                            const purse = ratingValue * 100;
+                            let fighterAEarnings = (winner === fighterA || winner === "Draw") ? purse : purse / 2;
+                            let fighterBEarnings = (winner === fighterB || winner === "Draw") ? purse : purse / 2;
+                            
+                            let isActualBonus = false;
+                            if (SHARED_BONUSES.has(cleanBonusType)) {
+                                fighterAEarnings += BONUS_VALUE;
+                                fighterBEarnings += BONUS_VALUE;
+                                isActualBonus = true;
+                            } else if (WINNER_BONUSES.has(cleanBonusType)) {
+                                if (winner === fighterA) fighterAEarnings += BONUS_VALUE;
+                                if (winner === fighterB) fighterBEarnings += BONUS_VALUE;
+                                isActualBonus = true;
+                            } else if (originalBonusType && originalBonusType !== "—") {
+                                // Self-Diagnosis: If there's text in the bonus column but it's not a valid bonus.
+                                console.log(`DEBUG: For match '${fighterA} vs ${fighterB}', the text '${originalBonusType}' was found but is not a valid bonus type.`);
+                            }
+                            
+                            const bonusDisplayType = originalBonusType || "—";
+                            const bonusDisplayText = isActualBonus ? `${bonusDisplayType} ($${BONUS_VALUE.toLocaleString()})` : bonusDisplayType;
+
+                            matchesContainer.innerHTML += `
+                                <div class="match">
+                                    <p><strong>${fighterA} vs ${fighterB}</strong></p>
+                                    <p>🏆 Winner: <span class="winner">${winner || "N/A"}</span></p>
+                                    <p>⭐ Rating: <span class="rating">${stars}</span> (${ratingText})</p>
+                                    <p>🎁 Bonus: <span class="winner">${bonusDisplayText}</span></p>
+                                    <p>💵 ${fighterA}: $${fighterAEarnings.toLocaleString()} | ${fighterB}: $${fighterBEarnings.toLocaleString()}</p>
+                                </div>`;
+                        });
+                        
+                        title.addEventListener('click', () => {
+                            matchesContainer.style.display = matchesContainer.style.display === 'block' ? 'none' : 'block';
+                        });
+
+                        eventCard.appendChild(title);
+                        eventCard.appendChild(matchesContainer);
+                        container.appendChild(eventCard);
+                    });
+                } catch (error) {
+                    container.innerHTML = `<p style="color: red;">A critical error occurred. Please check sheet permissions and names. Details: ${error.message}</p>`;
+                    console.error("CRITICAL ERROR:", error);
+                }
+            };
+            
+            // Run the function
+            loadEvents();
+        });
+    </script>
+</body>
+</html>
