@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iron Crown Combat - News</title>
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #000; color: #f5f5f5; line-height: 1.6; }
+        header { background-color: #111; padding: 1em; border-bottom: 3px solid gold; text-align: center; }
+        .logo { color: gold; font-size: 2em; font-weight: bold; margin: 0; }
+        nav a { margin: 0 0.8em; color: #cc0000; text-decoration: none; font-size: 1.1em; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        main { padding: 2em 1em; max-width: 900px; margin: 0 auto; }
+        .news-header { display: flex; align-items: center; border-bottom: 2px solid gold; margin-bottom: 2em; padding-bottom: 1em; }
+        .announcer-img { width: 100px; height: 100px; border-radius: 50%; border: 3px solid gold; margin-right: 1.5em; }
+        .header-text h2 { margin: 0; color: gold; font-size: 2em; }
+        .header-text p { margin: 0; color: #ccc; font-style: italic; }
+        .news-article { background-color: #1a1a1a; border: 1px solid #333; margin-bottom: 2em; padding: 1.5em; border-radius: 8px; }
+        .news-article h3 { margin: 0 0 0.5em 0; color: gold; }
+        .news-article .date { color: #888; font-size: 0.9em; margin-bottom: 1em; }
+        .news-article .content { line-height: 1.7; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo">Iron Crown Combat</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="fighters.html">Fighters</a>
+            <a href="events.html">Events</a>
+            <a href="rankings.html">Rankings</a>
+            <a href="news.html">News</a>
+            <a href="about.html">About</a>
+            <a href="rules.html">Test Your Metal</a>
+        </nav>
+    </header>
+    <main id="news-container">
+        <div class="news-header">
+            <!-- You can change this image URL to your announcer's picture -->
+            <img src="https://i.imgur.com/example.jpg" alt="Jaimey Jameson" class="announcer-img">
+            <div class="header-text">
+                <h2>From The Foundry</h2>
+                <p>with Jaimey Jameson</p>
+            </div>
+        </div>
+        <p style="text-align: center;">Loading latest news...</p>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+            const newsSheetName = "News";
+            const newsURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(newsSheetName)}`;
+
+            const loadNews = async () => {
+                const container = document.getElementById('news-container');
+                try {
+                    const res = await fetch(newsURL);
+                    if (!res.ok) throw new Error("Failed to fetch news data.");
+                    
+                    const articles = await res.json();
+                    
+                    // Clear the loading message, but keep the header
+                    const header = container.querySelector('.news-header');
+                    container.innerHTML = '';
+                    container.appendChild(header);
+
+                    // Sort articles by date, newest first
+                    articles.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+                    
+                    articles.forEach(article => {
+                        if (!article.Title || !article.Article) return;
+                        
+                        const articleDiv = document.createElement('div');
+                        articleDiv.className = 'news-article';
+                        
+                        const formattedDate = new Date(article.Date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                        articleDiv.innerHTML = `
+                            <h3>${article.Title}</h3>
+                            <p class="date">${formattedDate}</p>
+                            <div class="content"><p>${article.Article.replace(/\n/g, '</p><p>')}</p></div>
+                        `;
+                        container.appendChild(articleDiv);
+                    });
+
+                } catch (error) {
+                    const header = container.querySelector('.news-header');
+                    container.innerHTML = '';
+                    if (header) container.appendChild(header);
+                    container.innerHTML += `<p style="color: red;">Error: Could not load news. Please ensure the 'News' sheet exists and is set up correctly.</p>`;
+                }
+            };
+            loadNews();
+        });
+    </script>
+</body>
+</html>
