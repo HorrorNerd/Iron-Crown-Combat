@@ -42,7 +42,6 @@
             const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheet)}`;
             const BONUS_VALUE = 5000;
             
-            // These are the ONLY valid bonus texts, converted to a Set for fast lookups.
             const WINNER_BONUSES = new Set(['ko of the night', 'submission of the night']);
             const SHARED_BONUSES = new Set(['fight of the night', 'match of the night']);
 
@@ -53,15 +52,12 @@
                     if (!res.ok) throw new Error(`Network response was not ok. Status: ${res.status}`);
                     
                     const data = await res.json();
-                    container.innerHTML = ""; // Clear loading message
+                    container.innerHTML = "";
 
-                    // Self-Diagnosis: Check if we got data and what the headers are
                     if(data.length === 0) {
-                        console.error("DEBUG: Fetched data is empty. Check sheet permissions or if the sheet is empty.");
                         container.innerHTML = `<p style="color: red;">Error: Could not retrieve any data from the spreadsheet.</p>`;
                         return;
                     }
-                    console.log("DEBUG: The first row of data from your sheet is:", data[0]);
 
                     const groupedByEvent = data.reduce((acc, row) => {
                         const eventName = row.Event?.trim();
@@ -92,7 +88,6 @@
                             const fighterA = match["Fighter A"]?.trim();
                             const fighterB = match["Fighter B"]?.trim();
                             
-                            // This is the definitive, corrected bonus logic.
                             const originalBonusType = (match["bonus type"] || "").trim();
                             const cleanBonusType = originalBonusType.toLowerCase();
                             
@@ -109,9 +104,6 @@
                                 if (winner === fighterA) fighterAEarnings += BONUS_VALUE;
                                 if (winner === fighterB) fighterBEarnings += BONUS_VALUE;
                                 isActualBonus = true;
-                            } else if (originalBonusType && originalBonusType !== "—") {
-                                // Self-Diagnosis: If there's text in the bonus column but it's not a valid bonus.
-                                console.log(`DEBUG: For match '${fighterA} vs ${fighterB}', the text '${originalBonusType}' was found but is not a valid bonus type.`);
                             }
                             
                             const bonusDisplayType = originalBonusType || "—";
@@ -136,12 +128,11 @@
                         container.appendChild(eventCard);
                     });
                 } catch (error) {
-                    container.innerHTML = `<p style="color: red;">A critical error occurred. Please check sheet permissions and names. Details: ${error.message}</p>`;
+                    container.innerHTML = `<p style="color: red;">A critical error occurred. Details: ${error.message}</p>`;
                     console.error("CRITICAL ERROR:", error);
                 }
             };
             
-            // Run the function
             loadEvents();
         });
     </script>
