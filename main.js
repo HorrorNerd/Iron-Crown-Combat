@@ -1,183 +1,182 @@
-// main.js (Final Corrected Version - Robust Error Handling)
+// --- START OF FILE script.js ---
 
-// --- CONFIGURATION ---
 const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-const spreadsheetURL = `https://opensheet.vercel.app/${sheetID}`;
+const fighterSheet = "Fighter Tracker";
+const eventSheet = "Event Results";
 
-// --- GLOBAL DATA STORE ---
+// Construct the URLs for fetching data via opensheet.vercel.app
+const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fighterSheet)}`;
+const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheet)}`;
+
+// Global store to hold event data so we don't have to re-fetch it constantly
 let eventData = [];
 let fightersData = [];
 
-// --- CORE LOGIC: Replicating the Spreadsheet Formula ---
-function calculateMatchEarnings(match) {
-    const ratingDecimal = (parseFloat(match["Match Rating"]) || 0) / 100;
-    const basePurse = ratingDecimal * 10000;
-    const winner = match.Winner, fighterA = match["Fighter A"], fighterB = match["Fighter B"];
-    let purseA = 0, purseB = 0;
-
-    if (winner === "Draw") {
-        purseA = basePurse * 0.5;
-        purseB = basePurse * 0.5;
-    } else if (winner === fighterA) {
-        purseA = basePurse;
-        purseB = basePurse * 0.5;
-    } else if (winner === fighterB) {
-        purseB = basePurse;
-        purseA = basePurse * 0.5;
-    }
-
-    const award = (match.Bonus || "").trim();
-    let bonusA = 0, bonusB = 0;
-    if (award === "Fight of the Night") {
-        bonusA = 5000;
-        bonusB = 5000;
-    } else if (award === "KO of the Night" || award === "Submission of the Night") {
-        if (winner === fighterA) bonusA = 5000;
-        if (winner === fighterB) bonusB = 5000;
-    }
-    
-    return { earningsA: purseA + bonusA, earningsB: purseB + bonusB };
-}
-
-
-// --- DATA FETCHING (Simplified and Safer) ---
-// This function now just loads data or throws an error. It doesn't touch the UI.
-async function loadAllData() {
-    if (fightersData.length > 0 && eventData.length > 0) return;
-
-    const response = await fetch(spreadsheetURL);
-    if (!response.ok) throw new Error(`Network error: ${response.statusText}`);
-    
-    const allSheets = await response.json();
-    if (!allSheets || !allSheets['Fighter Tracker'] || !allSheets['Event Results']) {
-        throw new Error("API response did not contain the expected sheet names.");
-    }
-    
-    fightersData = allSheets['Fighter Tracker'];
-    eventData = allSheets['Event Results'];
-    console.log("Data loaded successfully.");
-}
-
-
-// --- PAGE-SPECIFIC RENDER FUNCTIONS (with their own error handling) ---
-
-async function displayEvents() {
-    const container = document.getElementById("events-container");
-    if (!container) return;
-
-    try {
-        // Step 1: Try to load the data.
-        await loadAllData();
-
-        // Step 2: If successful, build the HTML.
-        container.innerHTML = "";
-        const groupedByEvent = eventData.reduce((acc, match) => {
-            const eventName = match.Event;
-            if (!acc[eventName]) acc[eventName] = [];
-            acc[eventName].push(match);
-            return acc;
-        }, {});
-
-        for (const eventName in groupedByEvent) {
-            const eventCard = document.createElement("div");
-            eventCard.className = "event-card";
-            let matchesHTML = '';
-            groupedByEvent[eventName].forEach(match => {
-                const { earningsA, earningsB } = calculateMatchEarnings(match);
-                const ratingValue = parseInt((match["Match Rating"] || "0%").replace("%", ""));
-                const stars = "★★★★★☆☆☆☆☆".slice(5 - Math.round(ratingValue / 20), 10 - Math.round(ratingValue / 20));
-                const awardHTML = match.Bonus ? `<p>🎁 Award: ${match.Bonus}</p>` : '';
-                matchesHTML += `
-                    <div class="match">
-                        <p><strong>${match["Fighter A"]} vs ${match["Fighter B"]}</strong></p>
-                        <p>🏆 Winner: <span class="winner">${match.Winner || "Draw/NC"}</span></p>
-                        <p>⭐ Rating: <span class="rating">${stars}</span> (${match["Match Rating"] || "N/A"})</p>
-                        ${awardHTML}
-                        <p>💵 ${match["Fighter A"]}: $${earningsA.toLocaleString()} | ${match["Fighter B"]}: $${earningsB.toLocaleString()}</p>
-                    </div>`;
-            });
-            eventCard.innerHTML = `<h2 class="event-title">🔥 ${eventName}</h2><div class="matches-container">${matchesHTML}</div>`;
-            container.appendChild(eventCard);
-        }
-        container.querySelectorAll('.event-title').forEach(title => {
-            title.addEventListener('click', () => title.parentElement.classList.toggle('active'));
-        });
-
-    } catch (error) {
-        // Step 3: If loading fails, display an error message in the correct container.
-        console.error("Error displaying events:", error);
-        container.innerHTML = `<p style="color: #e74c3c; font-weight: bold;">Could not load event data. Please check the spreadsheet link or try again later.</p>`;
-    }
-}
-
-async function displayFighters() {
+// --- Fighter Page Logic ---
+async function loadFighters() {
     const container = document.getElementById("fighters-container");
-    if (!container) return;
-
     try {
-        await loadAllData();
-        container.innerHTML = "";
+        // Fetch both sets of data at the same time for efficiency
+        const [fighterRes, eventRes] = await Promise.all([
+            fetch(fighterURL),
+            fetch(eventURL)
+        ]);
+
+        if (!fighterRes.ok || !eventRes.ok) {
+            throw new Error(`Failed to load sheet data. Check Sheet ID and names.`);
+        }
+
+        fightersData = await fighterRes.json();
+        eventData = await eventRes.json();
+        container.innerHTML = ""; // Clear "Loading..." message
+
         fightersData.forEach(fighter => {
+            if (!fighter.Fighter) return; // Skip empty rows
+
             const card = document.createElement("div");
             card.className = "card";
             card.innerHTML = `
                 <h2>${fighter.Fighter}</h2>
-                <p>Wins: ${fighter.Wins}</p>
-                <p>Losses: ${fighter.Losses}</p>
-                <p>Draws: ${fighter.Draws}</p>
-                <button class="view-bio-btn" data-fighter-name="${fighter.Fighter}">View Bio</button>`;
+                <p>Record: ${fighter.Wins} W - ${fighter.Losses} L - ${fighter.Draws} D</p>
+                <p>Static Earnings (from sheet): $${parseInt(fighter.Earnings || 0).toLocaleString()}</p>
+                <button onclick="openModal('${fighter.Fighter}')">View Bio & Fight History</button>
+            `;
             container.appendChild(card);
         });
-        document.querySelectorAll('.view-bio-btn').forEach(button => {
-            button.addEventListener('click', (event) => openModal(event.target.dataset.fighterName));
-        });
-
     } catch (error) {
-        console.error("Error displaying fighters:", error);
-        container.innerHTML = `<p style="color: #e74c3c; font-weight: bold;">Could not load fighter data. Please check the spreadsheet link or try again later.</p>`;
+        container.innerHTML = `<p style="color: red;">Error loading fighter data. Please check the sheet permissions (must be 'Anyone with the link can view') and ensure sheet names are correct.</p><p><small>${error.message}</small></p>`;
+        console.error("Error in loadFighters:", error);
     }
 }
 
+// --- Event Page Logic ---
+async function loadEvents() {
+    const container = document.getElementById("events-container");
+    try {
+        const res = await fetch(eventURL);
+        if (!res.ok) {
+            throw new Error(`Failed to load event data. Check Sheet ID and name.`);
+        }
+        const data = await res.json();
+        container.innerHTML = ""; // Clear "Loading..." message
 
-// --- MODAL LOGIC (No changes needed here) ---
+        // Group matches by event name
+        const groupedByEvent = data.reduce((acc, row) => {
+            if (!row.Event) return acc;
+            if (!acc[row.Event]) acc[row.Event] = [];
+            acc[row.Event].push(row);
+            return acc;
+        }, {});
+
+        Object.keys(groupedByEvent).forEach(eventName => {
+            const card = document.createElement("div");
+            card.className = "event-card";
+            card.innerHTML = `<h2 class="event-title">🔥 ${eventName}</h2>`;
+
+            groupedByEvent[eventName].forEach(match => {
+                const ratingText = match["Match Rating"] || "0%";
+                const ratingValue = parseInt(ratingText.replace("%", "")) || 0;
+                const stars = "★★★★★☆☆☆☆☆".slice(5 - Math.round(ratingValue / 20), 10 - Math.round(ratingValue / 20));
+                
+                const winner = match.Winner;
+                const fighterA = match["Fighter A"];
+                const fighterB = match["Fighter B"];
+                const bonusType = (match.Bonus || "").trim();
+                const purse = ratingValue * 100;
+
+                // Improved earnings calculation
+                let fighterAEarnings = (winner === fighterA || winner === "Draw") ? purse : purse / 2;
+                let fighterBEarnings = (winner === fighterB || winner === "Draw") ? purse : purse / 2;
+
+                if (bonusType === "Fight of the Night") {
+                    fighterAEarnings += 5000;
+                    fighterBEarnings += 5000;
+                } else if (bonusType === "KO of the Night" || bonusType === "Submission of the Night") {
+                    if (winner === fighterA) fighterAEarnings += 5000;
+                    if (winner === fighterB) fighterBEarnings += 5000;
+                }
+
+                card.innerHTML += `
+                    <div class="match">
+                        <p><strong>${fighterA} vs ${fighterB}</strong></p>
+                        <p>🏆 Winner: <span class="winner">${winner}</span></p>
+                        <p>⭐ Rating: <span class="rating">${stars}</span> (${ratingText})</p>
+                        <p>🎁 Bonus: ${bonusType || "—"}</p>
+                        <p>💵 ${fighterA}: $${fighterAEarnings.toLocaleString()} | ${fighterB}: $${fighterBEarnings.toLocaleString()}</p>
+                    </div>`;
+            });
+            container.appendChild(card);
+        });
+    } catch (error) {
+        container.innerHTML = `<p style="color: red;">Error loading event data. Please check the sheet permissions (must be 'Anyone with the link can view') and ensure the event sheet name is correct.</p><p><small>${error.message}</small></p>`;
+        console.error("Error in loadEvents:", error);
+    }
+}
+
+// --- Modal Logic (for Fighter Bios) ---
 function openModal(fighterName) {
     const modal = document.getElementById("modal");
     const content = document.getElementById("modal-content");
-    const fightHistory = eventData.filter(e => e["Fighter A"] === fighterName || e["Fighter B"] === fighterName);
-    let totalEarnings = 0, wins = 0, bonuses = 0;
+    
+    // Show a loading state immediately
+    content.innerHTML = `<h2>${fighterName}</h2><p>Calculating fight history...</p><button onclick="closeModal()">Close</button>`;
+    modal.style.display = "block";
 
-    const fightListHTML = fightHistory.map(match => {
-        const { earningsA, earningsB } = calculateMatchEarnings(match);
-        let myEarnings = (match["Fighter A"] === fighterName) ? earningsA : earningsB;
-        totalEarnings += myEarnings;
-        if (match.Winner === fighterName) wins++;
-        const award = (match.Bonus || "").trim();
-        if (award === "Fight of the Night" || (award && match.Winner === fighterName)) bonuses++;
-        return `<li>${match["Fighter A"]} vs ${match["Fighter B"]} - <strong>Earnings:</strong> $${myEarnings.toLocaleString()}</li>`;
+    // Filter through the globally stored event data to find this fighter's matches
+    const history = eventData.filter(e =>
+        e["Fighter A"] === fighterName || e["Fighter B"] === fighterName
+    );
+
+    let totalEarnings = 0;
+    let wins = 0;
+    let bonuses = 0;
+
+    const fightListHTML = history.map(match => {
+        const rating = parseInt(match["Match Rating"].replace("%", "")) || 0;
+        const purse = rating * 100;
+        const isWinner = match.Winner === fighterName;
+        const bonusType = (match.Bonus || "").trim();
+        let currentBonus = 0;
+
+        if (bonusType === "Fight of the Night" || (isWinner && (bonusType === "KO of the Night" || bonusType === "Submission of the Night"))) {
+            currentBonus = 5000;
+        }
+
+        const earnings = (isWinner || match.Winner === "Draw") ? (purse + currentBonus) : (purse / 2 + currentBonus);
+
+        totalEarnings += earnings;
+        if (isWinner) wins++;
+        if (currentBonus > 0) bonuses++;
+
+        return `<li>${match["Fighter A"]} vs ${match["Fighter B"]} - 
+            <strong>Winner:</strong> ${match.Winner} | 
+            <strong>Earnings:</strong> $${earnings.toLocaleString()}
+            ${bonusType ? `(Bonus: ${bonusType})` : ''}
+          </li>`;
     }).join("");
 
+    // Update the modal with the calculated data
     content.innerHTML = `
-        <button id="close-modal-btn">×</button>
         <h2>${fighterName}</h2>
         <p><strong>Total Calculated Earnings:</strong> $${totalEarnings.toLocaleString()}</p>
         <p><strong>Total Wins:</strong> ${wins} | <strong>Bonuses Earned:</strong> ${bonuses}</p>
         <h3>Fight History:</h3>
-        <ul>${fightListHTML}</ul>`;
-    
-    modal.style.display = "block";
-    document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+        <ul>${fightListHTML || "<li>No fight history found.</li>"}</ul>
+        <button onclick="closeModal()">Close</button>
+    `;
 }
 
 function closeModal() {
     document.getElementById("modal").style.display = "none";
 }
 
-
-// --- INITIALIZATION ---
+// --- Initializer ---
+// This runs when the page loads. It checks which page we're on and calls the correct function.
 document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById("fighters-container")) {
+        loadFighters();
+    }
     if (document.getElementById("events-container")) {
-        displayEvents();
-    } else if (document.getElementById("fighters-container")) {
-        displayFighters();
+        loadEvents();
     }
 });
