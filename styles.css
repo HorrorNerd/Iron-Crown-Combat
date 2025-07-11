@@ -1,0 +1,34 @@
+body {
+  background-color: #0a0a0a;
+  color: #f3c969;
+  font-family: sans-serif;
+  padding: 20px;
+}
+header { text-align: center; }
+h1 { color: #f3c969; }
+nav button {
+  background-color: transparent;
+  border: 2px solid #f3c969;
+  color: #f3c969;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+}
+.card, .event-card {
+  background: #1e1e1e;
+  border: 2px solid #f3c969;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+}
+.modal {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(10, 10, 10, 0.95);
+  display: flex; justify-content: center; align-items: center;
+}
+.modal-content {
+  background: #1e1e1e; border: 3px solid #f3c969; padding: 20px;
+  max-width: 600px; color: #f3c969; border-radius: 8px;
+}
+.hidden-section { display: none; }
+.active-section { display: block; }
