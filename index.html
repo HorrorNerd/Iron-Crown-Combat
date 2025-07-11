@@ -10,8 +10,8 @@
   <header>
     <h1>Iron Crown Combat</h1>
     <nav>
-      <button id="show-fighters">Fighters</button>
-      <button id="show-events">Events</button>
+      <button id="show-fighters-btn">Show Fighters</button>
+      <button id="show-events-btn">Show Events</button>
     </nav>
   </header>
 
@@ -27,37 +27,10 @@
     </section>
   </main>
 
-  <div id="modal" class="modal hidden-section">
-    <div class="modal-content" id="modal-content"></div>
+  <div id="modal" class="hidden-section">
+    <div id="modal-content"></div>
   </div>
 
   <script src="script.js"></script>
-  <script>
-    const showFightersBtn = document.getElementById("show-fighters");
-    const showEventsBtn = document.getElementById("show-events");
-    const fightersSection = document.getElementById("fighters-section");
-    const eventsSection = document.getElementById("events-section");
-    const modal = document.getElementById("modal");
-
-    showFightersBtn.onclick = () => {
-      fightersSection.classList.add("active-section");
-      fightersSection.classList.remove("hidden-section");
-      eventsSection.classList.add("hidden-section");
-      eventsSection.classList.remove("active-section");
-      modal.classList.add("hidden-section");
-    };
-
-    showEventsBtn.onclick = () => {
-      eventsSection.classList.add("active-section");
-      eventsSection.classList.remove("hidden-section");
-      fightersSection.classList.add("hidden-section");
-      fightersSection.classList.remove("active-section");
-      modal.classList.add("hidden-section");
-    };
-
-    function closeModal() {
-      modal.classList.add("hidden-section");
-    }
-  </script>
 </body>
 </html>
