@@ -8,7 +8,6 @@ const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent
 const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheet)}`;
 
 const BONUS_VALUE = 5000;
-// ** NEW: Define exactly what counts as a bonus to prevent errors **
 const WINNER_BONUSES = ['ko of the night', 'submission of the night'];
 const SHARED_BONUSES = ['fight of the night', 'match of the night'];
 
@@ -19,7 +18,6 @@ let fightersData = [];
 function calculateFighterStats(fighterName, allEvents) {
     const trimmedFighterName = fighterName.trim();
     const history = allEvents.filter(e => e["Fighter A"]?.trim() === trimmedFighterName || e["Fighter B"]?.trim() === trimmedFighterName);
-    
     let totalEarnings = 0, wins = 0, bonusCount = 0;
 
     history.forEach(match => {
@@ -29,7 +27,7 @@ function calculateFighterStats(fighterName, allEvents) {
         const isWinner = winner === trimmedFighterName;
         const bonusType = (match["bonus type"] || "").trim().toLowerCase();
         
-        // *** FINAL FIX: Stricter bonus logic based on the new arrays ***
+        // ** FINAL MATH FIX: Simplified and corrected bonus logic **
         let currentBonus = 0;
         if (SHARED_BONUSES.includes(bonusType)) {
             currentBonus = BONUS_VALUE;
@@ -51,11 +49,9 @@ async function loadFighters() {
     try {
         const [fighterRes, eventRes] = await Promise.all([fetch(fighterURL), fetch(eventURL)]);
         if (!fighterRes.ok || !eventRes.ok) throw new Error(`HTTP error!`);
-        
         fightersData = await fighterRes.json();
         eventData = await eventRes.json();
         container.innerHTML = "";
-
         fightersData.forEach(fighter => {
             if (!fighter.Fighter) return;
             const stats = calculateFighterStats(fighter.Fighter, eventData);
@@ -70,7 +66,7 @@ async function loadFighters() {
             container.appendChild(card);
         });
     } catch (error) {
-        container.innerHTML = `<p style="color: red;">Error loading fighter data. Check sheet permissions and column names.</p>`;
+        container.innerHTML = `<p style="color: red;">Error loading fighter data.</p>`;
     }
 }
 
@@ -109,11 +105,11 @@ async function loadEvents() {
                 const fighterB = match["Fighter B"]?.trim();
                 const bonusType = (match["bonus type"] || "").trim().toLowerCase();
                 const purse = ratingValue * 100;
-
+                
                 let fighterAEarnings = (winner === fighterA || winner === "Draw") ? purse : purse / 2;
                 let fighterBEarnings = (winner === fighterB || winner === "Draw") ? purse : purse / 2;
                 
-                // *** FINAL FIX: Stricter bonus logic and smarter display text ***
+                // ** FINAL MATH FIX: Simplified and corrected bonus logic **
                 let isActualBonus = false;
                 if (SHARED_BONUSES.includes(bonusType)) {
                     fighterAEarnings += BONUS_VALUE;
@@ -146,7 +142,7 @@ async function loadEvents() {
             container.appendChild(eventCard);
         });
     } catch (error) {
-        container.innerHTML = `<p style="color: red;">Error loading event data. Check sheet permissions and column names.</p>`;
+        container.innerHTML = `<p style="color: red;">Error loading event data.</p>`;
     }
 }
 
