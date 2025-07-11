@@ -3,21 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat</title>
+  <title>Iron Crown Combat - Events</title>
   <link rel="stylesheet" href="style.css">
 </head>
-  <!-- CORRECT -->
+
+<!-- THIS IS THE FIX: The onload attribute has been removed from the body tag -->
 <body>
-  <script src="main.js"></script>
+
   <header>
-    <h1>Iron Crown Combat</h1>
+    <h1>Event Cards</h1>
     <nav>
+      <!-- Corrected link to point to fighters.html -->
       <a href="fighters.html">Fighters</a>
-      <a href="events.html">Events</a>
     </nav>
   </header>
-  <main>
-    <p>Welcome to Iron Crown Combat. Explore our fighters and past events.</p>
+  
+  <main id="events-container">
+      <!-- The "Loading..." message is good practice -->
+      <p>Loading events...</p>
   </main>
+
+  <!-- This correctly points to main.js -->
+  <script src="main.js"></script>
 </body>
 </html>
