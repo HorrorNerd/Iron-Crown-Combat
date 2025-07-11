@@ -8,26 +8,36 @@ const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent
 const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheet)}`;
 
 const BONUS_VALUE = 5000;
+// ** NEW: Define exactly what counts as a bonus to prevent errors **
+const WINNER_BONUSES = ['ko of the night', 'submission of the night'];
+const SHARED_BONUSES = ['fight of the night', 'match of the night'];
 
 let eventData = [];
 let fightersData = [];
 
+// Helper function to calculate all stats for a fighter from the events sheet
 function calculateFighterStats(fighterName, allEvents) {
-    const history = allEvents.filter(e => e["Fighter A"] === fighterName || e["Fighter B"] === fighterName);
+    const trimmedFighterName = fighterName.trim();
+    const history = allEvents.filter(e => e["Fighter A"]?.trim() === trimmedFighterName || e["Fighter B"]?.trim() === trimmedFighterName);
+    
     let totalEarnings = 0, wins = 0, bonusCount = 0;
 
     history.forEach(match => {
         const rating = parseInt(match["Match Rating"]?.replace("%", "")) || 0;
         const purse = rating * 100;
-        const isWinner = match.Winner === fighterName;
-        const bonusType = (match["Bonus Type"] || "").trim();
+        const winner = match.Winner?.trim();
+        const isWinner = winner === trimmedFighterName;
+        const bonusType = (match["bonus type"] || "").trim().toLowerCase();
+        
+        // *** FINAL FIX: Stricter bonus logic based on the new arrays ***
         let currentBonus = 0;
-        if (bonusType === "Fight of the Night" || bonusType === "Match of the Night") {
+        if (SHARED_BONUSES.includes(bonusType)) {
             currentBonus = BONUS_VALUE;
-        } else if (isWinner && (bonusType === "KO of the Night" || bonusType === "Submission of the Night")) {
+        } else if (isWinner && WINNER_BONUSES.includes(bonusType)) {
             currentBonus = BONUS_VALUE;
         }
-        const earnings = (isWinner || match.Winner === "Draw") ? (purse + currentBonus) : (purse / 2 + currentBonus);
+        
+        const earnings = (isWinner || winner === "Draw") ? (purse + currentBonus) : (purse / 2 + currentBonus);
         totalEarnings += earnings;
         if (isWinner) wins++;
         if (currentBonus > 0) bonusCount++;
@@ -35,14 +45,17 @@ function calculateFighterStats(fighterName, allEvents) {
     return { totalEarnings, wins, bonusCount, history };
 }
 
+// --- Fighter Page Logic ---
 async function loadFighters() {
     const container = document.getElementById("fighters-container");
     try {
         const [fighterRes, eventRes] = await Promise.all([fetch(fighterURL), fetch(eventURL)]);
         if (!fighterRes.ok || !eventRes.ok) throw new Error(`HTTP error!`);
+        
         fightersData = await fighterRes.json();
         eventData = await eventRes.json();
         container.innerHTML = "";
+
         fightersData.forEach(fighter => {
             if (!fighter.Fighter) return;
             const stats = calculateFighterStats(fighter.Fighter, eventData);
@@ -58,19 +71,18 @@ async function loadFighters() {
         });
     } catch (error) {
         container.innerHTML = `<p style="color: red;">Error loading fighter data. Check sheet permissions and column names.</p>`;
-        console.error("Fighter load error:", error);
     }
 }
 
+// --- Event Page Logic ---
 async function loadEvents() {
     const container = document.getElementById("events-container");
     try {
         const res = await fetch(eventURL);
         if (!res.ok) throw new Error(`HTTP error!`);
         const data = await res.json();
-        // *** DEBUGGING: Let's see the raw data from the sheet ***
-        console.log("Fetched Event Data:", data); 
         container.innerHTML = "";
+
         const groupedByEvent = data.reduce((acc, row) => {
             if (row.Event) {
                 if (!acc[row.Event]) acc[row.Event] = [];
@@ -78,6 +90,7 @@ async function loadEvents() {
             }
             return acc;
         }, {});
+
         Object.keys(groupedByEvent).forEach(eventName => {
             const eventCard = document.createElement("div");
             eventCard.className = "event-card";
@@ -90,31 +103,41 @@ async function loadEvents() {
                 const ratingText = match["Match Rating"] || "0%";
                 const ratingValue = parseInt(ratingText.replace("%", "")) || 0;
                 const stars = "★★★★★☆☆☆☆☆".slice(5 - Math.round(ratingValue / 20), 10 - Math.round(ratingValue / 20));
-                const winner = match.Winner;
-                const fighterA = match["Fighter A"];
-                const fighterB = match["Fighter B"];
-                const bonusType = (match["Bonus Type"] || "").trim();
-                // *** DEBUGGING: Check what bonus type is being found for each match ***
-                if(bonusType) console.log(`Match: ${fighterA} vs ${fighterB}, Found Bonus Type: '${bonusType}'`);
+                
+                const winner = match.Winner?.trim();
+                const fighterA = match["Fighter A"]?.trim();
+                const fighterB = match["Fighter B"]?.trim();
+                const bonusType = (match["bonus type"] || "").trim().toLowerCase();
                 const purse = ratingValue * 100;
+
                 let fighterAEarnings = (winner === fighterA || winner === "Draw") ? purse : purse / 2;
                 let fighterBEarnings = (winner === fighterB || winner === "Draw") ? purse : purse / 2;
-                if (bonusType === "Fight of the Night" || bonusType === "Match of the Night") {
+                
+                // *** FINAL FIX: Stricter bonus logic and smarter display text ***
+                let isActualBonus = false;
+                if (SHARED_BONUSES.includes(bonusType)) {
                     fighterAEarnings += BONUS_VALUE;
                     fighterBEarnings += BONUS_VALUE;
-                } else if (bonusType === "KO of the Night" || bonusType === "Submission of the Night") {
+                    isActualBonus = true;
+                } else if (WINNER_BONUSES.includes(bonusType)) {
                     if (winner === fighterA) fighterAEarnings += BONUS_VALUE;
                     if (winner === fighterB) fighterBEarnings += BONUS_VALUE;
+                    isActualBonus = true;
                 }
+                
+                const bonusDisplayType = (match["bonus type"] || "").trim() || "—";
+                const bonusDisplayText = isActualBonus ? `${bonusDisplayType} ($${BONUS_VALUE.toLocaleString()})` : bonusDisplayType;
+
                 matchesContainer.innerHTML += `
                     <div class="match">
                         <p><strong>${fighterA} vs ${fighterB}</strong></p>
                         <p>🏆 Winner: <span class="winner">${winner}</span></p>
                         <p>⭐ Rating: <span class="rating">${stars}</span> (${ratingText})</p>
-                        <p>🎁 Bonus: <span class="winner">${bonusType || "—"} ${bonusType ? '($' + BONUS_VALUE.toLocaleString() + ')' : ''}</span></p>
+                        <p>🎁 Bonus: <span class="winner">${bonusDisplayText}</span></p>
                         <p>💵 ${fighterA}: $${fighterAEarnings.toLocaleString()} | ${fighterB}: $${fighterBEarnings.toLocaleString()}</p>
                     </div>`;
             });
+            
             title.addEventListener('click', () => {
                 matchesContainer.style.display = matchesContainer.style.display === 'block' ? 'none' : 'block';
             });
@@ -124,10 +147,10 @@ async function loadEvents() {
         });
     } catch (error) {
         container.innerHTML = `<p style="color: red;">Error loading event data. Check sheet permissions and column names.</p>`;
-        console.error("Event load error:", error);
     }
 }
 
+// --- Modal Logic ---
 function openModal(fighterName) {
     const modal = document.getElementById("modal");
     const content = document.getElementById("modal-content");
