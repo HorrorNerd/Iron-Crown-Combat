@@ -1,4 +1,4 @@
-// script.js (Final Version with Collapsible Events & Formatting Fix)
+// main.js (Final Version)
 
 // --- CONFIGURATION ---
 const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
@@ -52,17 +52,21 @@ function calculateMatchEarnings(match, fighterName = null) {
 // --- DATA FETCHING ---
 async function loadAllData() {
   if (dataLoaded) return;
-  const [fighterRes, eventRes] = await Promise.all([
-    fetch(fighterURL),
-    fetch(eventURL)
-  ]);
-  fightersData = await fighterRes.json();
-  eventData = await eventRes.json();
-  dataLoaded = true;
-  console.log("All data loaded.");
+  try {
+    const [fighterRes, eventRes] = await Promise.all([
+      fetch(fighterURL),
+      fetch(eventURL)
+    ]);
+    fightersData = await fighterRes.json();
+    eventData = await eventRes.json();
+    dataLoaded = true;
+    console.log("All data loaded successfully.");
+  } catch (error) {
+    console.error("Failed to load spreadsheet data:", error);
+  }
 }
 
-// --- PAGE-SPECIFIC LOGIC ---
+// --- PAGE-SPECIFIC RENDER FUNCTIONS ---
 
 async function displayFighters() {
   await loadAllData();
@@ -90,7 +94,6 @@ async function displayFighters() {
   });
 }
 
-// --- UPDATED displayEvents Function ---
 async function displayEvents() {
   await loadAllData();
   const container = document.getElementById("events-container");
@@ -114,7 +117,6 @@ async function displayEvents() {
       const ratingValue = parseInt((match["Match Rating"] || "0%").replace("%", ""));
       const stars = "★★★★★☆☆☆☆☆".slice(5 - Math.round(ratingValue / 20), 10 - Math.round(ratingValue / 20));
       
-      // **FIX:** Removed extra dollar sign before template literal
       matchesHTML += `
         <div class="match">
           <p><strong>${match["Fighter A"]} vs ${match["Fighter B"]}</strong></p>
@@ -126,7 +128,6 @@ async function displayEvents() {
       `;
     });
     
-    // **NEW:** Create the collapsible structure
     eventCard.innerHTML = `
         <h2 class="event-title">🔥 ${eventName}</h2>
         <div class="matches-container">${matchesHTML}</div>
@@ -134,7 +135,6 @@ async function displayEvents() {
     container.appendChild(eventCard);
   }
 
-  // **NEW:** Add event listeners for the collapsible behavior
   container.querySelectorAll('.event-title').forEach(title => {
     title.addEventListener('click', () => {
       title.parentElement.classList.toggle('active');
@@ -142,36 +142,23 @@ async function displayEvents() {
   });
 }
 
-// --- MODAL LOGIC (with formatting fix) ---
+// --- MODAL LOGIC ---
 function openModal(fighterName) {
   const modal = document.getElementById("modal");
   const content = document.getElementById("modal-content");
   
   const fightHistory = eventData.filter(e => e["Fighter A"] === fighterName || e["Fighter B"] === fighterName);
 
-  let totalEarnings = 0;
-  let wins = 0;
-  let bonuses = 0;
+  let totalEarnings = 0, wins = 0, bonuses = 0;
 
   const fightListHTML = fightHistory.map(match => {
     const earnings = calculateMatchEarnings(match, fighterName);
-    const isWinner = match.Winner === fighterName;
-    const hasBonus = ["KO of the Night", "Submission of the Night", "Fight of the Night"].includes((match.Bonus || "").trim());
-    
+    if (match.Winner === fighterName) wins++;
+    if (["KO of the Night", "Submission of the Night", "Fight of the Night"].includes((match.Bonus || "").trim())) bonuses++;
     totalEarnings += earnings;
-    if (isWinner) wins++;
-    if (hasBonus) bonuses++;
-    
-    // **FIX:** Removed extra dollar sign
-    return `
-      <li>${match["Fighter A"]} vs ${match["Fighter B"]} - 
-        <strong>Winner:</strong> ${match.Winner} | 
-        <strong>Earnings:</strong> $${earnings.toLocaleString()}
-      </li>
-    `;
+    return `<li>${match["Fighter A"]} vs ${match["Fighter B"]} - <strong>Earnings:</strong> $${earnings.toLocaleString()}</li>`;
   }).join("");
 
-  // **FIX:** Removed extra dollar sign
   content.innerHTML = `
     <button id="close-modal-btn">×</button>
     <h2>${fighterName}</h2>
@@ -191,7 +178,6 @@ function closeModal() {
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-  // A single run point prevents trying to load data twice.
   if (document.getElementById("fighters-container")) {
     displayFighters();
   } else if (document.getElementById("events-container")) {
