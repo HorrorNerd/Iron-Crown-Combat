@@ -30,7 +30,6 @@ function renderFighters(fighters) {
 
   fighters.forEach(fighter => {
     const earnings = Number(fighter.Earnings) || 0;
-
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
@@ -71,8 +70,8 @@ function renderEvents(events) {
     content.className = "collapsible-content";
 
     title.onclick = () => {
-      const isVisible = content.classList.toggle("show");
-      title.setAttribute("aria-expanded", isVisible);
+      const isShown = content.classList.toggle("show");
+      title.setAttribute("aria-expanded", isShown);
     };
     title.onkeydown = (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -93,7 +92,6 @@ function renderEvents(events) {
       let payoutB = 0;
 
       if (winner.toLowerCase() === "draw") {
-        // For a draw, split the total purse evenly
         payoutA = totalPurse / 2;
         payoutB = totalPurse / 2;
       } else if (winner === fighterA) {
@@ -167,5 +165,19 @@ function openModal(fighterName) {
   modal.classList.remove("hidden-section");
 }
 
-// Start fetching and rendering data on page load
+// Show/hide sections
+document.getElementById("show-fighters-btn").onclick = () => {
+  document.getElementById("fighters-section").classList.add("active-section");
+  document.getElementById("fighters-section").classList.remove("hidden-section");
+  document.getElementById("events-section").classList.add("hidden-section");
+  document.getElementById("events-section").classList.remove("active-section");
+};
+
+document.getElementById("show-events-btn").onclick = () => {
+  document.getElementById("events-section").classList.add("active-section");
+  document.getElementById("events-section").classList.remove("hidden-section");
+  document.getElementById("fighters-section").classList.add("hidden-section");
+  document.getElementById("fighters-section").classList.remove("active-section");
+};
+
 fetchData();
