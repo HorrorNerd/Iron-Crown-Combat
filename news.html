@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iron Crown Combat - News</title>
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #000; color: #f5f5f5; line-height: 1.7; }
+        header { background-color: #111; padding: 1em; border-bottom: 3px solid gold; text-align: center; }
+        .logo { color: gold; font-size: 2.2em; font-weight: bold; margin: 0; letter-spacing: 1px; }
+        nav { margin-top: 1em; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5em; }
+        nav a { background-color: #1c1c1c; border: 1px solid #333; padding: 8px 16px; border-radius: 5px; color: #cc0000; text-decoration: none; font-size: 1.1em; font-weight: bold; transition: background-color 0.2s, color 0.2s; }
+        nav a:hover { background-color: gold; color: #000; }
+        main { padding: 2em 1em; max-width: 900px; margin: 0 auto; }
+        .news-header { display: flex; align-items: center; border-bottom: 2px solid gold; margin-bottom: 2.5em; padding-bottom: 1.5em; }
+        .announcer-img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid gold; margin-right: 1.5em; object-fit: cover; background-color: #333; }
+        .header-text h2 { margin: 0; color: gold; font-size: 2.5em; font-weight: bold; }
+        .header-text p { margin: 0; color: #ccc; font-style: italic; font-size: 1.2em; }
+        .news-article { background-color: #1a1a1a; border: 1px solid #333; margin-bottom: 2em; padding: 2em; border-radius: 8px; }
+        .news-article h3 { margin: 0 0 0.5em 0; color: gold; font-size: 1.8em; }
+        .news-article .date { color: #888; font-size: 1em; margin-bottom: 1em; }
+        .news-article .content { font-size: 1.1em; color: #ddd; }
+        /* --- NEW STYLES FOR LISTS --- */
+        .news-article .content ul { list-style: none; padding-left: 20px; }
+        .news-article .content ul li { padding-left: 10px; margin-bottom: 0.5em; position: relative; }
+        .news-article .content ul li::before {
+            content: '■'; /* A square bullet */
+            color: gold;
+            position: absolute;
+            left: -15px;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo">Iron Crown Combat</h1>
+        <nav> <a href="index.html">Home</a> <a href="fighters.html">Fighters</a> <a href="events.html">Events</a> <a href="rankings.html">Rankings</a> <a href="news.html">News</a> <a href="about.html">About</a> <a href="rules.html">Test Your Metal</a> </nav>
+    </header>
+    <main id="news-container">
+        <div class="news-header">
+            <!-- PASTE JAIMEY'S PICTURE LINK HERE -->
+            <img src="YOUR_LINK_HERE" alt="Jaimey Jameson" class="announcer-img">
+            <div class="header-text">
+                <h2>From The Foundry</h2>
+                <p>with Jaimey Jameson</p>
+            </div>
+        </div>
+        <p style="text-align: center;">Loading latest news...</p>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+            const newsSheetName = "News";
+            const newsURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(newsSheetName)}`;
+
+            // --- NEW: MARKDOWN TO HTML CONVERTER ---
+            const parseMarkdown = (text) => {
+                if (!text) return '';
+                
+                return text
+                    // Bold: *text* -> <strong>text</strong>
+                    .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+                    // Italic: _text_ -> <em>text</em>
+                    .replace(/_(.*?)_/g, '<em>$1</em>')
+                    // Paragraphs: two newlines -> </p><p>
+                    .replace(/\n\s*\n/g, '</p><p>')
+                    // Bullet points: - item -> <li>item</li>
+                    .replace(/^\s*-\s(.*)/gm, '<li>$1</li>')
+                    // Wrap bullet points in <ul> tags
+                    .replace(/<li>(?!<\/ul>)/g, '<ul><li>')
+                    .replace(/(<\/li>)(?!<li>)/g, '</li></ul>');
+            };
+
+            const loadNews = async () => {
+                const container = document.getElementById('news-container');
+                try {
+                    const res = await fetch(newsURL);
+                    if (!res.ok) throw new Error("Failed to fetch news data.");
+                    
+                    const articles = await res.json();
+                    
+                    const header = container.querySelector('.news-header');
+                    container.innerHTML = '';
+                    container.appendChild(header);
+
+                    articles.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+                    
+                    articles.forEach(article => {
+                        const title = article.Title;
+                        const content = article.Article;
+                        const date = article.Date;
+
+                        if (!title || !content) return;
+                        
+                        const articleDiv = document.createElement('div');
+                        articleDiv.className = 'news-article';
+                        
+                        const formattedDate = new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                        
+                        // ** NEW: Use the markdown parser **
+                        const htmlContent = parseMarkdown(content);
+
+                        articleDiv.innerHTML = `
+                            <h3>${title}</h3>
+                            <p class="date">${formattedDate}</p>
+                            <div class="content"><p>${htmlContent}</p></div>
+                        `;
+                        container.appendChild(articleDiv);
+                    });
+
+                } catch (error) {
+                    const header = container.querySelector('.news-header');
+                    container.innerHTML = '';
+                    if (header) container.appendChild(header);
+                    container.innerHTML += `<p style="color: red;">Error: Could not load news. Please check the 'News' sheet and ensure it is shared publicly.</p>`;
+                    console.error("News Loading Error:", error);
+                }
+            };
+            loadNews();
+        });
+    </script>
+</body>
+</html>
