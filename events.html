@@ -4,47 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Iron Crown Combat - Events</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: #f5f5f5;
-            line-height: 1.7;
-            /* ** NEW: Crucible logo background ** */
-            background-color: #000;
-            background-image: url('https://i.postimg.cc/Jzs3hFj8/Crucible-logo.png');
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-attachment: fixed;
-            background-size: cover; /* Adjust to 'contain' if logo is distorted */
-        }
-        /* Add a dark overlay so text is readable over the background */
-        .body-overlay { background-color: rgba(0, 0, 0, 0.9); min-height: 100vh; }
-        header { background-color: #111; padding: 1em; border-bottom: 3px solid gold; text-align: center; }
-        .logo { color: gold; font-size: 2.2em; font-weight: bold; margin: 0; letter-spacing: 1px; }
-        nav { margin-top: 0.5em; }
-        nav a { margin: 0 0.8em; color: #cc0000; text-decoration: none; font-size: 1.1em; font-weight: bold; }
-        nav a:hover { text-decoration: underline; }
-        main { padding: 2em 1em; max-width: 900px; margin: 0 auto; }
-        .event-card { background-color: #1a1a1a; border: 1px solid #333; margin-bottom: 2em; border-radius: 8px; overflow: hidden; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
-        .event-title { color: #111; background-color: gold; font-size: 1.5em; margin: 0; padding: 0.8em 1em; cursor: pointer; position: relative; font-weight: bold; }
-        .event-title::after { content: '▼'; color: #111; position: absolute; right: 15px; transition: transform 0.2s; }
-        .event-title.active::after { transform: rotate(180deg); }
-        .matches-container { display: none; padding: 1em; }
-        .match { background-color: #111; padding: 1.2em; margin-bottom: 1em; border-left: 5px solid #cc0000; border-radius: 5px; transition: background-color 0.2s; }
-        .match p { margin: 0.6em 0; font-size: 1.1em; }
-        .match strong { color: gold; font-size: 1.2em; }
-        .winner, .rating { font-weight: bold; color: gold; }
-        /* ** NEW: Style to make bonus stand out ** */
-        .bonus-highlight {
-            background-color: gold;
-            color: #000;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: inline-block;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="body-overlay">
