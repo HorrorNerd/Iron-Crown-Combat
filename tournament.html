@@ -5,7 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Iron Crown Combat - Tournament</title>
     <style>
-    <link rel="stylesheet" href="style.css">
+    :root { --c-gold: #ffd700; --c-red: #cc0000; --c-dark-bg: #111; --c-card-bg: #1a1a1a; --c-grey-text: #ccc; }
+    main { max-width: 100%; }
+    .tournament-title { text-align: center; color: var(--c-gold); font-size: 2.5em; margin-bottom: 1em; }
+    .bracket { display: flex; justify-content: space-between; max-width: 1400px; margin: 0 auto; }
+    .round { width: 22%; display: flex; flex-direction: column; justify-content: space-around; }
+    .round h3 { text-align: center; color: var(--c-grey-text); text-transform: uppercase; letter-spacing: 2px; }
+    .match { position: relative; margin-bottom: 2em; }
+    .match-connector { display: flex; align-items: center; justify-content: flex-end; }
+    .connector-line { width: 100%; height: 2px; background: var(--c-gold); }
+    .connector-path { position: absolute; right: -16%; top: 50%; width: 16%; height: 50%; border: 2px solid var(--c-gold); border-left: none; }
+    .match:nth-of-type(odd) .connector-path { border-top-right-radius: 10px; border-bottom: none; }
+    .match:nth-of-type(even) .connector-path { border-bottom-right-radius: 10px; border-top: none; top: 0; }
+    .round-final .connector-path { display: none; }
+    .fighter { display: flex; align-items: center; background-color: var(--c-card-bg); padding: 0.5em; border-radius: 5px; margin: 0.5em 0; border: 2px solid #333; }
+    .fighter img { width: 50px; height: 50px; border-radius: 50%; object-fit: contain; background-color: #222; margin-right: 1em; }
+    .fighter-name { font-weight: bold; font-size: 1.1em; color: #f5f5f5; }
+    .winner { border-color: var(--c-gold); box-shadow: 0 0 10px var(--c-gold); }
+    .winner .fighter-name { color: var(--c-gold); }
+    .tbd { color: var(--c-grey-text); font-style: italic; }
+    @media (max-width: 900px) {
+        .bracket { flex-direction: column; }
+        .round { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; margin-bottom: 2em; }
+        .round h3 { width: 100%; margin-bottom: 1em; }
+        .match { width: 45%; margin: 1em 2.5%; }
+        .match-connector { display: none; }
+    }
+    @media (max-width: 600px) { .match { width: 90%; } }
+</style>
 </head>
 <body>
     <header>
