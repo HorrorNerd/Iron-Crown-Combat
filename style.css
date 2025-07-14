@@ -1,0 +1,195 @@
+/* --- Iron Crown Combat Master Stylesheet (v3 - Fully Responsive) --- */
+
+/* 1. General Body and Header Styles */
+:root {
+    --c-gold: #ffd700;
+    --c-red: #cc0000;
+    --c-dark-bg: #111;
+    --c-card-bg: #1a1a1a;
+    --c-grey-text: #ccc;
+}
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #000;
+    color: #f5f5f5;
+    line-height: 1.7;
+}
+header {
+    background-color: var(--c-dark-bg);
+    padding: 1em;
+    border-bottom: 3px solid var(--c-gold);
+    text-align: center;
+}
+.logo {
+    color: var(--c-gold);
+    font-size: 2.2em;
+    font-weight: bold;
+    margin: 0;
+    letter-spacing: 1px;
+}
+main {
+    padding: 2em 1em;
+    max-width: 900px;
+    margin: 0 auto;
+}
+h2 {
+    font-size: 2em;
+    color: var(--c-gold);
+    border-bottom: 2px solid var(--c-gold);
+    padding-bottom: 0.5em;
+    margin-bottom: 1em;
+    text-align: center;
+}
+p {
+    font-size: 1.2em;
+    color: #ddd;
+}
+
+/* 2. Redesigned Navigation Bar */
+nav {
+    margin-top: 1em;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5em;
+}
+nav a {
+    background-color: #1c1c1c;
+    border: 1px solid #333;
+    padding: 8px 16px;
+    border-radius: 5px;
+    color: var(--c-red);
+    text-decoration: none;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s;
+}
+nav a:hover {
+    background-color: var(--c-gold);
+    color: #000;
+}
+
+/* 3. Page-Specific Base Styles */
+/* == Index Page == */
+.index-main { text-align: center; }
+.blurb p { text-align: center; }
+
+/* == About Page == */
+.social-links { text-align: center; margin-top: 2em; }
+.social-links a { display: inline-block; background-color: var(--c-red); color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 5px; margin-right: 1em; font-size: 1.1em; }
+.social-links a:hover { background-color: #ff3333; }
+
+/* == Fighters Page & Modal == */
+.roster-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em; max-width: 1200px; }
+.fighter-card { background-color: var(--c-card-bg); border: 1px solid #333; border-radius: 8px; padding: 1.5em; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.fighter-image { width: 120px; height: 120px; border-radius: 50%; object-fit: contain; border: 4px solid var(--c-gold); margin-bottom: 1em; background-color: #222; }
+.fighter-card h2 { margin: 0.5em 0; border: none; font-size: 1.6em; }
+.fighter-card p { margin-bottom: 1.5em; font-size: 1.1em; color: var(--c-grey-text); text-align: center;}
+.fighter-card button { background-color: var(--c-red); color: white; border: none; padding: 10px 20px; font-size: 1em; font-weight: bold; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
+.fighter-card button:hover { background-color: #ff3333; }
+#modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); }
+#modal-content { background-color: var(--c-dark-bg); margin: 10% auto; padding: 25px; border: 2px solid var(--c-gold); border-radius: 10px; width: 90%; max-width: 700px; color: #fff; position: relative; }
+#modal-content h2 { border: none; text-align: left; font-size: 2em; }
+#modal-content ul { list-style: none; padding: 0; }
+#modal-content li { background-color: #222; padding: 10px; margin-bottom: 8px; border-radius: 5px; text-align: left;}
+#close-modal { position: absolute; top: 15px; right: 20px; color: #fff; font-size: 28px; font-weight: bold; cursor: pointer; }
+
+/* == Events Page == */
+.events-body-overlay { background-color: rgba(0, 0, 0, 0.9); min-height: 100vh; }
+.event-card { background-color: var(--c-card-bg); border: 1px solid #333; margin-bottom: 2em; border-radius: 8px; overflow: hidden; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+.event-title { text-align: left; color: #111; background-color: var(--c-gold); font-size: 1.5em; margin: 0; padding: 0.8em 1em; cursor: pointer; position: relative; font-weight: bold; border: none; }
+.event-title::after { content: '▼'; color: #111; position: absolute; right: 15px; transition: transform 0.2s; }
+.event-title.active::after { transform: rotate(180deg); }
+.matches-container { display: none; padding: 1em; }
+.match p { margin: 0.6em 0; font-size: 1.1em; }
+.bonus-highlight { background-color: var(--c-gold); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; }
+.winner, .rating { font-weight: bold; color: var(--c-gold); }
+
+/* == Rankings Page == */
+.champion-section { background-color: var(--c-card-bg); border: 1px solid var(--c-gold); text-align: center; padding: 1.5em; margin-bottom: 2.5em; border-radius: 8px; }
+.champion-section h2 { margin: 0 0 0.5em 0; color: var(--c-grey-text); font-size: 1.2em; text-transform: uppercase; letter-spacing: 2px; border: none; }
+#champion-name { color: var(--c-gold); font-size: 2.5em; font-weight: bold; }
+.rankings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5em; max-width: 1200px; }
+.ranking-list h2 { font-size: 1.8em; }
+.ranking-list ol { list-style: none; padding: 0; margin: 0; counter-reset: rank-counter; }
+.ranking-list li { background-color: var(--c-card-bg); border: 1px solid #333; margin-bottom: 0.8em; border-radius: 5px; }
+.ranking-list li a { display: flex; align-items: center; padding: 1em; text-decoration: none; color: #f5f5f5; transition: background-color 0.2s; }
+.ranking-list li a:hover { background-color: #252525; }
+.ranking-list li a::before { counter-increment: rank-counter; content: counter(rank-counter); color: var(--c-gold); font-weight: bold; font-size: 1.5em; margin-right: 0.8em; min-width: 2ch; text-align: right; }
+.fighter-name { font-weight: bold; font-size: 1.2em; }
+.fighter-stat { margin-left: auto; color: var(--c-grey-text); font-size: 1.1em; }
+
+/* == News Page == */
+.news-header { display: flex; align-items: center; border-bottom: 2px solid gold; margin-bottom: 2.5em; padding-bottom: 1.5em; }
+.announcer-img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid gold; margin-right: 1.5em; object-fit: cover; background-color: #333; }
+.header-text h2 { margin: 0; color: gold; font-size: 2.5em; font-weight: bold; border: none; text-align: left; }
+.header-text p { margin: 0; color: #ccc; font-style: italic; font-size: 1.2em; text-align: left; }
+.news-article { background-color: var(--c-card-bg); border: 1px solid #333; margin-bottom: 2em; padding: 2em; border-radius: 8px; }
+.news-article h3 { font-size: 1.8em; text-align: left; border: none; color: gold;}
+.news-article .date { color: #888; font-size: 1em; margin-bottom: 1em; }
+.news-article .content { font-size: 1.1em; color: #ddd; }
+
+/* == Tournament Page == */
+.tournament-main { max-width: 100%; }
+.tournament-title { text-align: center; color: var(--c-gold); font-size: 2.5em; margin-bottom: 1em; border: none; }
+.bracket { display: flex; justify-content: space-between; max-width: 1400px; margin: 0 auto; }
+.round { width: 22%; display: flex; flex-direction: column; justify-content: space-around; }
+.round h3 { text-align: center; color: var(--c-grey-text); text-transform: uppercase; letter-spacing: 2px; border: none; }
+.matchup { position: relative; margin-bottom: 2em; }
+.fighter { display: flex; align-items: center; background-color: var(--c-card-bg); padding: 0.5em; border-radius: 5px; margin: 0.5em 0; border: 2px solid #333; }
+.tbd .fighter-name { color: var(--c-grey-text); font-style: italic; }
+
+/* --- 4. RESPONSIVE DESIGN FOR MOBILE --- */
+@media (max-width: 900px) {
+    /* Make nav links stack for easier tapping on mobile */
+    nav {
+        flex-direction: column;
+        gap: 0.8em;
+        align-items: center;
+    }
+    nav a {
+        width: 80%;
+        text-align: center;
+    }
+    h2 { font-size: 1.8em; }
+    
+    /* Responsive Rankings */
+    .rankings-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Responsive Tournament Bracket */
+    .bracket {
+        flex-direction: column;
+    }
+    .round {
+        width: 100%;
+        margin-bottom: 3em;
+    }
+    .matchup {
+        width: 90%;
+        margin: 1em auto;
+    }
+    .match-connector {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .logo { font-size: 1.8em; }
+    nav a { font-size: 1em; }
+    
+    /* Responsive News Header */
+    .news-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    .header-text h2, .header-text p {
+        text-align: center;
+    }
+    .announcer-img {
+        margin-right: 0;
+        margin-bottom: 1em;
+    }
+}
