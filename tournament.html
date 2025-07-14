@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iron Crown Combat - Tournament</title>
+    <style>
+        :root { --c-gold: #ffd700; --c-red: #cc0000; --c-dark-bg: #111; --c-card-bg: #1a1a1a; --c-grey-text: #ccc; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #000; color: #f5f5f5; line-height: 1.6; }
+        header { background-color: var(--c-dark-bg); padding: 1em; border-bottom: 3px solid var(--c-gold); text-align: center; }
+        .logo { color: var(--c-gold); font-size: 2.2em; font-weight: bold; margin: 0; letter-spacing: 1px; }
+        nav { margin-top: 1em; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5em; }
+        nav a { background-color: #1c1c1c; border: 1px solid #333; padding: 8px 16px; border-radius: 5px; color: var(--c-red); text-decoration: none; font-size: 1.1em; font-weight: bold; transition: background-color 0.2s, color 0.2s; }
+        nav a:hover { background-color: var(--c-gold); color: #000; }
+        main { padding: 2em 1em; }
+        .tournament-title { text-align: center; color: var(--c-gold); font-size: 2.5em; margin-bottom: 1em; }
+        .bracket { display: flex; justify-content: space-between; max-width: 1400px; margin: 0 auto; }
+        .round { width: 22%; display: flex; flex-direction: column; justify-content: space-around; }
+        .round h3 { text-align: center; color: var(--c-grey-text); text-transform: uppercase; letter-spacing: 2px; }
+        .matchup { position: relative; margin-bottom: 2em; }
+        .match-connector { display: flex; align-items: center; justify-content: flex-end; }
+        .connector-line { width: 100%; height: 2px; background: var(--c-gold); opacity: 0.5; }
+        .connector-path { position: absolute; right: -16%; top: 50%; width: 16%; height: 50%; border: 2px solid var(--c-gold); border-left: none; opacity: 0.5;}
+        .matchup:nth-of-type(odd) .connector-path { border-top-right-radius: 10px; border-bottom: none; }
+        .matchup:nth-of-type(even) .connector-path { border-bottom-right-radius: 10px; border-top: none; top: 0; }
+        .round-final .connector-path { display: none; }
+        .fighter { display: flex; align-items: center; background-color: var(--c-card-bg); padding: 0.5em; border-radius: 5px; margin: 0.5em 0; border: 2px solid #333; }
+        .fighter img { width: 50px; height: 50px; border-radius: 50%; object-fit: contain; background-color: #222; margin-right: 1em; }
+        .fighter-name { font-weight: bold; font-size: 1.1em; }
+        .winner { border-color: var(--c-gold); box-shadow: 0 0 10px var(--c-gold); }
+        .winner .fighter-name { color: var(--c-gold); }
+        .tbd .fighter-name { color: var(--c-grey-text); font-style: italic; }
+        @media (max-width: 900px) {
+            .bracket { flex-direction: column; }
+            .round { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; margin-bottom: 2em; }
+            .round h3 { width: 100%; margin-bottom: 1em; }
+            .matchup { width: 45%; margin: 1em 2.5%; }
+            .match-connector { display: none; }
+        }
+        @media (max-width: 600px) { .matchup { width: 90%; } }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo">Iron Crown Combat</h1>
+        <nav> <a href="index.html">Home</a> <a href="fighters.html">Fighters</a> <a href="events.html">Events</a> <a href="rankings.html">Rankings</a> <a href="news.html">News</a> <a href="tournament.html">Tournament</a> <a href="about.html">About</a> <a href="rules.html">Test Your Metal</a> </nav>
+    </header>
+    <main>
+        <h2 class="tournament-title">Crucible Tournament</h2>
+        <div class="bracket" id="bracket-container">
+            <!-- The bracket will be generated here by JavaScript -->
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    
+    // ####################################################################
+    // #                  THE ONLY PLACE YOU NEED TO EDIT                   #
+    // ####################################################################
+
+    // To update a winner, change null to the winner's full name in quotes.
+    // Example: winner: null, -> winner: "Cole Maddox",
+
+    const round1Data = [
+        {
+            p1: { name: "Shiv", img: "https://i.postimg.cc/bNCHpPDL/Shiv.png" },
+            p2: { name: "Cole Maddox", img: "https://i.postimg.cc/mDH6FDMb/Maddox.png" },
+            winner: "Cole Maddox",
+        },
+        {
+            p1: { name: "Abigail Jones", img: "https://i.postimg.cc/fW5YfsKZ/Abigail-Jones.png" },
+            p2: { name: "Sophia Rodriques", img: "https://i.postimg.cc/NFNTs8ML/Sophia-Rodriques.png" },
+            winner: "Sophia Rodriques",
+        },
+        {
+            p1: { name: "Dante Marcheli", img: "https://i.postimg.cc/yNXD6hpB/Dante-Marcheli.png" },
+            p2: { name: "Veronica Kane", img: "https://i.postimg.cc/Wbb6Bz3h/Veronica-Kane.png" },
+            winner: "Dante Marcheli",
+        },
+        {
+            p1: { name: "The Kumari Twins", img: "https://i.postimg.cc/pdySRkL5/Kumari-Twins.png" },
+            p2: { name: "Kai Lawson", img: "https://i.postimg.cc/43MSdtYL/KAI-LAWSON.png" },
+            winner: "The Kumari Twins",
+        }
+    ];
+
+    // ####################################################################
+    // #                    NO EDITS NEEDED BELOW THIS LINE                 #
+    // ####################################################################
+
+    const TBD_FIGHTER = { name: "TBD", img: "" };
+
+    const createFighterHTML = (fighter, isWinner) => {
+        const winnerClass = isWinner ? 'winner' : '';
+        const tbdClass = fighter.name === 'TBD' ? 'tbd' : '';
+        const imgSrc = fighter.img || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // Transparent pixel
+        return `
+            <div class="fighter ${winnerClass} ${tbdClass}">
+                <img src="${imgSrc}" alt="${fighter.name}">
+                <span class="fighter-name">${fighter.name}</span>
+            </div>
+        `;
+    };
+    
+    const buildBracket = () => {
+        const container = document.getElementById('bracket-container');
+        container.innerHTML = '';
+        
+        let currentRound = round1Data;
+        let roundNumber = 1;
+        const roundTitles = ["Round 1", "Semi-Finals", "Finals", "Champion"];
+
+        while (currentRound.length > 0) {
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'round';
+            if (roundNumber === roundTitles.length) {
+                roundDiv.classList.add('round-final');
+            }
+            
+            roundDiv.innerHTML = `<h3>${roundTitles[roundNumber - 1]}</h3>`;
+            
+            let nextRound = [];
+
+            for (let i = 0; i < currentRound.length; i++) {
+                const match = currentRound[i];
+                
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'matchup';
+                
+                let fighter1HTML = createFighterHTML(match.p1, match.winner === match.p1.name);
+                let fighter2HTML = createFighterHTML(match.p2, match.winner === match.p2.name);
+                
+                matchDiv.innerHTML = `${fighter1HTML}${fighter2HTML}`;
+                
+                if (roundNumber < (roundTitles.length -1)) {
+                     matchDiv.innerHTML += `<div class="match-connector"><div class="connector-line"></div><div class="connector-path"></div></div>`;
+                }
+                
+                roundDiv.appendChild(matchDiv);
+
+                if (i % 2 !== 0) { // Process pairs of matches to create the next round
+                    const matchA = currentRound[i-1];
+                    const matchB = currentRound[i];
+                    
+                    const winnerA = matchA.winner ? (matchA.p1.name === matchA.winner ? matchA.p1 : matchA.p2) : TBD_FIGHTER;
+                    const winnerB = matchB.winner ? (matchB.p1.name === matchB.winner ? matchB.p1 : matchB.p2) : TBD_FIGHTER;
+
+                    nextRound.push({ p1: winnerA, p2: winnerB, winner: null });
+                }
+            }
+
+            container.appendChild(roundDiv);
+            currentRound = nextRound;
+            roundNumber++;
+        }
+    };
+    
+    buildBracket();
+});
+    </script>
+</body>
+</html>
