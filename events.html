@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iron Crown Combat - Events</title>
+    <!-- Link to your master stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- ** NEW STYLE FOR THE MATCH DIVIDER ** -->
+    <style>
+        .match:not(:last-child) {
+            border-bottom: 1px solid #444; /* A dark grey line */
+            padding-bottom: 1.2em;
+            margin-bottom: 1.2em;
+        }
+        /* Overriding the default margin for better spacing with the new border */
+        .match {
+            margin-bottom: 0; 
+            padding-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="events-body-overlay">
+        <header>
+            <h1 class="logo">Iron Crown Combat</h1>
+            <nav> <a href="index.html">Home</a> <a href="fighters.html">Fighters</a> <a href="events.html">Events</a> <a href="rankings.html">Rankings</a> <a href="news.html">News</a> <a href="tournament.html">Tournament</a> <a href="about.html">About</a> <a href="rules.html">Test Your Metal</a> <a href="guestbook.html">Guestbook</a></nav>
+        </header>
+        <main id="events-container">
+            <p style="text-align: center; font-size: 1.2em;">Loading event archive...</p>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+            const eventSheetName = "Event Results";
+            const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheetName)}`;
+            const BONUS_VALUE = 5000;
+            const IGNORED_BONUS_TEXT = new Set(['tournament', 'non tournament']);
+            const loadEvents = async () => {
+                const container = document.getElementById("events-container");
+                try {
+                    const res = await fetch(eventURL);
+                    if (!res.ok) throw new Error("Failed to fetch event data.");
+                    const data = await res.json();
+                    container.innerHTML = "";
+                    const groupedByEvent = data.reduce((acc, row) => {
+                        const eventName = row.Event?.trim();
+                        if (eventName) {
+                            if (!acc[eventName]) acc[eventName] = [];
+                            acc[eventName].push(row);
+                        }
+                        return acc;
+                    }, {});
+                    for (const eventName in groupedByEvent) {
+                        const eventCard = document.createElement('div');
+                        eventCard.className = 'event-card';
+                        const title = document.createElement('h2');
+                        title.className = 'event-title';
+                        title.textContent = eventName;
+                        const matchesContainer = document.createElement('div');
+                        matchesContainer.className = 'matches-container';
+                        groupedByEvent[eventName].forEach(match => {
+                            const matchDiv = document.createElement('div');
+                            matchDiv.className = 'match';
+                            const ratingText = match["Match Rating"] || "0%";
+                            const ratingValue = parseInt(ratingText.replace('%', '')) || 0;
+                            const stars = "★★★★★☆☆☆☆☆".slice(5 - Math.round(ratingValue / 20), 10 - Math.round(ratingValue / 20));
+                            const purse = ratingValue * 100;
+                            const winner = match.Winner?.trim();
+                            const fighterA = match["Fighter A"]?.trim();
+                            const fighterB = match["Fighter B"]?.trim();
+                            const originalBonusType = (match["Bonus Type"] || match["bonus type"] || "").trim();
+                            const cleanBonusType = originalBonusType.toLowerCase();
+                            let fighterAEarnings = 0, fighterBEarnings = 0;
+                            if (winner === 'Draw') {
+                                fighterAEarnings = purse / 2;
+                                fighterBEarnings = purse / 2;
+                            } else if (winner === fighterA) {
+                                fighterAEarnings = purse;
+                                fighterBEarnings = purse / 2;
+                            } else {
+                                fighterAEarnings = purse / 2;
+                                fighterBEarnings = purse;
+                            }
+                            let bonusText = "—", isActualBonus = false;
+                            if (!IGNORED_BONUS_TEXT.has(cleanBonusType) && cleanBonusType) {
+                                if (cleanBonusType.includes('fight') || cleanBonusType.includes('match')) {
+                                    fighterAEarnings += BONUS_VALUE;
+                                    fighterBEarnings += BONUS_VALUE;
+                                    isActualBonus = true;
+                                } else if (cleanBonusType.includes('ko') || cleanBonusType.includes('submission')) {
+                                    if (winner === fighterA) fighterAEarnings += BONUS_VALUE;
+                                    if (winner === fighterB) fighterBEarnings += BONUS_VALUE;
+                                    isActualBonus = true;
+                                }
+                            }
+                            if (isActualBonus) {
+                                bonusText = `<span class="bonus-highlight">${originalBonusType}</span>`;
+                            } else if (originalBonusType && !IGNORED_BONUS_TEXT.has(cleanBonusType)) {
+                                bonusText = originalBonusType;
+                            }
+                            matchDiv.innerHTML = `<p><strong>${fighterA} vs ${fighterB}</strong></p><p>Winner: <span class="winner">${winner || 'N/A'}</span></p><p>Rating: <span class="rating">${stars}</span> (${ratingText})</p><p>Bonus: ${bonusText}</p><p>Earnings: ${fighterA} ($${fighterAEarnings.toLocaleString()}) | ${fighterB} ($${fighterBEarnings.toLocaleString()})</p>`;
+                            matchesContainer.appendChild(matchDiv);
+                        });
+                        title.addEventListener('click', () => {
+                            title.classList.toggle('active');
+                            matchesContainer.style.display = matchesContainer.style.display === 'block' ? 'none' : 'block';
+                        });
+                        eventCard.appendChild(title);
+                        eventCard.appendChild(matchesContainer);
+                        container.appendChild(eventCard);
+                    }
+                } catch (error) { container.innerHTML = `<p style="color: red;">Error: Could not load event data.</p>`; }
+            };
+            loadEvents();
+        });
+    </script>
+</body>
+</html>
