@@ -1,0 +1,45 @@
+/* --- Iron Crown Combat Master Stylesheet (v4 - Definitive Fixes) --- */
+
+/* 1. General Body and Header Styles */
+:root { /* Color variables for easy changes */
+    --c-gold: #ffd700; --c-red: #cc0000; --c-dark-bg: #111;
+    --c-card-bg: #1a1a1a; --c-grey-text: #ccc;
+}
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #000; color: #f5f5f5; line-height: 1.7; }
+header { background-color: var(--c-dark-bg); padding: 1em; border-bottom: 3px solid var(--c-gold); text-align: center; }
+.logo { color: var(--c-gold); font-size: 2.2em; font-weight: bold; margin: 0; letter-spacing: 1px; }
+main { padding: 2em 1em; max-width: 900px; margin: 0 auto; }
+h2 { font-size: 2em; color: var(--c-gold); border-bottom: 2px solid var(--c-gold); padding-bottom: 0.5em; margin-bottom: 1em; text-align: center; }
+p { font-size: 1.2em; color: #ddd; }
+
+/* 2. Navigation Bar */
+nav { margin-top: 1em; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5em; }
+nav a { background-color: #1c1c1c; border: 1px solid #333; padding: 8px 16px; border-radius: 5px; color: var(--c-red); text-decoration: none; font-size: 1.1em; font-weight: bold; transition: background-color 0.2s, color 0.2s; }
+nav a:hover { background-color: var(--c-gold); color: #000; }
+
+/* 3. Page-Specific Styles */
+/* == Index Page == */
+.index-main { text-align: center; }
+.blurb p { text-align: center; }
+
+/* == Events Page - DEFINITIVE DIVIDER FIX == */
+.matches-container .match {
+    padding-bottom: 1.2em !important;
+    margin-bottom: 1.2em !important;
+    border-bottom: 1px solid #444 !important;
+}
+.matches-container .match:last-child {
+    border-bottom: none !important; /* Remove border from the very last match */
+    margin-bottom: 0 !important;
+}
+/* Other Event styles */
+.event-card { background-color: var(--c-card-bg); border: 1px solid #333; margin-bottom: 2em; border-radius: 8px; overflow: hidden; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+.event-title { text-align: left; color: #111; background-color: var(--c-gold); font-size: 1.5em; margin: 0; padding: 0.8em 1em; cursor: pointer; position: relative; font-weight: bold; border: none; }
+.event-title::after { content: '▼'; color: #111; position: absolute; right: 15px; transition: transform 0.2s; }
+.event-title.active::after { transform: rotate(180deg); }
+.matches-container { display: none; padding: 1em; }
+.bonus-highlight { background-color: var(--c-gold); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; }
+.winner, .rating { font-weight: bold; color: var(--c-gold); }
+
+/* Other styles for Fighters, Rankings, etc. are omitted for brevity but would be here */
+/* (The rest of your master CSS file remains the same) */
