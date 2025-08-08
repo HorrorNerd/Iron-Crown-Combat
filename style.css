@@ -2,7 +2,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Oswald', 'Impact', 'Arial Narrow Bold', Arial, sans-serif;
-    background: #181a1b url('assets/gritty-metal-texture.png') repeat;
+    background: #181a1b url('image.png') repeat;
     background-size: cover;
     color: #f1f1f1;
     min-height: 100vh;
