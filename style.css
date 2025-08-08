@@ -1,45 +1,175 @@
-/* --- Iron Crown Combat Master Stylesheet (v4 - Definitive Fixes) --- */
-
-/* 1. General Body and Header Styles */
-:root { /* Color variables for easy changes */
-    --c-gold: #ffd700; --c-red: #cc0000; --c-dark-bg: #111;
-    --c-card-bg: #1a1a1a; --c-grey-text: #ccc;
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Oswald', 'Impact', 'Arial Narrow Bold', Arial, sans-serif;
+    background: #181a1b url('assets/gritty-metal-texture.png') repeat;
+    background-size: cover;
+    color: #f1f1f1;
+    min-height: 100vh;
 }
-body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #000; color: #f5f5f5; line-height: 1.7; }
-header { background-color: var(--c-dark-bg); padding: 1em; border-bottom: 3px solid var(--c-gold); text-align: center; }
-.logo { color: var(--c-gold); font-size: 2.2em; font-weight: bold; margin: 0; letter-spacing: 1px; }
-main { padding: 2em 1em; max-width: 900px; margin: 0 auto; }
-h2 { font-size: 2em; color: var(--c-gold); border-bottom: 2px solid var(--c-gold); padding-bottom: 0.5em; margin-bottom: 1em; text-align: center; }
-p { font-size: 1.2em; color: #ddd; }
 
-/* 2. Navigation Bar */
-nav { margin-top: 1em; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5em; }
-nav a { background-color: #1c1c1c; border: 1px solid #333; padding: 8px 16px; border-radius: 5px; color: var(--c-red); text-decoration: none; font-size: 1.1em; font-weight: bold; transition: background-color 0.2s, color 0.2s; }
-nav a:hover { background-color: var(--c-gold); color: #000; }
-
-/* 3. Page-Specific Styles */
-/* == Index Page == */
-.index-main { text-align: center; }
-.blurb p { text-align: center; }
-
-/* == Events Page - DEFINITIVE DIVIDER FIX == */
-.matches-container .match {
-    padding-bottom: 1.2em !important;
-    margin-bottom: 1.2em !important;
-    border-bottom: 1px solid #444 !important;
+.header {
+    background: rgba(35,39,42,0.98);
+    border-bottom: 3px solid #b7850b;
+    box-shadow: 0 2px 16px #11191f99;
+    padding: 1.2em 0 0.7em;
+    text-align: center;
+    position: relative;
 }
-.matches-container .match:last-child {
-    border-bottom: none !important; /* Remove border from the very last match */
-    margin-bottom: 0 !important;
-}
-/* Other Event styles */
-.event-card { background-color: var(--c-card-bg); border: 1px solid #333; margin-bottom: 2em; border-radius: 8px; overflow: hidden; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
-.event-title { text-align: left; color: #111; background-color: var(--c-gold); font-size: 1.5em; margin: 0; padding: 0.8em 1em; cursor: pointer; position: relative; font-weight: bold; border: none; }
-.event-title::after { content: '▼'; color: #111; position: absolute; right: 15px; transition: transform 0.2s; }
-.event-title.active::after { transform: rotate(180deg); }
-.matches-container { display: none; padding: 1em; }
-.bonus-highlight { background-color: var(--c-gold); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; }
-.winner, .rating { font-weight: bold; color: var(--c-gold); }
 
-/* Other styles for Fighters, Rankings, etc. are omitted for brevity but would be here */
-/* (The rest of your master CSS file remains the same) */
+.logo {
+    font-size: 2.2rem;
+    font-family: 'Oswald', 'Impact', 'Arial Narrow', Arial, sans-serif;
+    letter-spacing: 3px;
+    margin-top: 0;
+    margin-bottom: 0.3em;
+    background: linear-gradient(90deg, #cfcfcf 20%, #b7850b 50%, #565e64 100%);
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px #141414;
+}
+.logo .iron { color: #b8b8b8; }
+.logo .crown { color: #e56915; }
+.logo .combat { color: #4591db; }
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6em;
+    margin: 0.2em 0 0;
+}
+nav a {
+    background: #181a1b;
+    color: #b8b8b8;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-decoration: none;
+    padding: 0.6em 1.2em;
+    border-radius: 6px;
+    border: 1.5px solid #b8b8b8;
+    transition: all 0.2s cubic-bezier(.32,.72,.55,1.15);
+    margin: 0.15em 0;
+    box-shadow: 0 1px 4px #23272a30;
+}
+nav a.active, nav a:hover {
+    background: #e56915;
+    color: #181a1b;
+    border: 1.5px solid #ffd700;
+    text-shadow: 0 0 4px #ffd70090, 0 0 14px #e5691540;
+}
+
+.hero-image {
+    width: 100%;
+    max-width: 550px;
+    margin: 1em auto 1.2em;
+    display: block;
+    border-radius: 16px;
+    border: 2.5px solid #b8b8b8;
+    box-shadow: 0 6px 32px #23272a60;
+    background: #23272a;
+}
+
+.card {
+    background: rgba(35,39,42,0.92);
+    border: 2px solid #b8b8b8;
+    border-radius: 14px;
+    box-shadow: 0 2px 18px 4px #1c1c1ca0, 0 2px 10px #b7850b44 inset;
+    padding: 2em 1.2em 1.5em;
+    max-width: 700px;
+    margin: 2em auto;
+    position: relative;
+    overflow: hidden;
+    /* subtle grunge overlay if available */
+    /* background-image: url('assets/grunge-overlay.png'); 
+    background-blend-mode: multiply; */
+}
+
+.card .subtitle {
+    display: block;
+    font-size: 1.15rem;
+    color: #ffd700;
+    margin-top: 0.18em;
+    letter-spacing: 1.5px;
+    text-shadow: 0 1px 8px #323232cc;
+}
+.card .league-title {
+    font-size: 1.32rem; 
+    font-weight: 700;
+    text-shadow: 0 1px 5px #b8b8b8de;
+    letter-spacing: 1.8px;
+}
+.card .swa {
+    display: block;
+    color: #b7850b;
+    font-size: 1rem;
+    font-style: italic;
+    margin-bottom: 1em;
+}
+
+.accent {
+    color: #e56915;
+    font-weight: 600;
+}
+.accent-metal {
+    color: #b8b8b8;
+    text-shadow: 0 1px 9px #565e64, 0 0 2px #ffd700;
+    font-size: 1.1em;
+}
+
+.outcome-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 1em 0 1.3em 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2.5em 2em;
+    font-size: 1.19em;
+}
+.outcome-list li {
+    background: #23272aee;
+    border-left: 4px solid #e56915;
+    color: #b8b8b8;
+    padding: 0.4em 1em 0.4em 0.65em;
+    margin-bottom: 0.3em;
+    border-radius: 7px;
+    min-width: 100px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 1.5px 8px #1c1c1c60;
+}
+.icon-ko, .icon-submission, .icon-stoppage, .icon-time {
+    color: #ffd700; margin-right: 0.4em; font-size: 1.16em;
+}
+
+footer.footer {
+    margin-top: 2em;
+    text-align: center;
+    background: rgba(23, 20, 16, 0.92);
+    border-top: 2px solid #b8b8b8;
+    box-shadow: 0 -2px 10px #141414;
+    color: #b8b8b8;
+    font-size: 0.99em;
+    letter-spacing: 1px;
+    padding: 1em 0 0.7em;
+}
+
+/* -- RESPONSIVE -- */
+@media (max-width: 820px) {
+    .card { padding: 1.3em 0.8em 1.2em; }
+    .header { font-size: 0.97em; }
+    .logo { font-size: 1.44rem; }
+}
+@media (max-width: 600px) {
+    nav {
+        flex-direction: column;
+        gap: 0.2em;
+        align-items: center;
+    }
+    .card { margin: 1.2em 0.3em; padding: 1.15em 0.4em 0.8em; }
+    .hero-image { max-width: 99vw; }
+    .logo { font-size: 1.1rem; letter-spacing: 2px;}
+}
