@@ -1,4 +1,4 @@
-// --- Iron Crown Combat Fighters & Events JS by Perplexity ---
+// --- Iron Crown Combat Fighters & Events Script ---
 
 const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
 const fighterSheet = "Fighter Tracker";
@@ -14,12 +14,12 @@ const SHARED_BONUSES = ['fight of the night', 'match of the night'];
 let fightersData = [];
 let eventData = [];
 
-// Helper: Flexible fighter name lookup
+// --- Helper: get fighter name regardless of column label ---
 function extractFighterName(row) {
     return row.Fighter || row.Name || row["Fighter Name"] || row["name"] || "";
 }
 
-// Helper: Calculate stats for a fighter based on events
+// --- Helper: calculate stats for a fighter ---
 function calculateFighterStats(fighterName, allEvents) {
     const trimmed = fighterName.trim();
     const history = allEvents.filter(e =>
@@ -51,7 +51,7 @@ function calculateFighterStats(fighterName, allEvents) {
     return { totalEarnings, wins, bonusCount, history };
 }
 
-// -------- Fighters Page Logic --------
+// --- Load fighters into card grid ---
 async function loadFighters() {
     const container = document.getElementById("fighters-container");
     try {
@@ -59,30 +59,26 @@ async function loadFighters() {
         if (!fighterRes.ok || !eventRes.ok) throw new Error("Failed to fetch spreadsheet data.");
         fightersData = await fighterRes.json();
         eventData = await eventRes.json();
+
         container.innerHTML = "";
-
-        // Log for debugging
-        console.log("fightersData", fightersData);
-
         let cards = 0;
+
         fightersData.forEach(fighter => {
             const fighterName = extractFighterName(fighter);
             if (!fighterName) return;
 
             const stats = calculateFighterStats(fighterName, eventData);
-
-            // Use provided stats or fallback to calculated
-            const recordWins   = fighter.Wins    ?? stats.wins;
-            const recordLosses = fighter.Losses  ?? 0;
-            const recordDraws  = fighter.Draws   ?? 0;
-            const imageUrl     = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
+            const winsVal = fighter.Wins ?? stats.wins;
+            const lossVal = fighter.Losses ?? 0;
+            const drawVal = fighter.Draws ?? 0;
+            const imageUrl = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
 
             const card = document.createElement("div");
             card.className = "fighter-card";
             card.innerHTML = `
                 <img src="${imageUrl}" alt="Photo of ${fighterName}" class="fighter-image">
                 <h2>${fighterName}</h2>
-                <p>${recordWins} W - ${recordLosses} L - ${recordDraws} D</p>
+                <p>${winsVal} W - ${lossVal} L - ${drawVal} D</p>
                 <p><strong>Earnings:</strong> $${stats.totalEarnings.toLocaleString()}</p>
                 <button onclick="openModal('${fighterName.replace(/'/g,"\\'")}')">View Bio & History</button>
             `;
@@ -91,10 +87,10 @@ async function loadFighters() {
         });
 
         if (cards === 0) {
-            container.innerHTML = `<p style="color: #e56915;">No fighters found. Please check your sheet tab and column headers.</p>`;
+            container.innerHTML = `<p style="color: #e56915;">No fighters found. Check your sheet tab and column headers.</p>`;
         }
 
-        // Open modal if ?fighter= param in URL
+        // Optional: Auto-open fighter modal from URL param
         const params = new URLSearchParams(window.location.search);
         const fighterToOpen = params.get('fighter');
         if (fighterToOpen) {
@@ -107,7 +103,7 @@ async function loadFighters() {
     }
 }
 
-// -------- Event Page Logic --------
+// --- Load events into collapsible list ---
 async function loadEvents() {
     const container = document.getElementById("events-container");
     try {
@@ -171,11 +167,12 @@ async function loadEvents() {
                     </div>`;
             });
 
-            // Collapse/expand matches on event title click
+            // Toggle matches on event title click
             title.addEventListener('click', () => {
                 matchesContainer.style.display =
                     matchesContainer.style.display === 'block' ? 'none' : 'block';
             });
+
             eventCard.appendChild(title);
             eventCard.appendChild(matchesContainer);
             container.appendChild(eventCard);
@@ -186,7 +183,7 @@ async function loadEvents() {
     }
 }
 
-// -------- Modal Logic --------
+// --- Modal open/close ---
 window.openModal = function(fighterName) {
     const modal = document.getElementById("modal");
     const content = document.getElementById("modal-content");
@@ -200,8 +197,8 @@ window.openModal = function(fighterName) {
     }
 
     const stats = calculateFighterStats(fighterName, eventData);
+    const imageUrl = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
 
-    // Prepare bio details (flexibly gets all fields)
     const bioDetailsHtml = `
         <div class="bio-details">
             <div class="detail-item">
@@ -223,7 +220,6 @@ window.openModal = function(fighterName) {
         </div>
     `;
 
-    // Build fight history
     let historyHtml = '<h3>Fight History</h3>';
     if (stats.history.length > 0) {
         historyHtml += '<ul>';
@@ -244,6 +240,9 @@ window.openModal = function(fighterName) {
 
     content.innerHTML = `
         <span id="close-modal" onclick="closeModal()">×</span>
+        <div class="modal-fighter-photo-wrap">
+          <img src="${imageUrl}" alt="Photo of ${fighterName}" class="modal-fighter-photo">
+        </div>
         <h2>${fighterName}</h2>
         <p><strong>Official Record:</strong> ${fighter.Wins ?? stats.wins} W - ${fighter.Losses ?? 0} L - ${fighter.Draws ?? 0} D</p>
         ${bioDetailsHtml}
@@ -260,10 +259,10 @@ window.closeModal = function() {
 
 // Close modal with Escape key
 document.addEventListener('keydown', e => {
-    if (e.key === "Escape") window.closeModal();
+    if (e.key === "Escape") closeModal();
 });
 
-// -------- Main Loader --------
+// --- Run loaders for relevant pages ---
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById("fighters-container")) {
         loadFighters();
