@@ -9,7 +9,6 @@ const SHARED_BONUSES = ['fight of the night', 'match of the night'];
 let fightersData = [];
 let eventData = [];
 
-// --- Helper: get fighter name regardless of column label ---
 function extractFighterName(row) {
   return row.Fighter || row.Name || row["Fighter Name"] || row["name"] || "";
 }
@@ -39,7 +38,6 @@ function calculateFighterStats(fighterName, allEvents) {
   return { totalEarnings, wins, bonusCount, history };
 }
 
-// --- Load fighters into card grid ---
 async function loadFighters() {
   const container = document.getElementById("fighters-container");
   try {
@@ -72,7 +70,6 @@ async function loadFighters() {
     if (cards === 0) {
       container.innerHTML = `<p style="color: #e56915;">No fighters found. Check your sheet tab and column headers.</p>`;
     }
-    // Optional: Auto-open fighter modal from URL param
     const params = new URLSearchParams(window.location.search);
     const fighterToOpen = params.get('fighter');
     if (fighterToOpen) {
@@ -84,7 +81,6 @@ async function loadFighters() {
   }
 }
 
-// --- Modal open/close ---
 window.openModal = function(fighterName) {
   const modal = document.getElementById("modal");
   const content = document.getElementById("modal-content");
@@ -153,12 +149,10 @@ window.closeModal = function() {
   document.getElementById("modal").style.display = "none";
 };
 
-// Close modal with Escape key
 document.addEventListener('keydown', e => {
   if (e.key === "Escape") closeModal();
 });
 
-// --- Run loader ---
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById("fighters-container")) {
     loadFighters();
