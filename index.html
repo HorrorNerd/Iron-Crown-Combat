@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-                <h1 class="logo">Iron Crown Combat</h1>
-                <!-- ** THE UPDATED NAVIGATION BAR ** -->
+    <header class="header">
+        <h1 class="logo">
+            <span class="iron">IRON </span><span class="crown">CROWN</span> <span class="combat">COMBAT</span>
+        </h1>
         <nav>
-            <a href="index.html">Home</a>
+            <a href="index.html" class="active">Home</a>
             <a href="fighters.html">Fighters</a>
             <a href="events.html">Events</a>
             <a href="rankings.html">Rankings</a>
@@ -21,27 +22,44 @@
             <a href="rules.html">Test Your Metal</a>
         </nav>
     </header>
-    <main style="text-align: center;">
-        <img src="https://i.postimg.cc/kgg1vw8Y/Iron-Crown-Combat-Logo.png?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Fighting ring" class="hero-image">
-        <div class="blurb">
-            <h2>Iron Crown Combat—
-Where the Crown is Heavy… and only the worthy can lift it.</h2>
-            <p>🔱 Iron Crown Combat 🔱
-Presented by SWA (Syndicate Wrestling Alliance)
 
-Iron Crown Combat is a brutal, hybrid-rules fight league where only the strong endure.
-Hosted in a wrestling ring, each fight is contested under 3 rounds of 5 minutes with no judges—victory can only be earned by:
+    <main>
+        <img 
+            src="https://i.postimg.cc/kgg1vw8Y/Iron-Crown-Combat-Logo.png?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
+            alt="Iron Crown Combat logo - a cage fight ring" 
+            class="hero-image"
+        >
 
-KO
+        <section class="card blurb">
+            <h2>
+                Where the Crown is Heavy…
+                <span class="subtitle">and only the worthy can lift it.</span>
+            </h2>
+            <p class="league-title">🔱 Iron Crown Combat 🔱<br>
+            <span class="swa">Presented by SWA (Syndicate Wrestling Alliance)</span>
+            </p>
 
-Submission
+            <p>
+                <strong>Iron Crown Combat</strong> is a brutal, hybrid-rules fight league where only the strong endure.<br>
+                Hosted in a wrestling ring, each fight is contested under <span class="accent">3 rounds of 5 minutes</span>.<br>
+                <span class="accent accent-metal">No judges—victory can only be earned by:</span>
+            </p>
+            <ul class="outcome-list">
+                <li><span class="icon-ko">✦</span> KO</li>
+                <li><span class="icon-submission">✦</span> Submission</li>
+                <li><span class="icon-stoppage">✦</span> Referee Stoppage</li>
+                <li><span class="icon-time">✦</span> Time-limit Draw</li>
+            </ul>
 
-Referee Stoppage
-
-Time-limit Draw
-
-
-All fighting styles are welcome—from pro wrestling and jiu-jitsu to kickboxing, sambo, and beyond. Competitors come from all over the world to battle for supremacy, pride, and a piece of the purse.</p>
+            <p>
+                All fighting styles are welcome—from pro wrestling and jiu-jitsu to kickboxing, sambo, and beyond.<br>
+                Competitors come from all over the world to battle for supremacy, pride, and a piece of the purse.
+            </p>
+        </section>
     </main>
+
+    <footer class="footer">
+        &copy; 2025 Iron Crown Combat. All rights reserved.
+    </footer>
 </body>
 </html>
