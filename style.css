@@ -173,3 +173,99 @@ footer.footer {
     .hero-image { max-width: 99vw; }
     .logo { font-size: 1.1rem; letter-spacing: 2px;}
 }
+/* General Styles (logo, header, footer, etc. should match homepage styles) */
+
+/* NEWS PAGE SPECIFIC */
+.news-header {
+    display: flex;
+    align-items: center;
+    gap: 1.1em;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    background: rgba(23,20,16,0.83);
+    box-shadow: 0 2px 14px #2a2321b8;
+    padding: 1em 1.2em;
+    border-radius: 12px;
+}
+.announcer-img {
+    width: 95px; max-width: 24vw;
+    height: auto;
+    border-radius: 50%;
+    box-shadow: 0 4px 16px #1d140b80, 0 0 0 4px #b8b8b8;
+    background: #23272a;
+}
+.header-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.metal-title {
+    font-family: 'Oswald','Impact','Arial Narrow Bold',Arial,sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    font-size: 1.4rem;
+    color: #ffd700;
+    margin-bottom: 0.15em;
+    text-shadow: 0 1px 12px #91590d66, 0 2px 8px #181a1b;
+}
+.news-header p {
+    color: #b7850b;
+    font-weight: 600;
+    margin-top: 0;
+    font-size: 1.07em;
+    letter-spacing: 1px;
+}
+.news-article {
+    margin: 1.8em auto 1.4em auto;
+    padding: 1.4em 1.4em 1em 1.4em;
+    background: rgba(24, 26, 27, 0.95);
+    border-left: 6px solid #e56915;
+    box-shadow: 0 2px 16px #1c1c1d60, 0 0px 1.5px #e5691550;
+    border-radius: 11px;
+    max-width: 650px;
+    position: relative;
+    overflow: hidden;
+}
+.news-article h3 {
+    margin: 0 0 0.25em 0;
+    color: #ffd700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    font-size: 1.2em;
+}
+.news-article .date {
+    color: #b8b8b8;
+    font-size: 0.98em;
+    margin-bottom: 0.21em;
+    font-style: italic;
+}
+.news-article .content {
+    color: #e3e3e2;
+    margin-top: 0.8em;
+    line-height: 1.6;
+    font-size: 1.07em;
+    word-break: break-word;
+}
+.news-article ul {
+    padding-left: 1.1em;
+    margin-bottom: 0.8em;
+}
+.news-article li {
+    background: #24292f;
+    color: #ffd700;
+    margin-bottom: 0.2em;
+    padding: 0.28em 0.8em 0.28em 0.8em;
+    border-radius: 0.4em;
+    box-shadow: 0 0 8px #b8b8b821;
+    list-style-type: disc;
+}
+.loading-text {
+    color: #b8b8b8;
+    font-size: 1.08em;
+    text-align: center;
+    margin-top: 2em;
+}
+
+/* RESPONSIVE FOR NEWS */
+@media (max-width: 650px) {
+    .news-header {
