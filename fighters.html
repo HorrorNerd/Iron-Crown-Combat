@@ -1,146 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="referrer" content="no-referrer">
-    <title>Iron Crown Combat - Fighters</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* --- Fighters Grid --- */
-        .roster-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-            gap: 2em 1.6em;
-            padding: 2em 1em 2em 1em;
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-        .fighter-card {
-            background: rgba(35,39,42,0.92);
-            border: 2px solid #b8b8b8;
-            border-left: 6px solid #e56915;
-            border-radius: 12px;
-            box-shadow: 0 2px 16px #181a1b66, 0 0 6px #b7850ba0 inset;
-            padding: 1.1em 1em 1.6em;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 0.12s cubic-bezier(.32,.72,.55,1.15), box-shadow 0.14s;
-            min-height: 280px;
-        }
-        .fighter-card:hover {
-            transform: translateY(-8px) scale(1.022);
-            box-shadow: 0 10px 28px #11191f77, 0 0 16px #ffd70030;
-        }
-        .fighter-image {
-            width: 108px; height: 108px; object-fit: cover;
-            border-radius: 50%;
-            border: 3.5px solid #b8b8b8;
-            box-shadow: 0 2px 8px #181a1baa, 0 0 0 0.8em #23272a55;
-            background: #23272a;
-            margin-bottom: 1em;
-        }
-        .fighter-card h2 {
-            color: #ffd700;
-            font-family: 'Oswald','Impact','Arial Narrow',Arial,sans-serif;
-            letter-spacing: 1.2px;
-            font-size: 1.18em;
-            margin: 0 0 0.4em 0;
-            text-transform: uppercase;
-        }
-        .fighter-card p {
-            color: #e56915;
-            margin: 0 0 0.8em 0;
-            font-weight: bold;
-        }
-        .fighter-card button {
-            background: linear-gradient(90deg, #e56915 40%, #b7850b 100%);
-            color: #181a1b;
-            border: none;
-            padding: 0.55em 1.3em;
-            border-radius: 7px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            font-size: 1.02em;
-            box-shadow: 0 1.5px 7px #ffd70074;
-            cursor: pointer;
-            transition: background 0.16s, color 0.16s, transform 0.10s;
-        }
-        .fighter-card button:hover {
-            background: #ffd700;
-            color: #e56915;
-            transform: scale(1.06);
-            box-shadow: 0 2px 14px #b8b8b888;
-        }
-        /* --- Fighter Modal --- */
-        #modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(16, 12, 7, 0.92);
-            z-index: 99;
-            justify-content: center;
-            align-items: center;
-        }
-        #modal-content {
-            background: linear-gradient(140deg, #23272a 70%, #181a1b 95%);
-            border: 3px solid #b8b8b8;
-            border-radius: 14px;
-            box-shadow: 0 12px 32px #181a1b88, 0 0 18px #b7850b30;
-            max-width: 420px;
-            width: 88vw;
-            margin: 4vh auto;
-            padding: 2em 1.1em 1.4em 1.1em;
-            color: #f1f1f1;
-            position: relative;
-            animation: modalpopin 0.18s cubic-bezier(.8,1.4,.7,1);
-        }
-        @keyframes modalpopin {
-            from { opacity: 0; transform: translateY(48px) scale(0.92);}
-            to { opacity: 1; transform: translateY(0) scale(1);}
-        }
-        #close-modal {
-            position: absolute;
-            top: 0.5em; right: 0.8em;
-            color: #ffd700;
-            font-size: 2.5em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: color 0.15s;
-            z-index: 1;
-            text-shadow: 0 2px 9px #15181c90;
-        }
-        #close-modal:hover { color: #e56915; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="referrer" content="no-referrer">
+  <title>Iron Crown Combat - Fighters</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <h1 class="logo">
+      <span class="iron">IRON </span><span class="crown">CROWN</span> <span class="combat">COMBAT</span>
+    </h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="fighters.html" class="active">Fighters</a>
+      <a href="events.html">Events</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="news.html">News</a>
+      <a href="tournament.html">Tournament</a>
+      <a href="about.html">About</a>
+      <a href="rules.html">Test Your Metal</a>
+      <a href="guestbook.html">Guestbook</a>
+    </nav>
+  </header>
 
-        #modal-content h2 {
-            font-size: 1.6em;
-            color: #ffd700;
-            text-align: center;
-            border-bottom: 2px solid #e56915;
-            padding-bottom: 0.4em;
-            margin-bottom: 1em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-family: 'Oswald','Impact','Arial Narrow',Arial,sans-serif;
-        }
-        #modal-content h3 {
-            color: #b7850b;
-            letter-spacing: 1px;
-            margin: 1.2em 0 0.44em 0;
-            font-size: 1.14em;
-        }
-        #modal-content p {
-            color: #f1f1f1;
-            font-size: 1.03em;
-            padding-bottom: 0.1em;
-        }
-        .bio-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1em 0.7em;
-            margin-bottom: 1.3em;
-            background-color: #191b1c;
-            padding: 0.8em 0.4em 0.5em;
-            border-radius: 7px;
-            border: 1.5px solid
+  <!-- MAIN ROSTER GRID -->
+  <main>
+    <div class="roster-grid" id="fighters-container">
+      <p style="text-align:center; font-size:1.2em; color:#ffd700;">Loading fighter roster...</p>
+    </div>
+  </main>
+
+  <!-- MODAL POPUP -->
+  <div id="modal" style="display:none;">
+    <div id="modal-content"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    &copy; 2025 Iron Crown Combat. All rights reserved.
+  </footer>
+
+  <!-- SCRIPT -->
+  <script src="script.js"></script>
+</body>
+</html>
