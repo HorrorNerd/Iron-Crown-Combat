@@ -7,40 +7,46 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1 class="logo">Iron Crown Combat</h1>
-         <!-- ** THE UPDATED NAVIGATION BAR ** -->
+    <header class="header">
+        <h1 class="logo">
+            <span class="iron">IRON </span><span class="crown">CROWN</span> <span class="combat">COMBAT</span>
+        </h1>
         <nav>
             <a href="index.html">Home</a>
             <a href="fighters.html">Fighters</a>
             <a href="events.html">Events</a>
             <a href="rankings.html">Rankings</a>
-            <a href="news.html">News</a>
+            <a href="news.html" class="active">News</a>
             <a href="tournament.html">Tournament</a>
             <a href="about.html">About</a>
             <a href="rules.html">Test Your Metal</a>
-        </nav>   </header>
+        </nav>
+    </header>
+
     <main id="news-container">
-        <div class="news-header">
-            <!-- PASTE JAIMEY'S PICTURE LINK HERE -->
+        <div class="news-header card">
             <img src="https://i.postimg.cc/PqLSBxSm/Announcer-Jaimey.png" alt="Jaimey Jameson" class="announcer-img">
             <div class="header-text">
-                <h2>From The Foundry</h2>
-                <p>with Jamey Jameson</p>
+                <h2 class="metal-title">From The Foundry</h2>
+                <p>with Jaimey Jameson</p>
             </div>
         </div>
-        <p style="text-align: center;">Loading latest news...</p>
+        <p class="loading-text">Loading latest news...</p>
     </main>
+
+    <footer class="footer">
+        &copy; 2025 Iron Crown Combat. All rights reserved.
+    </footer>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
             const newsSheetName = "News";
             const newsURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(newsSheetName)}`;
 
-            // --- NEW: MARKDOWN TO HTML CONVERTER ---
+            // --- MARKDOWN TO HTML CONVERTER ---
             const parseMarkdown = (text) => {
                 if (!text) return '';
-                
                 return text
                     // Bold: *text* -> <strong>text</strong>
                     .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
@@ -77,11 +83,10 @@
                         if (!title || !content) return;
                         
                         const articleDiv = document.createElement('div');
-                        articleDiv.className = 'news-article';
+                        articleDiv.className = 'news-article card';
                         
                         const formattedDate = new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
                         
-                        // ** NEW: Use the markdown parser **
                         const htmlContent = parseMarkdown(content);
 
                         articleDiv.innerHTML = `
@@ -96,7 +101,7 @@
                     const header = container.querySelector('.news-header');
                     container.innerHTML = '';
                     if (header) container.appendChild(header);
-                    container.innerHTML += `<p style="color: red;">Error: Could not load news. Please check the 'News' sheet and ensure it is shared publicly.</p>`;
+                    container.innerHTML += `<p style="color: #e56915; text-align:center;">Error: Could not load news. Please check the 'News' sheet and ensure it is shared publicly.</p>`;
                     console.error("News Loading Error:", error);
                 }
             };
