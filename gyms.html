@@ -58,16 +58,16 @@
   <script>
     // Make sure these match your actual tab names!
     const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-    const managersSheet = "Manager"; // Your Manager sheet/tab
+    const managersSheet = "Managers"; // <-- updated to "Managers"
     const fightersSheet = "Fighter Tracker"; // Your Fighter Tracker tab
     const managersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(managersSheet)}`;
     const fightersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(fightersSheet)}`;
 
-    // Fetch and combine data
     async function fetchGymsAndFighters() {
       const [managersRes, fightersRes] = await Promise.all([fetch(managersURL), fetch(fightersURL)]);
       const managersData = await managersRes.json();
       const fightersData = await fightersRes.json();
+
       // gyms = all rows in managers tab
       const gyms = managersData.map(mgr => ({
         name: mgr["Gym Name"],
@@ -76,7 +76,6 @@
       }));
       const gymMap = Object.fromEntries(gyms.map(g => [g.name, g]));
       fightersData.forEach(f => {
-        // Get fighter name and gym assignment (last column as fallback)
         const fighterName = f["Fighter"] && f["Fighter"].trim();
         const gymName = f["Gym"] && f["Gym"].trim();
         if (gymName && gymMap[gymName] && fighterName) {
@@ -86,7 +85,6 @@
       return gyms;
     }
 
-    // Renders gym cards
     function renderGyms(gyms) {
       const grid = document.getElementById("gyms-grid");
       grid.innerHTML = "";
@@ -103,7 +101,6 @@
       });
     }
 
-    // Modal showing gym roster
     function showGymModal(gym) {
       const modal = document.getElementById("gym-modal");
       const content = modal.querySelector(".modal-content");
@@ -120,12 +117,10 @@
       modal.style.display = "flex";
     }
 
-    // Modal background click closes
     document.getElementById("gym-modal").addEventListener("click", function(e) {
       if (e.target === this) this.style.display='none';
     });
 
-    // Load gyms/fighters on page load
     fetchGymsAndFighters().then(renderGyms);
   </script>
 </body>
