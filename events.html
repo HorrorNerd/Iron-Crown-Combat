@@ -297,7 +297,6 @@
               } else if (originalBonusType && !IGNORED_BONUS_TEXT.has(cleanBonusType)) {
                 bonusText = originalBonusType;
               }
-              // Add bonus value to earnings when applicable
               if (isActualBonus) {
                 if (cleanBonusType.includes('fight') || cleanBonusType.includes('match'))
                   { fighterAEarnings += BONUS_VALUE; fighterBEarnings += BONUS_VALUE; }
@@ -306,11 +305,11 @@
                   if (winner === fighterB) fighterBEarnings += BONUS_VALUE;
                 }
               }
-              // Title fight detection (bonus type, "cole maddox", or "crown"/"champion")
-              const isTitleFight =
-                /title|champion/i.test(originalBonusType) ||
-                [fighterA, fighterB].some(f => f && f.toLowerCase().includes("cole maddox")) ||
-                cleanBonusType.includes("crown") || cleanBonusType.includes("champion");
+              // Accurate Title Fight detection from spreadsheet
+              const isTitleFight = (
+                (match['Title Fight'] && match['Title Fight'].toLowerCase() === 'yes') ||
+                (match['Title Fight'] && match['Title Fight'] === 'TRUE')
+              );
               matchDiv.className = "match" + (isTitleFight ? " match-title-fight" : "");
               matchDiv.innerHTML = `
                 <p><strong>${fighterA} vs ${fighterB}</strong></p>
