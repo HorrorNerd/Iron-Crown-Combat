@@ -1,121 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Iron Crown Combat - Events</title>
-    <!-- Link to your master stylesheet -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- ** NEW STYLE FOR THE MATCH DIVIDER ** -->
-    <style>
-        .match:not(:last-child) {
-            border-bottom: 1px solid #444; /* A dark grey line */
-            padding-bottom: 1.2em;
-            margin-bottom: 1.2em;
-        }
-        /* Overriding the default margin for better spacing with the new border */
-        .match {
-            margin-bottom: 0; 
-            padding-bottom: 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iron Crown Combat - Events</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body, .events-body-overlay {
+      min-height: 100vh;
+      background: url('image.png') no-repeat center/cover fixed;
+      margin: 0;
+      color: #f1f1f1;
+    }
+    .events-body-overlay {
+      background: rgba(0,0,0,0.79);
+      min-height: 100vh;
+      padding-bottom: 3em;
+      position: relative;
+    }
+    header {
+      text-align: center;
+      padding: 2em 0 1.2em 0;
+    }
+    .logo {
+      font-size: 2rem;
+      color: #ffd700;
+      text-shadow: 0 2px 10px #181a1b;
+      font-family: 'Oswald', 'Impact', Arial, sans-serif;
+      margin-bottom: 1.1em;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.7em;
+      margin-bottom: 2em;
+    }
+    nav a {
+      background: #252325;
+      color: #ffd700;
+      font-weight: bold;
+      text-decoration: none;
+      padding: 0.6em 1.22em;
+      border-radius: 9px;
+      border: 1.3px solid #e56915;
+      transition: background 0.21s;
+      margin: 0.1em 0;
+    }
+    nav a.active, nav a:hover {
+      background: #ffd700;
+      color: #23272a;
+      border: 1.3px solid #e56915;
+      text-shadow: 0 0 2px #e5691590;
+    }
+    /* Event Card Accordion */
+    .event-card {
+      margin: 2em auto 1.1em;
+      background: rgba(30,32,33,0.99);
+      border-radius: 18px;
+      box-shadow: 0 8px 24px #151415a8, 0 0 24px #ffd70022 inset;
+      max-width: 720px;
+      overflow: hidden;
+      border-left: 8px solid #e56915;
+      border-bottom: 2px solid #ffd70044;
+      transition: box-shadow 0.18s;
+      padding: 0 0 0.7em;
+    }
+    .event-title {
+      background: linear-gradient(90deg, #e56915 10%, #ffd700 70%, #3d3d44 115%);
+      color: #23272a;
+      font-size: 1.24rem;
+      font-family: 'Oswald','Impact',sans-serif;
+      letter-spacing: 0.7px;
+      padding: 1em 2em;
+      margin: 0;
+      cursor: pointer;
+      border-bottom: 2px solid #ffd70022;
+      position: relative;
+      transition: background 0.2s;
+      user-select: none;
+    }
+    .event-title:hover, .event-title.active {
+      background: linear-gradient(90deg, #ffd700 30%, #e56915 100%);
+      color: #181a1b;
+    }
+    .event-title::after {
+      content: "▼";
+      position: absolute;
+      right: 1.2em;
+      font-size: 1.1em;
+      top: 49%;
+      transform: translateY(-50%) rotate(0deg);
+      transition: transform 0.23s;
+      opacity: 0.8;
+    }
+    .event-title.active::after {
+      transform: translateY(-50%) rotate(-180deg);
+      opacity: 1;
+    }
+    .matches-container {
+      display: block;
+      padding: 1.2em 1.2em 0.3em 1.7em;
+      animation: fadeIn 0.23s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px);}
+      to   { opacity: 1; transform: translateY(0);}
+    }
+    .match {
+      padding: 1.1em 0;
+      margin: 0;
+      border-bottom: 1px solid #444;
+      position: relative;
+      transition: box-shadow 0.18s;
+    }
+    .match:last-child {
+      border-bottom: none;
+    }
+    .match > p {
+      margin: 0.38em 0;
+      font-size: 1.05em;
+      letter-spacing: 0.1px;
+    }
+    .match strong {
+      color: #ffd700;
+      letter-spacing: 1.1px;
+      font-size: 1.08em;
+    }
+    .winner {
+      color: #ffd700;
+      font-weight: bold;
+      text-shadow: 0 1px 8px #e5691522;
+    }
+    .rating {
+      letter-spacing: 1px;
+      color: #e56915;
+      font-weight: bold;
+    }
+    /* Themed Award Badges */
+    .bonus-highlight {
+      display: inline-block;
+      padding: 3px 14px;
+      margin-left: 6px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #ffd700 33%, #e56915 93%);
+      color: #181a1b;
+      font-weight: bold;
+      font-size: 1em;
+      letter-spacing: 0.7px;
+      box-shadow: 0 1px 10px #ffd70077, 0 0 9px #e5691511 inset;
+      border: 2px solid #e56915;
+      text-shadow: 0 1px 6px #ffd70055;
+      position: relative;
+    }
+    .bonus-ko:before { content: "🥊 "; }
+    .bonus-sub:before { content: "🤼 "; }
+    .bonus-fotn:before, .bonus-motn:before { content: "🔥 "; }
+    /* Title Fights: Crown/Championship */
+    .match-title-fight {
+      border: 2.2px solid #ffd700;
+      box-shadow: 0 0 16px #ffd70088, 0 1px 12px #e5691510;
+      border-radius: 13px;
+      background: linear-gradient(92deg, #e5691520 45%, #ffd70022 100%);
+    }
+    .match-title-fight::before {
+      content: "👑 TITLE FIGHT";
+      position: absolute;
+      left: -2px;
+      top: -25px;
+      background: #ffd700;
+      color: #23272a;
+      font-weight: bold;
+      font-size: 0.93em;
+      padding: 2px 12px;
+      border-radius: 10px 10px 10px 3px;
+      box-shadow: 0 2px 10px #e5691535;
+      letter-spacing: 2px;
+      white-space: nowrap;
+    }
+    .match-earnings {
+      color: #b8b8b8;
+      font-size: 1em;
+      font-family: 'Oswald', 'Arial', sans-serif;
+      margin-top: 0.3em;
+      padding-top: 2px;
+    }
+    @media (max-width:850px) {
+      .event-card { max-width: 97vw; padding-right: 0;}
+      .matches-container { padding: 1em 0.3em 0.2em 1em;}
+      .event-title { padding: 1em 1em 1em 1.2em;}
+    }
+    @media (max-width:500px) {
+      .event-title { font-size: 1em; padding: 0.8em 0.6em; }
+      .matches-container { padding-left: 0.6em; }
+      .match > p { font-size: 0.97em;}
+      .match-title-fight::before { font-size: 0.81em; left: 0; top: -20px; padding: 2px 6px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="events-body-overlay">
-        <header>
-            <h1 class="logo">Iron Crown Combat</h1>
-            <nav> <a href="index.html">Home</a> <a href="fighters.html">Fighters</a> <a href="events.html">Events</a> <a href="rankings.html">Rankings</a> <a href="news.html">News</a> <a href="tournament.html">Tournament</a> <a href="about.html">About</a> <a href="rules.html">Test Your Metal</a> <a href="guestbook.html">Guestbook</a></nav>
-        </header>
-        <main id="events-container">
-            <p style="text-align: center; font-size: 1.2em;">Loading event archive...</p>
-        </main>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-            const eventSheetName = "Event Results";
-            const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheetName)}`;
-            const BONUS_VALUE = 5000;
-            const IGNORED_BONUS_TEXT = new Set(['tournament', 'non tournament']);
-            const loadEvents = async () => {
-                const container = document.getElementById("events-container");
-                try {
-                    const res = await fetch(eventURL);
-                    if (!res.ok) throw new Error("Failed to fetch event data.");
-                    const data = await res.json();
-                    container.innerHTML = "";
-                    const groupedByEvent = data.reduce((acc, row) => {
-                        const eventName = row.Event?.trim();
-                        if (eventName) {
-                            if (!acc[eventName]) acc[eventName] = [];
-                            acc[eventName].push(row);
-                        }
-                        return acc;
-                    }, {});
-                    for (const eventName in groupedByEvent) {
-                        const eventCard = document.createElement('div');
-                        eventCard.className = 'event-card';
-                        const title = document.createElement('h2');
-                        title.className = 'event-title';
-                        title.textContent = eventName;
-                        const matchesContainer = document.createElement('div');
-                        matchesContainer.className = 'matches-container';
-                        groupedByEvent[eventName].forEach(match => {
-                            const matchDiv = document.createElement('div');
-                            matchDiv.className = 'match';
-                            const ratingText = match["Match Rating"] || "0%";
-                            const ratingValue = parseInt(ratingText.replace('%', '')) || 0;
-                            const stars = "★★★★★☆☆☆☆☆".slice(5 - Math.round(ratingValue / 20), 10 - Math.round(ratingValue / 20));
-                            const purse = ratingValue * 100;
-                            const winner = match.Winner?.trim();
-                            const fighterA = match["Fighter A"]?.trim();
-                            const fighterB = match["Fighter B"]?.trim();
-                            const originalBonusType = (match["Bonus Type"] || match["bonus type"] || "").trim();
-                            const cleanBonusType = originalBonusType.toLowerCase();
-                            let fighterAEarnings = 0, fighterBEarnings = 0;
-                            if (winner === 'Draw') {
-                                fighterAEarnings = purse / 2;
-                                fighterBEarnings = purse / 2;
-                            } else if (winner === fighterA) {
-                                fighterAEarnings = purse;
-                                fighterBEarnings = purse / 2;
-                            } else {
-                                fighterAEarnings = purse / 2;
-                                fighterBEarnings = purse;
-                            }
-                            let bonusText = "—", isActualBonus = false;
-                            if (!IGNORED_BONUS_TEXT.has(cleanBonusType) && cleanBonusType) {
-                                if (cleanBonusType.includes('fight') || cleanBonusType.includes('match')) {
-                                    fighterAEarnings += BONUS_VALUE;
-                                    fighterBEarnings += BONUS_VALUE;
-                                    isActualBonus = true;
-                                } else if (cleanBonusType.includes('ko') || cleanBonusType.includes('submission')) {
-                                    if (winner === fighterA) fighterAEarnings += BONUS_VALUE;
-                                    if (winner === fighterB) fighterBEarnings += BONUS_VALUE;
-                                    isActualBonus = true;
-                                }
-                            }
-                            if (isActualBonus) {
-                                bonusText = `<span class="bonus-highlight">${originalBonusType}</span>`;
-                            } else if (originalBonusType && !IGNORED_BONUS_TEXT.has(cleanBonusType)) {
-                                bonusText = originalBonusType;
-                            }
-                            matchDiv.innerHTML = `<p><strong>${fighterA} vs ${fighterB}</strong></p><p>Winner: <span class="winner">${winner || 'N/A'}</span></p><p>Rating: <span class="rating">${stars}</span> (${ratingText})</p><p>Bonus: ${bonusText}</p><p>Earnings: ${fighterA} ($${fighterAEarnings.toLocaleString()}) | ${fighterB} ($${fighterBEarnings.toLocaleString()})</p>`;
-                            matchesContainer.appendChild(matchDiv);
-                        });
-                        title.addEventListener('click', () => {
-                            title.classList.toggle('active');
-                            matchesContainer.style.display = matchesContainer.style.display === 'block' ? 'none' : 'block';
-                        });
-                        eventCard.appendChild(title);
-                        eventCard.appendChild(matchesContainer);
-                        container.appendChild(eventCard);
-                    }
-                } catch (error) { container.innerHTML = `<p style="color: red;">Error: Could not load event data.</p>`; }
-            };
-            loadEvents();
-        });
-    </script>
+  <div class="events-body-overlay">
+    <header>
+      <h1 class="logo">Iron Crown Combat</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="events.html" class="active">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="news.html">News</a>
+        <a href="tournament.html">Tournament</a>
+        <a href="about.html">About</a>
+        <a href="rules.html">Test Your Metal</a>
+        <a href="guestbook.html">Guestbook</a>
+      </nav>
+    </header>
+    <main id="events-container">
+      <p style="text-align: center; font-size: 1.2em;">Loading event archive...</p>
+    </main>
+  </div>
+  <footer class="footer">
+    &copy; 2025 Iron Crown Combat. All rights reserved.
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+      const eventSheetName = "Event Results";
+      const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheetName)}`;
+      const BONUS_VALUE = 5000;
+      const IGNORED_BONUS_TEXT = new Set(['tournament', 'non tournament']);
+      const loadEvents = async () => {
+        const container = document.getElementById("events-container");
+        try {
+          const res = await fetch(eventURL);
+          if (!res.ok) throw new Error("Failed to fetch event data.");
+          const data = await res.json();
+          container.innerHTML = "";
+          const groupedByEvent = data.reduce((acc, row) => {
+            const eventName = row.Event?.trim();
+            if (eventName) {
+              if (!acc[eventName]) acc[eventName] = [];
+              acc[eventName].push(row);
+            }
+            return acc;
+          }, {});
+          for (const eventName in groupedByEvent) {
+            const eventCard = document.createElement('div');
+            eventCard.className = 'event-card';
+            const title = document.createElement('h2');
+            title.className = 'event-title';
+            title.textContent = eventName;
+            const matchesContainer = document.createElement('div');
+            matchesContainer.className = 'matches-container';
+            matchesContainer.style.display = Object.keys(groupedByEvent).slice(-1)[0] === eventName ? 'block' : 'none';
+            groupedByEvent[eventName].forEach(match => {
+              const matchDiv = document.createElement('div');
+              // Standard rating stars
+              const ratingText = match["Match Rating"] || "0%";
+              const ratingValue = parseInt(ratingText.replace('%', '')) || 0;
+              const starCount = Math.max(1, Math.round(ratingValue / 20));
+              const stars = "★★★★★☆☆☆☆☆".slice(5 - starCount, 10 - starCount);
+              const purse = ratingValue * 100;
+              const winner = match.Winner?.trim();
+              const fighterA = match["Fighter A"]?.trim();
+              const fighterB = match["Fighter B"]?.trim();
+              const originalBonusType = (match["Bonus Type"] || match["bonus type"] || "").trim();
+              const cleanBonusType = originalBonusType.toLowerCase();
+              let fighterAEarnings = 0, fighterBEarnings = 0;
+              if (winner === 'Draw') {
+                fighterAEarnings = purse / 2;
+                fighterBEarnings = purse / 2;
+              } else if (winner === fighterA) {
+                fighterAEarnings = purse;
+                fighterBEarnings = purse / 2;
+              } else {
+                fighterAEarnings = purse / 2;
+                fighterBEarnings = purse;
+              }
+              // Award theming
+              let bonusText = "—";
+              let isActualBonus = false;
+              let bonusClass = "";
+              if (!IGNORED_BONUS_TEXT.has(cleanBonusType) && cleanBonusType) {
+                if (cleanBonusType.includes('ko')) {
+                  bonusText = `<span class="bonus-highlight bonus-ko">${originalBonusType}</span>`;
+                  isActualBonus = true; bonusClass = "bonus-ko";
+                } else if (cleanBonusType.includes('submission')) {
+                  bonusText = `<span class="bonus-highlight bonus-sub">${originalBonusType}</span>`;
+                  isActualBonus = true; bonusClass = "bonus-sub";
+                } else if (cleanBonusType.includes('fight of the night') || cleanBonusType.includes('match of the night')) {
+                  bonusText = `<span class="bonus-highlight bonus-fotn">${originalBonusType}</span>`;
+                  isActualBonus = true; bonusClass = "bonus-fotn";
+                } else if (cleanBonusType.includes('fight') || cleanBonusType.includes('match')) {
+                  bonusText = `<span class="bonus-highlight bonus-motn">${originalBonusType}</span>`;
+                  isActualBonus = true; bonusClass = "bonus-motn";
+                }
+              } else if (originalBonusType && !IGNORED_BONUS_TEXT.has(cleanBonusType)) {
+                bonusText = originalBonusType;
+              }
+              // Add bonus value to earnings when applicable
+              if (isActualBonus) {
+                if (cleanBonusType.includes('fight') || cleanBonusType.includes('match'))
+                  { fighterAEarnings += BONUS_VALUE; fighterBEarnings += BONUS_VALUE; }
+                else if (cleanBonusType.includes('ko') || cleanBonusType.includes('submission')) {
+                  if (winner === fighterA) fighterAEarnings += BONUS_VALUE;
+                  if (winner === fighterB) fighterBEarnings += BONUS_VALUE;
+                }
+              }
+              // Title fight detection (bonus type, "cole maddox", or "crown"/"champion")
+              const isTitleFight =
+                /title|champion/i.test(originalBonusType) ||
+                [fighterA, fighterB].some(f => f && f.toLowerCase().includes("cole maddox")) ||
+                cleanBonusType.includes("crown") || cleanBonusType.includes("champion");
+              matchDiv.className = "match" + (isTitleFight ? " match-title-fight" : "");
+              matchDiv.innerHTML = `
+                <p><strong>${fighterA} vs ${fighterB}</strong></p>
+                <p>Winner: <span class="winner">${winner || 'N/A'}</span></p>
+                <p>Rating: <span class="rating">${stars}</span> <span style="color:#b8b8b8;">(${ratingText})</span></p>
+                <p>Bonus: ${bonusText}</p>
+                <p class="match-earnings">
+                  <span style="color:#e56915;">${fighterA}</span> <span>($${fighterAEarnings.toLocaleString()})</span>
+                  <span style="color:#ffd700; margin-left:0.4em;">${fighterB}</span> <span>($${fighterBEarnings.toLocaleString()})</span>
+                </p>
+              `;
+              matchesContainer.appendChild(matchDiv);
+            });
+            title.addEventListener('click', () => {
+              title.classList.toggle('active');
+              matchesContainer.style.display = matchesContainer.style.display === 'block' ? 'none' : 'block';
+            });
+            eventCard.appendChild(title);
+            eventCard.appendChild(matchesContainer);
+            container.appendChild(eventCard);
+          }
+        } catch (error) {
+          container.innerHTML = `<p style="color: red;">Error: Could not load event data.</p>`;
+        }
+      };
+      loadEvents();
+    });
+  </script>
 </body>
 </html>
