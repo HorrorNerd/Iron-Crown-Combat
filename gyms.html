@@ -60,31 +60,32 @@
   <script>
     // Spreadsheet info
     const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-    const gymsSheet = "Gyms";
-    const fightersSheet = "Fighter Tracker";
-    const gymsURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(gymsSheet)}`;
-    const fightersURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fightersSheet)}`;
+    const managersSheet = "Manager"; // Use your actual manager sheet/tab name
+    const fightersSheet = "Fighter Tracker"; // Use your actual fighter sheet/tab name
+    const managersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(managersSheet)}`;
+    const fightersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(fightersSheet)}`;
 
-    // Fetch gyms and fighters, assign fighters to gyms by "Gym" column
+    // Fetch gyms (from Manager tab) and fighters (from Fighter Tracker tab) and assign fighters to gyms by "Gym" column
     async function fetchGymsAndFighters() {
-      const [gymsRes, fightersRes] = await Promise.all([fetch(gymsURL), fetch(fightersURL)]);
-      const gymsData = await gymsRes.json();
+      const [managersRes, fightersRes] = await Promise.all([fetch(managersURL), fetch(fightersURL)]);
+      const managersData = await managersRes.json();
       const fightersData = await fightersRes.json();
 
-      // Map gyms by name for easy assignment
-      const gyms = gymsData.map(gym => ({
-        name: gym["Gym Name"],
-        logo: gym["Logo URL"],
-        description: gym["Description"],
-        manager: { name: gym["Manager Name"], picture: gym["Manager Photo"] },
+      // Map gyms via manager tab (one group per row)
+      const gyms = managersData.map(mgr => ({
+        name: mgr["Gym Name"],
+        logo: mgr["Logo URL"],
+        description: mgr["Gym Description"] || mgr["Description"],
+        manager: { name: mgr["Manager Name"], picture: mgr["Manager Photo"] },
         fighters: []
       }));
       const gymMap = Object.fromEntries(gyms.map(g => [g.name, g]));
 
+      // Assign fighters to gyms via "Gym" column (should match case/text to manager tab!)
       fightersData.forEach(f => {
-        // Get fighter name and gym (last column, or by name "Gym")
         const fighterName = f["Fighter Name"] || f["Name"];
-        const gymName = f["Gym"];
+        // Last column on spreadsheet is the gym; fallback to "Gym"
+        const gymName = f["Gym"] || Object.values(f)[Object.values(f).length - 1];
         if(gymMap[gymName]) gymMap[gymName].fighters.push(fighterName);
       });
 
@@ -95,6 +96,7 @@
       const grid = document.getElementById("gyms-grid");
       grid.innerHTML = "";
       gyms.forEach((gym) => {
+        if(!gym.name) return;
         const card = document.createElement("div");
         card.className = "gym-card";
         card.innerHTML = `
@@ -112,7 +114,7 @@
       content.innerHTML = `
         <button class="modal-close" onclick="document.getElementById('gym-modal').style.display='none';">&times;</button>
         <div class="modal-title">${gym.name}</div>
-        <div class="modal-desc">${gym.description}</div>
+        <div class="modal-desc">${gym.description || "No description available."}</div>
         <div class="modal-subtitle">Manager</div>
         <img src="${gym.manager.picture}" alt="${gym.manager.name}" class="manager-img"/>
         <div style="font-weight:bold; margin-bottom:1.1em;">${gym.manager.name}</div>
