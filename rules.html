@@ -1,59 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Iron Crown Combat - Test Your Metal</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iron Crown Combat - Test Your Metal</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: url('image.png') no-repeat center/cover fixed;
+      color: #f1f1f1;
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Oswald','Impact',Arial,sans-serif;
+    }
+    header {
+      text-align: center;
+      background: rgba(35,39,42, 0.97);
+      border-bottom: 3px solid #ffd700;
+      padding: 2em 0 1em 0;
+      box-shadow: 0 2px 16px #181a1b88;
+    }
+    .logo {
+      font-size: 2.2rem;
+      color: #ffd700;
+      text-shadow: 0 2px 10px #23272a;
+      margin-bottom: 1em;
+      font-family: 'Oswald','Impact','Arial Narrow',Arial,sans-serif;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.7em;
+      margin-bottom: 1.5em;
+    }
+    nav a {
+      text-decoration: none;
+      font-weight: bold;
+      background: #181a1b;
+      color: #ffd700;
+      border: 1.5px solid #e56915;
+      border-radius: 8px;
+      padding: 0.7em 1.3em;
+      transition: background 0.18s, color 0.12s;
+      letter-spacing: 2px;
+    }
+    nav a.active, nav a:hover {
+      background: #ffd700;
+      color: #23272a;
+    }
+    main {
+      max-width: 820px;
+      margin: 3em auto 4em auto;
+      background: rgba(30,32,33,0.96);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px #181a1b97, 0 0 18px #ffd70022 inset;
+      padding: 2.3em 1.7em 2em 1.7em;
+      font-size: 1.07em;
+    }
+    h2, h3 {
+      color: #ffd700;
+      text-shadow: 0 2px 8px #23272a66, 0 1px 30px #e5691515;
+      font-family: 'Oswald','Impact',Arial,sans-serif;
+      margin-bottom: 0.45em;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    h2 { font-size: 1.7em; }
+    h3 { font-size: 1.18em; text-align: left;}
+    ul {
+      padding-left: 1.4em;
+      margin-bottom: 1.2em;
+      list-style: disc;
+    }
+    li {
+      margin-bottom: 0.5em;
+      color: #ffd700;
+    }
+    strong { color: #e56915; }
+    em { color: #ffd700; font-style: italic;}
+    a { color: #ffd700; text-decoration: underline; transition: color 0.15s;}
+    a:hover { color: #e56915;}
+    .discord-link {
+      font-size: 1.08em;
+      text-align: left;
+      margin: 1em 0;
+      display: block;
+    }
+    .discord-link a {
+      display: inline-block;
+      background: linear-gradient(90deg,#e56915 5%,#ffd700 80%);
+      color: #23272a !important;
+      font-weight: bold;
+      font-size: 1.1em;
+      padding: 0.36em 1.1em;
+      border-radius: 14px;
+      text-decoration: none;
+      margin-left: 0.4em;
+      transition: background 0.18s, color 0.18s;
+      letter-spacing: 1px;
+    }
+    .discord-link a:hover {
+      background: linear-gradient(90deg,#ffd700 65%,#e56915 120%);
+      color: #23272a !important;
+    }
+    @media (max-width:700px) {
+      main { padding: 1em 0.5em; }
+      h2 { font-size: 1.13em; }
+      .logo { font-size: 1.17em; }
+      .discord-link a { font-size: 1em; padding: 0.29em 0.7em;}
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1 class="logo">Iron Crown Combat</h1>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="fighters.html">Fighters</a>
-            <a href="events.html">Events</a>
-            <a href="rankings.html">Rankings</a>
-            <a href="news.html">News</a>
-            <a href="about.html">About</a>
-            <a href="rules.html">Test Your Metal</a>
-        </nav>
-    </header>
-    <main>
-        <div style="font-family: Arial, sans-serif; color: #e2e2e2; background-color: #121212; padding: 20px; border-radius: 10px; max-width: 800px; margin: auto;">
-  <h2 style="color: #ffd700;">🔻 Submit Your Fighter to Iron Crown Combat 🔻</h2>
-  <p><strong>Think you have what it takes to survive the Crucible?</strong><br>
-  You may submit <strong>1 male and 1 female fighter</strong> to compete in Iron Crown Combat. All styles are welcome — as long as they stay grounded in semi-realism. That means <em>no superpowers, no werewolves — just gritty, bone-cracking combat.</em></p>
+  <header>
+    <h1 class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="fighters.html">Fighters</a>
+      <a href="events.html">Events</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="news.html">News</a>
+      <a href="about.html">About</a>
+      <a href="rules.html" class="active">Test Your Metal</a>
+    </nav>
+  </header>
+  <main>
+    <h2>🔻 Submit Your Fighter to Iron Crown Combat 🔻</h2>
+    <p><strong>Think you have what it takes to survive the Crucible?</strong><br>
+      You may submit <strong>1 male and 1 female fighter</strong> to compete in Iron Crown Combat. All styles are welcome — as long as they stay grounded in semi-realism. That means <em>no superpowers, no werewolves—just gritty, bone-cracking combat.</em>
+    </p>
 
-  <h3 style="color: #ffd700;">✅ Submission Rules</h3>
-  <ul>
-    <li><strong>Platform:</strong> Fire Pro Wrestling World (PS4)</li>
-    <li><strong>Match Format:</strong> 3 rounds, 5 minutes each</li>
-    <li><strong>Win Conditions:</strong> KO, Submission, Ref Stoppage, or Time-limit Draw (No judges)</li>
-    <li><strong>Environment:</strong> Ring only – no cage</li>
-    <li><strong>Custom Moves:</strong> Minimal use, must be clearly labeled</li>
-    <li><strong>Ukemi:</strong> Set to 0-0-0</li>
-    <li><strong>Logic Settings:</strong> Only 1 offensive and 1 defensive parameter can be set to 10. All others must be 8 or lower.</li>
-    <li><strong>No Tag Matches</strong></li>
-    <li><strong>No Gym Mate Battles</strong> (fighters from the same camp can’t face each other – e.g., Shiv vs. Executioner)</li>
-  </ul>
+    <h3>✅ Submission Rules</h3>
+    <ul>
+      <li><strong>Platform:</strong> Fire Pro Wrestling World (PS4)</li>
+      <li><strong>Match Format:</strong> 3 rounds, 5 minutes each</li>
+      <li><strong>Win Conditions:</strong> KO, Submission, Ref Stoppage, or Time-limit Draw (No judges)</li>
+      <li><strong>Environment:</strong> Ring only – no cage</li>
+      <li><strong>Custom Moves:</strong> Minimal use, must be clearly labeled</li>
+      <li><strong>Ukemi:</strong> Set to 0-0-0</li>
+      <li><strong>Logic Settings:</strong> Only 1 offensive and 1 defensive parameter can be set to 10. All others must be 8 or lower.</li>
+      <li><strong>No Tag Matches</strong></li>
+      <li><strong>No Gym Mate Battles</strong> (fighters from the same camp can’t face each other – e.g., Shiv vs. Executioner)</li>
+    </ul>
 
-  <h3 style="color: #ffd700;">🧾 How to Submit</h3>
-  <p>Upload your fighter to the ps4 workshop </p>
-  <p>Include the following info:</p>
-  <ul>
-    <li>Fighter’s full name</li>
-    <li>Nickname (if applicable)</li>
-    <li>Age, Height, Weight, Country of origin</li>
-    <li>Fighting style & description</li>
-    <li>Signature move(s) and personality traits</li>
-    <li>Backstory</li>
-  </ul>
-<h3> send me your fighters link as a message on our <a href="https://discord.gg/ATZZFNEpa5">Discord</a>
-  <h3 style="color: #ffd700;">💰 Purse & Prestige</h3>
-  <p>Fighters earn money based on match rating and performance bonuses (KO of the Night, Submission of the Night, Fight of the Night).</p>
-  <p><strong>Top earners gain power</strong> — the right to challenge anyone, regardless of division or gender, and eventually compete for the <strong>Iron Crown Championship.</strong></p>
-        </div>
-    </main>
+    <h3>🧾 How to Submit</h3>
+    <p>Upload your fighter to the PS4 workshop and include:</p>
+    <ul>
+      <li>Fighter’s full name</li>
+      <li>Nickname (if applicable)</li>
+      <li>Age, Height, Weight, Country of origin</li>
+      <li>Fighting style & description</li>
+      <li>Signature move(s) and personality traits</li>
+      <li>Backstory</li>
+    </ul>
+
+    <div class="discord-link">
+      Send your fighter's link as a message on our 
+      <a href="https://discord.gg/ATZZFNEpa5" target="_blank">Discord</a>
+    </div>
+
+    <h3>💰 Purse & Prestige</h3>
+    <p>
+      Fighters earn money based on match rating and performance bonuses (KO of the Night, Submission of the Night, Fight of the Night).
+      <br><strong>Top earners gain power</strong> — the right to challenge anyone, regardless of division or gender, and eventually compete for the <strong>Iron Crown Championship.</strong>
+    </p>
+  </main>
+  <footer class="footer">
+    &copy; 2025 Iron Crown Combat. All rights reserved.
+  </footer>
 </body>
 </html>
