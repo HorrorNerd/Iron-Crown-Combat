@@ -433,3 +433,77 @@ footer.footer {
   margin: 0.3em 0;
   text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
+/* Fight Night Hero Section */
+.fight-night-hero {
+  position: relative;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('image.png') no-repeat center/cover fixed;
+  color: #f1f1f1;
+}
+
+.hero-overlay {
+  background: rgba(0,0,0,0.72);
+  padding: 2em 1.4em;
+  border-radius: 20px;
+  max-width: 900px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 20px rgba(229,105,21,0.4) inset;
+}
+
+/* Existing hero content styles */
+.home-image {
+  max-width: 320px;
+  height: auto;
+  margin: 0 auto 1.2em;
+  display: block;
+}
+
+.home-intro {
+  font-size: 1.5rem;
+  color: #ffd700;
+  margin-bottom: 0.8em;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+.home-title {
+  font-size: 2.2rem;
+  margin: 0.2em 0;
+  color: #ffd700;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.85);
+}
+
+.home-subtitle {
+  font-size: 1.15rem;
+  margin-bottom: 1.4em;
+  color: #e56915;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+}
+
+.home-description {
+  font-size: 1.06rem;
+  line-height: 1.6;
+  margin-bottom: 1em;
+}
+
+.victory-conditions {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1em 0;
+  font-size: 1.15rem;
+  color: #ffd700;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+}
+.victory-conditions li {
+  margin: 0.3em 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .home-title { font-size: 1.6rem; }
+  .home-intro { font-size: 1.2rem; }
+  .fight-night-hero { padding: 1em; }
+  .hero-overlay { padding: 1.5em 1em; }
+}
