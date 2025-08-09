@@ -38,6 +38,38 @@ function calculateFighterStats(fighterName, allEvents) {
   return { totalEarnings, wins, bonusCount, history };
 }
 
+function getChampionshipBadgeHtml() {
+  return `
+    <div class="champ-belt-badge" title="King Of The Crown">
+      <svg viewBox="0 0 360 120" class="belt-svg" aria-label="Championship Belt">
+        <rect x="10" y="48" width="75" height="24" rx="12" fill="#23272a" stroke="#b8b8b8" stroke-width="3"/>
+        <rect x="275" y="48" width="75" height="24" rx="12" fill="#23272a" stroke="#b8b8b8" stroke-width="3"/>
+        <ellipse cx="180" cy="60" rx="85" ry="44" fill="url(#plateGrad)" stroke="#ffd700" stroke-width="5"/>
+        <g>
+          <ellipse cx="180" cy="60" rx="38" ry="16" fill="#565e64" stroke="#b8b8b8" stroke-width="2"/>
+          <polygon points="152,60 158,32 166,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
+          <polygon points="166,58 176,22 180,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
+          <polygon points="180,58 184,22 194,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
+          <polygon points="194,58 202,32 208,60" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
+          <ellipse cx="180" cy="56" rx="33" ry="7" fill="#7e848b" opacity="0.9"/>
+        </g>
+        <text x="180" y="96" font-size="18" text-anchor="middle" fill="#ffd700" font-family="'Oswald','Impact',Arial,sans-serif" letter-spacing="2" font-weight="bold">KING OF THE CROWN</text>
+        <defs>
+          <linearGradient id="plateGrad" x1="95" y1="16" x2="265" y2="104" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#ffc600"/>
+            <stop offset="0.35" stop-color="#ffe38b"/>
+            <stop offset="0.45" stop-color="#ffd700"/>
+            <stop offset="0.85" stop-color="#ae8800"/>
+            <stop offset="1" stop-color="#ffc600"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="belt-holder-label">Cole Maddox</span>
+    </div>
+  `;
+}
+
+// Load fighters and render cards
 async function loadFighters() {
   const container = document.getElementById("fighters-container");
   try {
@@ -55,9 +87,12 @@ async function loadFighters() {
       const lossVal = fighter.Losses ?? 0;
       const drawVal = fighter.Draws ?? 0;
       const imageUrl = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
+      const isKing = fighterName === "Cole Maddox";
+      const badgeHtml = isKing ? getChampionshipBadgeHtml() : "";
       const card = document.createElement("div");
       card.className = "fighter-card";
       card.innerHTML = `
+        ${badgeHtml}
         <img src="${imageUrl}" alt="Photo of ${fighterName}" class="fighter-image">
         <h2>${fighterName}</h2>
         <p>${winsVal} W - ${lossVal} L - ${drawVal} D</p>
@@ -81,6 +116,7 @@ async function loadFighters() {
   }
 }
 
+// Open modal with fighter info
 window.openModal = function(fighterName) {
   const modal = document.getElementById("modal");
   const content = document.getElementById("modal-content");
@@ -93,8 +129,14 @@ window.openModal = function(fighterName) {
   }
   const stats = calculateFighterStats(fighterName, eventData);
   const imageUrl = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
+  const isKing = fighterName === "Cole Maddox";
+  const badgeHtml = isKing ? getChampionshipBadgeHtml() : "";
   const bioDetailsHtml = `
     <div class="bio-details">
+      <div class="detail-item">
+          <strong>Record</strong>
+          <span>${fighter.Wins ?? stats.wins} W - ${fighter.Losses ?? 0} L - ${fighter.Draws ?? 0} D</span>
+      </div>
       <div class="detail-item">
           <strong>Height</strong>
           <span>${fighter.Height || 'N/A'}</span>
@@ -132,11 +174,11 @@ window.openModal = function(fighterName) {
   }
   content.innerHTML = `
     <span id="close-modal" onclick="closeModal()">×</span>
+    ${badgeHtml}
     <div class="modal-fighter-photo-wrap">
       <img src="${imageUrl}" alt="Photo of ${fighterName}" class="modal-fighter-photo">
     </div>
     <h2>${fighterName}</h2>
-    <p><strong>Official Record:</strong> ${fighter.Wins ?? stats.wins} W - ${fighter.Losses ?? 0} L - ${fighter.Draws ?? 0} D</p>
     ${bioDetailsHtml}
     <h3>Biography</h3>
     <p>${fighter.Bio ?? fighter.Biography ?? "This fighter's biography has not yet been written."}</p>
