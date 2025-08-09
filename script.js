@@ -69,7 +69,6 @@ function getChampionshipBadgeHtml() {
   `;
 }
 
-// Load fighters and render cards
 async function loadFighters() {
   const container = document.getElementById("fighters-container");
   try {
@@ -87,7 +86,7 @@ async function loadFighters() {
       const lossVal = fighter.Losses ?? 0;
       const drawVal = fighter.Draws ?? 0;
       const imageUrl = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
-      const isKing = fighterName === "Cole Maddox";
+      const isKing = fighterName.toLowerCase() === "cole maddox";
       const badgeHtml = isKing ? getChampionshipBadgeHtml() : '';
       const card = document.createElement("div");
       card.className = "fighter-card";
@@ -117,12 +116,11 @@ async function loadFighters() {
   }
 }
 
-// Open modal with fighter info, including awards
 window.openModal = function(fighterName) {
   const modal = document.getElementById("modal");
   const content = document.getElementById("modal-content");
   const fighter = fightersData.find(f =>
-    extractFighterName(f) === fighterName);
+    extractFighterName(f).toLowerCase() === fighterName.toLowerCase());
   if (!fighter) {
     content.innerHTML = `<h2>${fighterName}</h2><p>Fighter not found.</p><button onclick="closeModal()">Close</button>`;
     modal.style.display = "flex";
@@ -130,17 +128,18 @@ window.openModal = function(fighterName) {
   }
   const stats = calculateFighterStats(fighterName, eventData);
   const imageUrl = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
-  const isKing = fighterName === "Cole Maddox";
+  const isKing = fighterName.toLowerCase() === "cole maddox";
   const badgeHtml = isKing ? getChampionshipBadgeHtml() : "";
 
-  // Generate Awards & Bonuses list
+  // Generate Awards & Bonuses list with normalized names
   const awardsSet = new Set();
+  const normalizedFighterName = fighterName.toLowerCase();
   eventData.forEach(match => {
-    const fighterA = match["Fighter A"]?.trim();
-    const fighterB = match["Fighter B"]?.trim();
+    const fighterA = match["Fighter A"]?.trim().toLowerCase();
+    const fighterB = match["Fighter B"]?.trim().toLowerCase();
     const bonusType = (match["bonus type"] || "").trim();
     if (!bonusType) return;
-    if (fighterA === fighterName || fighterB === fighterName) {
+    if (fighterA === normalizedFighterName || fighterB === normalizedFighterName) {
       awardsSet.add(bonusType);
     }
   });
@@ -223,7 +222,7 @@ window.closeModal = function() {
   document.getElementById("modal").style.display = "none";
 };
 
-// Fullscreen image viewer functions
+// Opens the fullscreen image viewer with the given image SRC and alt text
 function openImageViewer(src, alt) {
   const overlay = document.getElementById('image-viewer-overlay');
   const img = document.getElementById('fullsize-image');
@@ -232,6 +231,7 @@ function openImageViewer(src, alt) {
   overlay.style.display = 'flex';
 }
 
+// Closes the fullscreen image viewer
 function closeImageViewer() {
   const overlay = document.getElementById('image-viewer-overlay');
   overlay.style.display = 'none';
@@ -239,7 +239,7 @@ function closeImageViewer() {
   img.src = '';
 }
 
-// Add click handlers for fighter images for fullscreen view
+// Add click handlers to fighter images to open fullscreen viewer
 function addImageClickHandlers() {
   const images = document.querySelectorAll('.fighter-image');
   images.forEach(img => {
