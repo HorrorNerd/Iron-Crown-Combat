@@ -88,7 +88,7 @@ async function loadFighters() {
       const drawVal = fighter.Draws ?? 0;
       const imageUrl = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
       const isKing = fighterName === "Cole Maddox";
-      const badgeHtml = isKing ? getChampionshipBadgeHtml() : "";
+      const badgeHtml = isKing ? getChampionshipBadgeHtml() : '';
       const card = document.createElement("div");
       card.className = "fighter-card";
       card.innerHTML = `
@@ -102,6 +102,7 @@ async function loadFighters() {
       container.appendChild(card);
       cards++;
     });
+    addImageClickHandlers();
     if (cards === 0) {
       container.innerHTML = `<p style="color: #e56915;">No fighters found. Check your sheet tab and column headers.</p>`;
     }
@@ -116,7 +117,7 @@ async function loadFighters() {
   }
 }
 
-// Open modal with fighter info
+// Open modal with fighter info, including awards
 window.openModal = function(fighterName) {
   const modal = document.getElementById("modal");
   const content = document.getElementById("modal-content");
@@ -131,11 +132,39 @@ window.openModal = function(fighterName) {
   const imageUrl = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
   const isKing = fighterName === "Cole Maddox";
   const badgeHtml = isKing ? getChampionshipBadgeHtml() : "";
+
+  // Generate Awards & Bonuses list
+  const awardsSet = new Set();
+  eventData.forEach(match => {
+    const fighterA = match["Fighter A"]?.trim();
+    const fighterB = match["Fighter B"]?.trim();
+    const bonusType = (match["bonus type"] || "").trim();
+    if (!bonusType) return;
+    if (fighterA === fighterName || fighterB === fighterName) {
+      awardsSet.add(bonusType);
+    }
+  });
+  const awardsArray = Array.from(awardsSet);
+  let awardsHtml = '<h3>Awards & Bonuses</h3>';
+  if (awardsArray.length > 0) {
+    awardsHtml += '<ul>';
+    awardsArray.forEach(award => {
+      awardsHtml += `<li>${award}</li>`;
+    });
+    awardsHtml += '</ul>';
+  } else {
+    awardsHtml += '<p>No awards or bonuses recorded.</p>';
+  }
+
   const bioDetailsHtml = `
     <div class="bio-details">
       <div class="detail-item">
           <strong>Record</strong>
           <span>${fighter.Wins ?? stats.wins} W - ${fighter.Losses ?? 0} L - ${fighter.Draws ?? 0} D</span>
+      </div>
+      <div class="detail-item">
+          <strong>Earnings</strong>
+          <span>$${stats.totalEarnings.toLocaleString()}</span>
       </div>
       <div class="detail-item">
           <strong>Height</strong>
@@ -155,6 +184,7 @@ window.openModal = function(fighterName) {
       </div>
     </div>
   `;
+
   let historyHtml = '<h3>Fight History</h3>';
   if (stats.history.length > 0) {
     historyHtml += '<ul>';
@@ -172,14 +202,16 @@ window.openModal = function(fighterName) {
   } else {
     historyHtml += '<p>No fight history recorded.</p>';
   }
+
   content.innerHTML = `
     <span id="close-modal" onclick="closeModal()">×</span>
     ${badgeHtml}
     <div class="modal-fighter-photo-wrap">
-      <img src="${imageUrl}" alt="Photo of ${fighterName}" class="modal-fighter-photo">
+      <img src="${imageUrl}" alt="Photo of ${fighterName}" class="modal-fighter-photo" onclick="openImageViewer('${imageUrl}', 'Photo of ${fighterName}')">
     </div>
     <h2>${fighterName}</h2>
     ${bioDetailsHtml}
+    ${awardsHtml}
     <h3>Biography</h3>
     <p>${fighter.Bio ?? fighter.Biography ?? "This fighter's biography has not yet been written."}</p>
     ${historyHtml}
@@ -191,8 +223,36 @@ window.closeModal = function() {
   document.getElementById("modal").style.display = "none";
 };
 
+// Fullscreen image viewer functions
+function openImageViewer(src, alt) {
+  const overlay = document.getElementById('image-viewer-overlay');
+  const img = document.getElementById('fullsize-image');
+  img.src = src;
+  img.alt = alt || 'Full size fighter photo';
+  overlay.style.display = 'flex';
+}
+
+function closeImageViewer() {
+  const overlay = document.getElementById('image-viewer-overlay');
+  overlay.style.display = 'none';
+  const img = document.getElementById('fullsize-image');
+  img.src = '';
+}
+
+// Add click handlers for fighter images for fullscreen view
+function addImageClickHandlers() {
+  const images = document.querySelectorAll('.fighter-image');
+  images.forEach(img => {
+    img.style.cursor = 'zoom-in';
+    img.onclick = () => openImageViewer(img.src, img.alt);
+  });
+}
+
 document.addEventListener('keydown', e => {
-  if (e.key === "Escape") closeModal();
+  if (e.key === "Escape") {
+    closeModal();
+    closeImageViewer();
+  }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
