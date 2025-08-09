@@ -56,15 +56,15 @@
     &copy; 2025 Iron Crown Combat. All rights reserved.
   </footer>
   <script>
-    // Update these to match your actual tab names!
+    // Make sure these match your actual tab names!
     const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-    const managersSheet = "Managers"; // name of your managers tab
-    const fightersSheet = "Fighter Tracker"; // name of your fighter tracker tab
+    const managersSheet = "Manager"; // Your Manager sheet/tab
+    const fightersSheet = "Fighter Tracker"; // Your Fighter Tracker tab
     const managersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(managersSheet)}`;
     const fightersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(fightersSheet)}`;
 
+    // Fetch and combine data
     async function fetchGymsAndFighters() {
-      // fetch managers and fighters
       const [managersRes, fightersRes] = await Promise.all([fetch(managersURL), fetch(fightersURL)]);
       const managersData = await managersRes.json();
       const fightersData = await fightersRes.json();
@@ -74,22 +74,24 @@
         manager: mgr["Manager"],
         fighters: []
       }));
-      // map gyms by name for quick assignment
       const gymMap = Object.fromEntries(gyms.map(g => [g.name, g]));
-      // assign fighters by gym field (any column named "Gym")
       fightersData.forEach(f => {
-        const fighterName = f["Fighter Name"] || f["Name"];
-        const gymName = f["Gym"] || Object.values(f)[Object.values(f).length-1];
-        if(gymMap[gymName]) gymMap[gymName].fighters.push(fighterName);
+        // Get fighter name and gym assignment (last column as fallback)
+        const fighterName = f["Fighter"] && f["Fighter"].trim();
+        const gymName = f["Gym"] && f["Gym"].trim();
+        if (gymName && gymMap[gymName] && fighterName) {
+          gymMap[gymName].fighters.push(fighterName);
+        }
       });
       return gyms;
     }
 
+    // Renders gym cards
     function renderGyms(gyms) {
       const grid = document.getElementById("gyms-grid");
       grid.innerHTML = "";
-      gyms.forEach((gym) => {
-        if(!gym.name) return;
+      gyms.forEach(gym => {
+        if (!gym.name || !gym.manager) return;
         const card = document.createElement("div");
         card.className = "gym-card";
         card.innerHTML = `
@@ -101,6 +103,7 @@
       });
     }
 
+    // Modal showing gym roster
     function showGymModal(gym) {
       const modal = document.getElementById("gym-modal");
       const content = modal.querySelector(".modal-content");
@@ -116,9 +119,12 @@
       `;
       modal.style.display = "flex";
     }
+
+    // Modal background click closes
     document.getElementById("gym-modal").addEventListener("click", function(e) {
       if (e.target === this) this.style.display='none';
     });
+
     // Load gyms/fighters on page load
     fetchGymsAndFighters().then(renderGyms);
   </script>
