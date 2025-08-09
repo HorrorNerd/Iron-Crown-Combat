@@ -580,3 +580,243 @@ footer.footer {
   .fight-night-hero { padding: 1em; }
   .hero-overlay { padding: 1.3em 0.6em; }
 }
+body {
+  background: url('image.png') no-repeat center/cover fixed;
+  color: #f1f1f1;
+  margin: 0;
+  min-height: 100vh;
+}
+
+.rankings-body-overlay {
+  background: rgba(10,12,16,0.81);
+  min-height: 100vh;
+  padding-bottom: 3em;
+  position: relative;
+}
+
+header {
+  text-align: center;
+  padding: 2em 0 1em 0;
+}
+
+.logo {
+  font-size: 2rem;
+  font-family: 'Oswald','Impact',Arial,sans-serif;
+  color: #ffd700;
+  text-shadow: 0 2px 10px #181a1b;
+  margin-bottom: 1em;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6em;
+  margin-bottom: 2em;
+}
+nav a {
+  background: #23272a;
+  color: #ffd700;
+  font-weight: bold;
+  letter-spacing: 1.4px;
+  text-decoration: none;
+  padding: 0.55em 1.1em;
+  border-radius: 8px;
+  border: 1.4px solid #e56915;
+  transition: background 0.19s;
+}
+nav a.active, nav a:hover {
+  background: #ffd700;
+  color: #23272a;
+  border: 1.4px solid #e56915;
+  text-shadow: 0 0 5px #e5691540;
+}
+
+/* Champion Card Styling */
+.champion-section {
+  max-width: 600px;
+  margin: 0 auto 2em;
+  background: linear-gradient(95deg,#23272a 60%,#ffd70022 140%);
+  border-radius: 24px;
+  box-shadow: 0 6px 28px #ffd70033 inset, 0 2px 12px #23272a77;
+  padding: 2em 1.2em 1.8em 1.2em;
+  position: relative;
+  text-align: center;
+  border-left: 10px solid #ffd700;
+}
+.champ-crown {
+  font-size: 3.6rem;
+  color: #ffd700;
+  text-shadow: 0 2px 20px #ffd70090, 0 1px 8px #23272a55;
+  vertical-align: middle;
+  margin-bottom: -0.1em;
+  letter-spacing: 0.1em;
+}
+.champion-section h2 {
+  color: #ffd700;
+  font-family: 'Oswald','Impact','Arial Narrow',sans-serif;
+  letter-spacing: 2px;
+  font-size: 1.36em;
+  padding-bottom: 0.4em;
+  margin-bottom: 0.3em;
+  border-bottom: 2px solid #e56915;
+  text-shadow: 0 1px 5px #ffd70055;
+}
+#champion-name {
+  font-size: 1.36em;
+  color: #e56915;
+  font-weight: bold;
+  margin: 1.1em 0 0.5em;
+  letter-spacing: 2px;
+  text-shadow: 0 1px 8px #181a1b44, 0 0 8px #ffd70044;
+}
+.champ-belt-badge {
+  margin-top: -1.1em;
+  margin-bottom: 0.7em;
+  display: block;
+}
+.champ-belt-badge .belt-svg {
+  width: 120px;
+  max-width: 120px;
+  margin: 0 auto 0.2em auto;
+  display: block;
+}
+.champion-label {
+  color: #ffd700;
+  font-size: 1.02em;
+  font-family: 'Oswald','Impact',Arial,sans-serif;
+  letter-spacing: 1.7px;
+  background: #23272a;
+  border-radius: 20px 12px 20px 12px;
+  padding: 0.12em 1.3em;
+  display: inline-block;
+  font-weight: bold;
+  border: 2px solid #ffd700;
+  box-shadow: 0 2px 7px #ffd70044;
+  text-shadow: 0 2px 8px #23272a99, 0 1px 8px #ffd70066;
+  margin-bottom: 0.3em;
+}
+
+/* Rankings Grid Layout */
+.rankings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2em;
+  max-width: 980px;
+  margin: 2em auto 3em;
+  padding: 0 1em;
+  align-items: flex-start;
+}
+.ranking-list {
+  background: rgba(35,39,42,0.98);
+  border-radius: 19px;
+  border-left: 8px solid #e56915;
+  box-shadow: 0 4px 22px rgba(0,0,0,0.53), 0 0 22px #ffd70022 inset;
+  padding: 1.3em 1em 1.8em 1em;
+  margin-bottom: 1em;
+  min-width: 220px;
+  max-width: 430px;
+  overflow-x: auto;
+}
+.ranking-list h2 {
+  color: #ffd700;
+  font-family: 'Oswald','Impact',Arial,sans-serif;
+  letter-spacing: 1.3px;
+  font-size: 1.17em;
+  margin-bottom: 0.7em;
+  padding-bottom: 0.3em;
+  border-bottom: 2px solid #e56915;
+  text-shadow: 0 1px 5px #ffd70066;
+  text-align: center;
+}
+.ranking-list ol {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  counter-reset: ranklist;
+}
+.ranking-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(87deg, #23272a 80%, #ffd70011 125%);
+  border-radius: 11px;
+  padding: 0.68em 1.1em;
+  margin-bottom: 0.53em;
+  border-left: 6px solid #e56915;
+  font-size: 1.06em;
+  box-shadow: 0 2px 8px #23272a22;
+  transition: border-color 0.18s, background 0.16s;
+  counter-increment: ranklist;
+  position: relative;
+}
+.ranking-list li a {
+  color: #f1f1f1;
+  text-decoration: none;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  transition: color 0.17s;
+}
+.ranking-list li:hover, .ranking-list li a:hover {
+  border-left: 6px solid #ffd700;
+  background: linear-gradient(95deg, #ffd70016 70%, #e56915 120%);
+  color: #e56915;
+  box-shadow: 0 2px 12px #ffd70033, 0 2px 18px #e5691509 inset;
+}
+.ranking-list li::before {
+  content: counter(ranklist) ". ";
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 1.08em;
+  margin-right: 1.2em;
+  left: 0.3em;
+  position: absolute;
+}
+
+.fighter-name {
+  color: #ffd700;
+  font-family: 'Oswald','Impact',Arial,sans-serif;
+  font-weight: bold;
+  font-size: 1.04em;
+  letter-spacing: 0.8px;
+}
+
+.fighter-stat {
+  color: #e56915;
+  font-size: 1.05em;
+  margin-left: 2em;
+  font-family: 'Oswald','Arial',sans-serif;
+  background: #23272a;
+  border-radius: 12px;
+  padding: 0.08em 1em;
+  border: 2px solid #e56915;
+  font-weight: bold;
+  box-shadow: 0 1px 10px #ffd70022;
+  text-shadow: 0 1px 6px #ffd7002a;
+}
+
+/* Responsive: On mobile, keep space after number and shrink sizes */
+@media (max-width:900px) {
+  .champion-section { max-width: 98vw; }
+  .rankings-grid { grid-template-columns: 1fr; gap: 1.5em;}
+  .ranking-list { max-width: 98vw; }
+}
+@media (max-width:600px) {
+  .champion-section, .rankings-grid { padding: 0.6em; }
+  .champ-belt-badge .belt-svg { width: 71px; max-width:71px;}
+  .champion-section h2 { font-size: 1em;}
+  .ranking-list h2 { font-size: 1em;}
+  .ranking-list li { font-size: 0.97em; padding: 0.53em 0.7em;}
+  .fighter-stat { font-size: 1em; padding: 0.05em 0.8em;}
+  .ranking-list li::before {
+    content: counter(ranklist) ". ";
+    font-size: 1em;
+    margin-right: 0.65em;
+  }
+}
