@@ -275,133 +275,141 @@
     &copy; 2025 Iron Crown Combat. All rights reserved.
   </footer>
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-      const fighterSheetName = "Fighter Tracker";
-      const eventSheetName = "Event Results";
-      const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fighterSheetName)}`;
-      const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheetName)}`;
-      const BONUS_VALUE = 5000;
-      const IGNORED_BONUS_TEXT = new Set(['tournament', 'non tournament']);
+  document.addEventListener('DOMContentLoaded', async () => {
+  const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+  const fighterSheetName = "Fighter Tracker";
+  const eventSheetName = "Event Results";
+  const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fighterSheetName)}`;
+  const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheetName)}`;
+  const BONUS_VALUE = 5000;
+  const IGNORED_BONUS_TEXT = new Set(['tournament', 'non tournament']);
 
-      // Belt badge SVG
-      function getChampionshipBadgeHtml() {
-        return `
-          <div class="champ-belt-badge" title="King Of The Crown">
-            <svg viewBox="0 0 360 120" class="belt-svg" aria-label="Championship Belt">
-              <rect x="10" y="48" width="75" height="24" rx="12" fill="#23272a" stroke="#b8b8b8" stroke-width="3"/>
-              <rect x="275" y="48" width="75" height="24" rx="12" fill="#23272a" stroke="#b8b8b8" stroke-width="3"/>
-              <ellipse cx="180" cy="60" rx="85" ry="44" fill="url(#plateGrad)" stroke="#ffd700" stroke-width="5"/>
-              <g>
-                <ellipse cx="180" cy="60" rx="38" ry="16" fill="#565e64" stroke="#b8b8b8" stroke-width="2"/>
-                <polygon points="152,60 158,32 166,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
-                <polygon points="166,58 176,22 180,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
-                <polygon points="180,58 184,22 194,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
-                <polygon points="194,58 202,32 208,60" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
-                <ellipse cx="180" cy="56" rx="33" ry="7" fill="#7e848b" opacity="0.9"/>
-              </g>
-              <text x="180" y="97" font-size="18" text-anchor="middle" fill="#ffd700" font-family="'Oswald','Impact',Arial,sans-serif" letter-spacing="2" font-weight="bold">KING OF THE CROWN</text>
-              <defs>
-                <linearGradient id="plateGrad" x1="95" y1="16" x2="265" y2="104" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#ffc600"/>
-                  <stop offset="0.35" stop-color="#ffe38b"/>
-                  <stop offset="0.45" stop-color="#ffd700"/>
-                  <stop offset="0.85" stop-color="#ae8800"/>
-                  <stop offset="1" stop-color="#ffc600"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            <span class="champion-label">Cole Maddox</span>
-          </div>
-        `;
-      }
+  function extractFighterName(f) {
+    return f.Fighter || f.Name || f["Fighter Name"] || f["name"] || "";
+  }
 
-      function extractFighterName(f) {
-        return f.Fighter || f.Name || f["Fighter Name"] || f["name"] || "";
-      }
-
-      // Returns {wins, totalEarnings}
-      function calculateFighterStats(fighterName, eventData) {
-        const history = eventData.filter(
-          e => e["Fighter A"]?.trim() === fighterName || e["Fighter B"]?.trim() === fighterName
-        );
-        let wins = 0;
-        let totalEarnings = 0;
-        history.forEach(match => {
-          const purse = parseInt(match["Match Rating"]?.replace('%', '')) * 100 || 0;
-          const winner = match.Winner?.trim();
-          const isWinner = winner === fighterName;
-          if (isWinner) wins++;
-          const originalBonusType = (match["Bonus Type"] || match["bonus type"] || "").trim();
-          const cleanBonusType = originalBonusType.toLowerCase();
-          let currentBonus = 0;
-          if (!IGNORED_BONUS_TEXT.has(cleanBonusType) && cleanBonusType) {
-            if (cleanBonusType.includes('fight') || cleanBonusType.includes('match')) {
-              currentBonus = BONUS_VALUE;
-            } else if (cleanBonusType.includes('ko') || cleanBonusType.includes('submission')) {
-              if (isWinner) currentBonus = BONUS_VALUE;
-            }
-          }
-          const earnings = (isWinner || winner === 'Draw') ? (purse + currentBonus) : (purse / 2 + currentBonus);
-          totalEarnings += earnings;
-        });
-        return { wins, totalEarnings };
-      }
-
-      async function loadRankings() {
-        const winsContainer = document.getElementById('top-wins-container');
-        const earnersContainer = document.getElementById('top-earners-container');
-        const championSection = document.getElementById('champion-section');
-        const championName = document.getElementById('champion-name');
-        const championBadge = document.getElementById('champion-badge');
-        try {
-          const [fighterRes, eventRes] = await Promise.all([fetch(fighterURL), fetch(eventURL)]);
-          if (!fighterRes.ok || !eventRes.ok) throw new Error("Failed to fetch spreadsheet data.");
-          const fightersData = await fighterRes.json();
-          const eventData = await eventRes.json();
-
-          // Compute stats for ranking and find the belt holder
-          const rankedFighters = fightersData.map(fighter => {
-            const name = extractFighterName(fighter);
-            if (!name) return null;
-            const stats = calculateFighterStats(name, eventData);
-            return { name, wins: parseInt(fighter.Wins, 10) || stats.wins, totalEarnings: stats.totalEarnings };
-          }).filter(Boolean);
-
-          // Champion logic: Cole Maddox as King of the Crown
-          let champ = rankedFighters.find(f => f.name.toLowerCase() === "cole maddox");
-          if (champ) {
-            championName.textContent = champ.name;
-            championBadge.innerHTML = getChampionshipBadgeHtml();
-          } else {
-            const topWins = [...rankedFighters].sort((a,b) => b.wins - a.wins)[0];
-            championName.textContent = topWins ? topWins.name : "TBD";
-            championBadge.innerHTML = "";
-          }
-
-          // Top 10 fighters lists
-          displayRankings(winsContainer, rankedFighters.slice().sort((a, b) => b.wins - a.wins).slice(0,10), 'wins');
-          displayRankings(earnersContainer, rankedFighters.slice().sort((a, b) => b.totalEarnings - a.totalEarnings).slice(0,10), 'earnings');
-        } catch (error) {
-          winsContainer.innerHTML = `<p style="color: red;">Error loading rankings.</p>`;
-          earnersContainer.innerHTML = `<p style="color: red;">Error loading rankings.</p>`;
+  // Returns {wins, totalEarnings}
+  function calculateFighterStats(fighterName, eventData) {
+    const history = eventData.filter(
+      e => e["Fighter A"]?.trim() === fighterName || e["Fighter B"]?.trim() === fighterName
+    );
+    let wins = 0;
+    let totalEarnings = 0;
+    history.forEach(match => {
+      const purse = parseInt(match["Match Rating"]?.replace('%', '')) * 100 || 0;
+      const winner = match.Winner?.trim();
+      const isWinner = winner === fighterName;
+      if (isWinner) wins++;
+      const originalBonusType = (match["Bonus Type"] || match["bonus type"] || "").trim();
+      const cleanBonusType = originalBonusType.toLowerCase();
+      let currentBonus = 0;
+      if (!IGNORED_BONUS_TEXT.has(cleanBonusType) && cleanBonusType) {
+        if (cleanBonusType.includes('fight') || cleanBonusType.includes('match')) {
+          currentBonus = BONUS_VALUE;
+        } else if (cleanBonusType.includes('ko') || cleanBonusType.includes('submission')) {
+          if (isWinner) currentBonus = BONUS_VALUE;
         }
       }
-
-      function displayRankings(container, data, type) {
-        const title = container.querySelector('h2').outerHTML;
-        const list = document.createElement('ol');
-        data.forEach(fighter => {
-          const item = document.createElement('li');
-          const stat = type === 'wins' ? `${fighter.wins} Wins` : `$${fighter.totalEarnings.toLocaleString()}`;
-          item.innerHTML = `<a href="fighters.html?fighter=${encodeURIComponent(fighter.name)}"><span class="fighter-name">${fighter.name}</span><span class="fighter-stat">${stat}</span></a>`;
-          list.appendChild(item);
-        });
-        container.innerHTML = title;
-        container.appendChild(list);
-      }
-      loadRankings();
+      const earnings = (isWinner || winner === 'Draw') ? (purse + currentBonus) : (purse / 2 + currentBonus);
+      totalEarnings += earnings;
     });
+    return { wins, totalEarnings };
+  }
+
+  async function loadRankings() {
+    const winsContainer = document.getElementById('top-wins-container');
+    const earnersContainer = document.getElementById('top-earners-container');
+    const championSection = document.getElementById('champion-section');
+    const championName = document.getElementById('champion-name');
+    const championBadge = document.getElementById('champion-badge');
+    try {
+      const [fighterRes, eventRes] = await Promise.all([fetch(fighterURL), fetch(eventURL)]);
+      if (!fighterRes.ok || !eventRes.ok) throw new Error("Failed to fetch spreadsheet data.");
+      const fightersData = await fighterRes.json();
+      const eventData = await eventRes.json();
+
+      // Compute stats for ranking and find the belt holder
+      const rankedFighters = fightersData.map(fighter => {
+        const name = extractFighterName(fighter);
+        if (!name) return null;
+        const stats = calculateFighterStats(name, eventData);
+        return { name, wins: parseInt(fighter.Wins, 10) || stats.wins, totalEarnings: stats.totalEarnings };
+      }).filter(Boolean);
+
+      // Champion logic: Cole Maddox as King of the Crown
+      let champ = rankedFighters.find(f => f.name.toLowerCase() === "cole maddox");
+      if (champ) {
+        championName.textContent = champ.name;
+        championBadge.innerHTML = getChampionshipBadgeHtml();
+      } else {
+        const topWins = [...rankedFighters].sort((a,b) => b.wins - a.wins)[0];
+        championName.textContent = topWins ? topWins.name : "TBD";
+        championBadge.innerHTML = "";
+      }
+
+      // Top 10 fighters lists
+      displayRankings(winsContainer, rankedFighters.slice().sort((a, b) => b.wins - a.wins).slice(0,10), 'wins');
+      displayRankings(earnersContainer, rankedFighters.slice().sort((a, b) => b.totalEarnings - a.totalEarnings).slice(0,10), 'earnings');
+    } catch (error) {
+      winsContainer.innerHTML = `<p style="color: red;">Error loading rankings.</p>`;
+      earnersContainer.innerHTML = `<p style="color: red;">Error loading rankings.</p>`;
+    }
+  }
+
+  // Add rank number inline for perfect spacing on all devices
+  function displayRankings(container, data, type) {
+    const title = container.querySelector('h2').outerHTML;
+    const list = document.createElement('ol');
+    data.forEach((fighter, i) => {
+      const item = document.createElement('li');
+      const stat = type === 'wins' ? `${fighter.wins} Wins` : `$${fighter.totalEarnings.toLocaleString()}`;
+      item.innerHTML = `
+        <span class="rank-number">${i+1}.</span>
+        <a href="fighters.html?fighter=${encodeURIComponent(fighter.name)}">
+          <span class="fighter-name">${fighter.name}</span>
+          <span class="fighter-stat">${stat}</span>
+        </a>`;
+      list.appendChild(item);
+    });
+    container.innerHTML = title;
+    container.appendChild(list);
+  }
+
+  // Belt badge SVG
+  function getChampionshipBadgeHtml() {
+    return `
+      <div class="champ-belt-badge" title="King Of The Crown">
+        <svg viewBox="0 0 360 120" class="belt-svg" aria-label="Championship Belt">
+          <rect x="10" y="48" width="75" height="24" rx="12" fill="#23272a" stroke="#b8b8b8" stroke-width="3"/>
+          <rect x="275" y="48" width="75" height="24" rx="12" fill="#23272a" stroke="#b8b8b8" stroke-width="3"/>
+          <ellipse cx="180" cy="60" rx="85" ry="44" fill="url(#plateGrad)" stroke="#ffd700" stroke-width="5"/>
+          <g>
+            <ellipse cx="180" cy="60" rx="38" ry="16" fill="#565e64" stroke="#b8b8b8" stroke-width="2"/>
+            <polygon points="152,60 158,32 166,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
+            <polygon points="166,58 176,22 180,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
+            <polygon points="180,58 184,22 194,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
+            <polygon points="194,58 202,32 208,60" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
+            <ellipse cx="180" cy="56" rx="33" ry="7" fill="#7e848b" opacity="0.9"/>
+          </g>
+          <text x="180" y="97" font-size="18" text-anchor="middle" fill="#ffd700" font-family="'Oswald','Impact',Arial,sans-serif" letter-spacing="2" font-weight="bold">KING OF THE CROWN</text>
+          <defs>
+            <linearGradient id="plateGrad" x1="95" y1="16" x2="265" y2="104" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#ffc600"/>
+              <stop offset="0.35" stop-color="#ffe38b"/>
+              <stop offset="0.45" stop-color="#ffd700"/>
+              <stop offset="0.85" stop-color="#ae8800"/>
+              <stop offset="1" stop-color="#ffc600"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="champion-label">Cole Maddox</span>
+      </div>
+    `;
+  }
+
+  loadRankings();
+});
+      
   </script>
 </body>
 </html>
