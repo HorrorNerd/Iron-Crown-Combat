@@ -1,96 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Iron Crown Combat - About Us</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iron Crown Combat - About Us</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: url('image.png') no-repeat center/cover fixed;
+      color: #f1f1f1;
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Oswald','Impact','Arial Narrow',Arial,sans-serif;
+    }
+    header {
+      text-align: center;
+      background: rgba(35,39,42, 0.97);
+      border-bottom: 3px solid #ffd700;
+      padding: 2em 0 1em;
+      box-shadow: 0 2px 16px #181a1b99;
+    }
+    .logo {
+      font-size: 2.2rem;
+      color: #ffd700;
+      text-shadow: 0 2px 10px #23272a;
+      margin-bottom: 1em;
+      font-family: 'Oswald','Impact','Arial Narrow',Arial,sans-serif;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.7em;
+      margin-bottom: 1.5em;
+    }
+    nav a {
+      text-decoration: none;
+      font-weight: bold;
+      background: #181a1b;
+      color: #ffd700;
+      border: 1.5px solid #e56915;
+      border-radius: 8px;
+      padding: 0.7em 1.3em;
+      transition: background 0.18s, color 0.12s;
+      letter-spacing: 2px;
+    }
+    nav a.active, nav a:hover {
+      background: #ffd700;
+      color: #23272a;
+    }
+    main {
+      max-width: 750px;
+      margin: 3em auto 4em auto;
+      background: rgba(30,32,33,0.96);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px #181a1b99, 0 0 18px #ffd70022 inset;
+      padding: 2.2em 1.7em 2em 1.7em;
+    }
+    h1, h2, .about-title {
+      color: #ffd700;
+      text-shadow: 0 2px 8px #23272a66, 0 5px 48px #e5691510;
+      font-family: 'Oswald','Impact',Arial,sans-serif;
+      margin-bottom: 0.5em;
+      letter-spacing: 2px;
+      font-size: 2em;
+      text-align: center;
+    }
+    hr {
+      border: none;
+      border-top: 1.7px solid #333;
+      margin: 2.2em 0 2.2em 0;
+    }
+    ul {
+      padding-left: 1.5em;
+      margin-bottom: 1em;
+      list-style: square;
+    }
+    li {
+      margin-bottom: 0.7em;
+      color: #ffd700;
+      font-size: 1.07em;
+    }
+    strong { color: #e56915; }
+    em { color: #ffd700; }
+    .social-links {
+      text-align: center;
+      margin: 2.2em 0 0.5em 0;
+    }
+    .social-links a {
+      display: inline-block;
+      background: linear-gradient(90deg,#e56915 10%,#ffd700 89%);
+      color: #23272a;
+      font-weight: bold;
+      font-size: 1.17em;
+      padding: 0.44em 1.3em;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px #181a1b55;
+      border: none;
+      text-decoration: none;
+      letter-spacing: 1.2px;
+      margin: 0 0.9em 0.69em 0.9em;
+      transition: background 0.18s, color 0.18s;
+    }
+    .social-links a:hover {
+      background: linear-gradient(90deg,#ffd700 65%,#e56915 120%);
+      color: #181a1b;
+    }
+    .about-crown {
+      font-size: 2.4em;
+      display: block;
+      text-align: center;
+      margin-top: 1em;
+      color: #ffd700;
+      text-shadow: 0 2px 8px #181a1b;
+    }
+    @media (max-width:650px) {
+      main { padding: 1em 0.5em; }
+      h1, h2, .about-title { font-size: 1.24em; }
+      .social-links a { font-size: 1em; padding: 0.4em 0.8em; }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1 class="logo">Iron Crown Combat</h1>
-                <!-- ** THE UPDATED NAVIGATION BAR ** -->
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="fighters.html">Fighters</a>
-            <a href="events.html">Events</a>
-            <a href="rankings.html">Rankings</a>
-            <a href="news.html">News</a>
-            <a href="tournament.html">Tournament</a>
-            <a href="about.html">About</a>
-            <a href="rules.html">Test Your Metal</a>
-        </nav>
-    </header>
-    <main>
-        <!-- EDIT THIS CONTENT DIRECTLY -->
-        <h2>Our History</h2>
-        <p>
-            <div style="font-family: Arial, sans-serif; color: #e5e5e5; background-color: #111; padding: 20px; border-radius: 10px;">
-  <h1 style="color: #f2c94c;">🛡️ Step Into the Crucible: The Rise of Iron Crown Combat 🛡️</h1>
+  <header>
+    <h1 class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="fighters.html">Fighters</a>
+      <a href="events.html">Events</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="news.html">News</a>
+      <a href="tournament.html">Tournament</a>
+      <a href="about.html" class="active">About</a>
+      <a href="rules.html">Test Your Metal</a>
+    </nav>
+  </header>
+  <main>
+    <span class="about-crown">🛡️</span>
+    <h1 class="about-title">Step Into the Crucible: The Rise of Iron Crown Combat</h1>
+    <p>
+      In a world where combat sports are too polished, too scripted, and too safe, <strong>Iron Crown Combat</strong> has kicked the door down with raw intensity and ruthless authenticity.
+      This isn’t pro wrestling. This isn’t MMA. This is <em>something in between—and somehow, more real than both</em>.
+    </p>
+    <p>
+      Born from the vision of <strong>SWA co-owners Cota Kinzo and Alex “The Wall” Thompson</strong>, ICC is a violent battleground built for <strong>fighters who don’t care about glitz—just grit</strong>.
+      It’s about proving yourself in the ring, one brutal bout at a time. No judges. No fluff. You either win… or you survive.
+    </p>
+    <p>
+      Every <strong>Sunday night</strong>, the world tunes in to <strong>Iron Crown Combat: Crucible</strong>—a weekly event where killers, legends, underdogs, and monsters collide in shoot-style wars.
+      Only knockouts, submissions, stoppages, or time limits can end a fight. No pinfalls. No gimmicks. Just pain and pride.
+    </p>
+    <hr>
 
-  <p>
-    In a world where combat sports are too polished, too scripted, and too safe, <strong>Iron Crown Combat</strong> has kicked the door down with raw intensity and ruthless authenticity.
-    This isn’t pro wrestling. This isn’t MMA. This is <em>something in between—and somehow, more real than both</em>.
-  </p>
+    <h2>Who's Brave Enough to Fight for the Crown?</h2>
+    <ul>
+      <li><strong>Reiko Draven</strong> — A quiet Muay Thai striker from Japan who excels with elbows and knees in the clinch. Rumors swirl that she’s the forgotten daughter of Cota Kinzo. Is she here for revenge?</li>
+      <li><strong>Abigail Jones</strong> — A powerful <strong>Swedish kickboxer</strong> with a perfect record and a head kick that ends careers.</li>
+      <li><strong>Shiv</strong> — A deranged brawler from Executioner’s camp. Unpredictable. Unhinged. Unstoppable?</li>
+      <li><strong>The Kumari Twins</strong> — <em>Male conjoined Siamese twins</em> who fight as one terrifying unit. Controversial. Dominant. Feared.</li>
+      <li><strong>Igor</strong> — “<em>The Old War Warrior</em>” is a hardened Russian veteran back from retirement. He won’t fight the Twins again unless the payday is massive.</li>
+      <li><strong>Solomon Sanders</strong> — A master manipulator offering <strong>$8K bounties</strong> to anyone who can beat the Kumari Twins.</li>
+      <li><strong>Sophia Rodriques, Cole Maddox, Dante Marcheli, Kai Lawson, Logan Briggs, and others</strong>—each with their own path to the crown.</li>
+    </ul>
 
-  <p>
-    Born from the vision of <strong>SWA co-owners Cota Kinzo and Alex “The Wall” Thompson</strong>, ICC is a violent battleground built for <strong>fighters who don’t care about glitz—just grit</strong>. 
-    It’s about proving yourself in the ring, one brutal bout at a time. No judges. No fluff. You either win… or you survive.
-  </p>
+    <hr>
 
-  <p>
-    Every <strong>Sunday night</strong>, the world tunes in to <strong>Iron Crown Combat: Crucible</strong>—a weekly event where killers, legends, underdogs, and monsters collide in shoot-style wars.
-    Only knockouts, submissions, stoppages, or time limits can end a fight. No pinfalls. No gimmicks. Just pain and pride.
-  </p>
+    <h2>👑 A Tournament for the Ages</h2>
+    <p>
+      The <strong>top 8 earners</strong> in ICC have entered a tournament to crown the first-ever <strong>Iron Crown Combat Champion</strong>.
+      And for the first time, top earners can challenge anyone—<em>no matter the gender</em>—because in ICC, <strong>money earns power</strong>.
+    </p>
+    <p>
+      The tournament unfolds over the coming Crucible events, with the final championship match scheduled for <strong>Crucible 10</strong>.
+      Who will rise to wear the crown?
+    </p>
 
-  <hr style="border: 1px solid #333;">
+    <hr>
 
-  <h2 style="color: #f2c94c;">⚔️ Who’s Brave Enough to Fight for the Crown?</h2>
+    <h2>🔥 Why You Should Watch</h2>
+    <p>
+      Iron Crown Combat is <strong>raw</strong>, <strong>unpredictable</strong>, and <strong>violently real</strong>.
+      There’s no gimmick—just fighters who leave it all in the ring, night after night.
+    </p>
+    <p style="font-size: 1.18em; font-weight: bold; color: #ffd700;">
+      Real stakes. Real violence. Real legacy.
+    </p>
+    <p style="text-align: center; font-size: 1.5em; font-weight: bold; color: #e56915;">
+      🔱 Honor the Crown. Endure the Crucible. 🔱
+    </p>
 
-  <ul>
-    <li><strong>Reiko Draven</strong> — A quiet Muay Thai striker from Japan who excels with elbows and knees in the clinch. Rumors swirl that she’s the forgotten daughter of Cota Kinzo. Is she here for revenge?</li>
-    <li><strong>Abigail Jones</strong> — A powerful <strong>Swedish kickboxer</strong> with a perfect record and a head kick that ends careers.</li>
-    <li><strong>Shiv</strong> — A deranged brawler from Executioner’s camp. Unpredictable. Unhinged. Unstoppable?</li>
-    <li><strong>The Kumari Twins</strong> — <em>Male conjoined Siamese twins</em> who fight as one terrifying unit. Controversial. Dominant. Feared.</li>
-    <li><strong>Igor</strong> — “<em>The Old War Warrior</em>” is a hardened Russian veteran back from retirement. He won’t fight the Twins again unless the payday is massive.</li>
-    <li><strong>Solomon Sanders</strong> — A master manipulator offering <strong>$8K bounties</strong> to anyone who can beat the Kumari Twins.</li>
-    <li><strong>Sophia Rodriques, Cole Maddox, Dante Marcheli, Kai Lawson, Logan Briggs, and others</strong>—each with their own path to the crown.</li>
-  </ul>
-
-  <hr style="border: 1px solid #333;">
-
-  <h2 style="color: #f2c94c;">👑 A Tournament for the Ages</h2>
-
-  <p>
-    The <strong>top 8 earners</strong> in ICC have entered a tournament to crown the first-ever <strong>Iron Crown Combat Champion</strong>.
-    And for the first time, top earners can challenge anyone—<em>no matter the gender</em>—because in ICC, <strong>money earns power</strong>.
-  </p>
-
-  <p>
-    The tournament unfolds over the coming Crucible events, with the final championship match scheduled for <strong>Crucible 10</strong>.
-    Who will rise to wear the crown?
-  </p>
-
-  <hr style="border: 1px solid #333;">
-
-  <h2 style="color: #f2c94c;">🔥 Why You Should Watch</h2>
-
-  <p>
-    Iron Crown Combat is <strong>raw</strong>, <strong>unpredictable</strong>, and <strong>violently real</strong>.
-    There’s no gimmick—just fighters who leave it all in the ring, night after night.
-  </p>
-
-  <p style="font-size: 1.2em; font-weight: bold; color: #f2c94c;">
-    Real stakes. Real violence. Real legacy.
-  </p>
-
-  <p style="text-align: center; font-size: 1.4em; font-weight: bold; color: #f2c94c;">
-    🔱 Honor the Crown. Endure the Crucible. 🔱
-  </p>
-            </div>
-        <div class="social-links">
-    <a href="YOUR_YOUTUBE_LINK_HERE" target="_blank">YouTube Channel</a>
-</div>
-    </main>
+    <div class="social-links">
+      <a href="https://www.twitch.tv/swttngaming?sr=a" target="_blank">Watch Us Live on Twitch</a>
+      <a href="https://www.youtube.com/@swttngaming" target="_blank">Recap Show on YouTube</a>
+    </div>
+  </main>
+  <footer class="footer">
+    &copy; 2025 Iron Crown Combat. All rights reserved.
+  </footer>
 </body>
 </html>
