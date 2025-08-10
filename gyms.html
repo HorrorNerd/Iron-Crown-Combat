@@ -16,15 +16,23 @@
     .gyms-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:2em; margin-bottom:3em;}
     .gym-card { background: rgba(30,32,33,0.92); border-radius:22px; text-align:center; padding:1.5em 1em; cursor:pointer; border-left: 8px solid #e56915; transition: box-shadow .19s;}
     .gym-card:hover { box-shadow: 0 4px 24px #ffd70032, 0 3px 28px #e5691555 inset;}
-    .gym-name { color: #ffd700; font-size:1.2em; font-weight:bold; margin-bottom:.7em; letter-spacing:2px;}
-    .manager-name { color:#e56915; font-size:1.08em; font-weight:bold; margin-bottom:.6em;}
+    .gym-logo { width: 120px; height: 120px; object-fit: cover; border-radius: 18px; background: #23272a; margin-bottom: 1em; border: 3px solid #ffd700;}
+    .gym-name { color: #ffd700; font-size:1.2em; font-weight:bold; margin-bottom:.5em; letter-spacing:2px;}
+    .manager-name { color:#e56915; font-size:1.08em; font-weight:bold; margin-bottom:.3em;}
     .gym-modal { display:none; position:fixed; z-index:20; left:0; top:0; width:100vw; height:100vh; background:rgba(20,20,20,.83); align-items:center; justify-content:center;}
-    .modal-content { background:#23272a; border-radius:22px; box-shadow:0 2px 32px #181a1b99; padding:2em; max-width:480px; width:90vw; position:relative; color:#f1f1f1;}
+    .modal-content { background:#23272a; border-radius:22px; box-shadow:0 2px 32px #181a1b99; padding:2em; max-width:500px; width:90vw; position:relative; color:#f1f1f1;}
     .modal-close { position:absolute; top:1.2em; right:1.5em; background:none; border:none; color:#ffd700; font-size:2em; font-weight:bold; cursor:pointer; z-index:3;}
-    .modal-title { color:#ffd700; font-size:1.23em; font-weight:bold; margin-bottom:.7em; letter-spacing:2px;}
-    .modal-subtitle { color:#e56915; font-size:1.05em; font-weight:bold; margin:.8em 0 .3em 0;}
+    .modal-title { color:#ffd700; font-size:1.23em; font-weight:bold; margin-bottom:.6em; letter-spacing:2px;}
+    .modal-subtitle { color:#e56915; font-size:1.05em; font-weight:bold; margin:.7em 0 .2em 0;}
     .modal-list { list-style: disc; margin-left:1em; margin-bottom:1em; color: #ffd700;}
-    @media (max-width:600px){ main{padding:1em;} .gym-card{padding:1.1em .6em;} .modal-content{padding:1em; font-size:1em;} }
+    .manager-img { width:90px; height:90px; border-radius:16px; object-fit:cover; border:3px solid #e56915; margin: 1em 0 .7em 0; background:#181a1b;}
+    .modal-gym-logo { width: 110px; height: 110px; object-fit: cover; border-radius: 16px; border: 3px solid #ffd700; display:block; margin:0 auto 1em auto;}
+    @media (max-width:600px){
+      main{padding:1em;} 
+      .gym-card{padding:1.1em .6em;} 
+      .modal-content{padding:1em; font-size:1em;}
+      .manager-img, .modal-gym-logo{width:64px; height:64px;}
+    }
   </style>
 </head>
 <body>
@@ -56,22 +64,24 @@
     &copy; 2025 Iron Crown Combat. All rights reserved.
   </footer>
   <script>
-    // Make sure these match your actual tab names!
+    // Use your real tab names!
     const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-    const managersSheet = "Managers"; // <-- updated to "Managers"
-    const fightersSheet = "Fighter Tracker"; // Your Fighter Tracker tab
+    const managersSheet = "Managers"; // tab with Manager, Gym Name, Manager Url, Gym Url
+    const fightersSheet = "Fighter Tracker";
     const managersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(managersSheet)}`;
     const fightersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(fightersSheet)}`;
 
+    // Fetch data and map fighters to gyms
     async function fetchGymsAndFighters() {
       const [managersRes, fightersRes] = await Promise.all([fetch(managersURL), fetch(fightersURL)]);
       const managersData = await managersRes.json();
       const fightersData = await fightersRes.json();
-
-      // gyms = all rows in managers tab
+      // Build gyms list with logos and manager photos
       const gyms = managersData.map(mgr => ({
         name: mgr["Gym Name"],
         manager: mgr["Manager"],
+        logo: mgr["Gym Url"], // gym logo url
+        managerPhoto: mgr["Manager Url"], // manager photo url
         fighters: []
       }));
       const gymMap = Object.fromEntries(gyms.map(g => [g.name, g]));
@@ -85,6 +95,7 @@
       return gyms;
     }
 
+    // Display gyms as cards
     function renderGyms(gyms) {
       const grid = document.getElementById("gyms-grid");
       grid.innerHTML = "";
@@ -93,6 +104,7 @@
         const card = document.createElement("div");
         card.className = "gym-card";
         card.innerHTML = `
+          <img src="${gym.logo}" alt="${gym.name} Logo" class="gym-logo"/>
           <div class="gym-name">${gym.name}</div>
           <div class="manager-name">Managed by: ${gym.manager}</div>
         `;
@@ -101,13 +113,16 @@
       });
     }
 
+    // Modal: show details and roster
     function showGymModal(gym) {
       const modal = document.getElementById("gym-modal");
       const content = modal.querySelector(".modal-content");
       content.innerHTML = `
         <button class="modal-close" onclick="document.getElementById('gym-modal').style.display='none';">&times;</button>
         <div class="modal-title">${gym.name}</div>
+        <img src="${gym.logo}" alt="${gym.name} Logo" class="modal-gym-logo"/>
         <div class="modal-subtitle">Manager</div>
+        <img src="${gym.managerPhoto}" alt="${gym.manager}" class="manager-img"/>
         <div style="font-weight:bold; margin-bottom:.9em; color:#e56915;">${gym.manager}</div>
         <div class="modal-subtitle">Fighters</div>
         <ul class="modal-list">
@@ -120,7 +135,6 @@
     document.getElementById("gym-modal").addEventListener("click", function(e) {
       if (e.target === this) this.style.display='none';
     });
-
     fetchGymsAndFighters().then(renderGyms);
   </script>
 </body>
