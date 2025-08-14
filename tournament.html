@@ -2,161 +2,118 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat - The Iron Trial</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>The Iron Trial – Tournament Bracket</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.css"/>
   <style>
-    /* [styles from prior code omitted here for brevity] */
-    body { background: #111; color: #f1f1f1; font-family:'Oswald','Impact',Arial,sans-serif; margin:0; }
-    /* ...paste the previous style block here */
-    main { padding:2em 1em; max-width:1100px; margin:auto;}
-    .tournament-title { text-align:center; color:#ffd700; font-size:2em;padding-bottom:1em;}
-    .round { margin: 2.5em 0; background:rgba(30,32,33,0.85); border-radius:13px; box-shadow:0 2px 18px #181a1b33;padding:2em 1em;}
-    .round h3 { color:#ffd700; text-align:center;text-transform:uppercase; font-size:1.21em; margin-bottom:1.5em;}
-    .matchup { display:flex;justify-content:space-around;align-items:center; margin-bottom:1.6em;}
-    .fight-column { flex: 1 1 0; display: flex; flex-direction:column; gap:0.5em;}
-    .fighter { display: flex; align-items: center;gap:0.7em; background:#16191c; border-radius:8px; padding: 0.4em 1.1em 0.4em 0.4em; border: 2px solid #282828;}
-    .fighter img { width:38px; height:38px; object-fit:cover; border-radius:50%;border:2.5px solid #ffd70044;background:#23272a;}
-    .fighter-name { font-weight: bold; font-size:1.09em; letter-spacing: .8px;}
-    .winner { border-color: #ffd700; background:linear-gradient(90deg,#23272a,#ffd70028);}
-    .winner .fighter-name { color:#ffd700;}
-    .tbd .fighter-name {color:#aaa; font-style:italic;}
-    .match-info { min-width:110px; text-align:center; font-size:.94em; color:#feb636;}
-    .match-info strong { color:#ffd700;}
-    @media(max-width:700px){.matchup{flex-direction:column;} .match-info {margin:0.65em 0;}}
+    body { background: #181a1b; color: #fff; font-family: 'Oswald', Arial, sans-serif; margin:0; }
+    .tournament-title { color: #ffd700; font-size:2.1em; text-align:center; margin:1.2em 0 2em 0;}
+    #bracket { display:flex; justify-content:center; margin-bottom:3em;}
+    .team-img { vertical-align:middle; width:32px; height:32px; border-radius:50%; object-fit:cover; background:#23272a; margin-right:0.7em;}
+    .jqbracket .highlightWinner { background: #ffd70055 !important; color: #23272a !important;}
   </style>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1 class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="fighters.html">Fighters</a>
-      <a href="events.html">Events</a>
-      <a href="rankings.html">Rankings</a>
-      <a href="news.html">News</a>
-      <a href="tournament.html" class="active">Tournament</a>
-      <a href="about.html">About</a>
-      <a href="rules.html">Test Your Metal</a>
-    </nav>
-  </header>
-  <main>
-    <h2 class="tournament-title">The Iron Trial – Tournament Bracket</h2>
-    <div id="bracket-container"></div>
-    <div style="color:#ffd700;text-align:center; margin-top:2em;">Update <b>Winner</b> field in your "Event" Google Sheet to show future round matchups.</div>
-  </main>
-  <footer style="margin-top:2em; text-align:center;">
-    &copy; 2025 Iron Crown Combat. All rights reserved.
-  </footer>
+  <h2 class="tournament-title">The Iron Trial – Tournament Bracket</h2>
+  <div id="bracket"></div>
+  <div style="color:#ffd700;text-align:center">Edit your sheet and refresh for live updates.<br/>Want automatic refresh? Ask for a polling script.</div>
   <script>
-    // --- Config ---
+    // ---- CONFIG ----
     const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
     const FIGHTER_TAB = "Fighter Tracker";
     const EVENT_TAB = "Event";
     const TOURNAMENT = "Iron Trial";
-
-    // --- Static Round 1 Matches ---
-    const round1Matches = [
-      { p1: "Abigail Jones", p2: "Franco Candellini" },
-      { p1: "Sophia Rodriques", p2: "Rocky Brickston" },
-      { p1: "Kumari Twins", p2: "Wade Sansom" },
-      { p1: "Reiko Draven", p2: "Patricia Mavis Stokes" },
-      { p1: "Malik Carter", p2: "Tina Wilder" },
-      { p1: "Kai Lawson", p2: "Natsume Tokonuto" },
-      { p1: "Igor", p2: "Pao Chaiya" },
-      { p1: "Marcus Graves", p2: "Piak Chaiya" },
-      { p1: "Eli Blackfox", p2: "S’ri Prai-Chaiya" },
-      { p1: "The Executioner", p2: "Fernando Riveiro" },
-      { p1: "Master Bo Qin", p2: "Brielle Fontaine" },
-      { p1: "Veronica Kane", p2: "Tina Wilder" },
-      { p1: "Rich Action", p2: "Gabriel Azrael" }
-    ];
-
-    // --- Sheet URLs ---
     const fightersURL = `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(FIGHTER_TAB)}`;
     const eventsURL = `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(EVENT_TAB)}`;
 
-    // --- Helper: load all fighters and images ---
-    async function getFightersDict() {
+    // ---- FETCH FIGHTER IMAGES AND NAMES ----
+    async function getFighterImages() {
       const res = await fetch(fightersURL);
-      const data = await res.json();
+      const rows = await res.json();
       const dict = {};
-      data.forEach(row => {
-        if (row.Fighter)
-          dict[row.Fighter.trim()] = { name: row.Fighter.trim(), img: (row.Image||"").trim() };
+      rows.forEach(r => {
+        if (r.Fighter)
+          dict[r.Fighter.trim()] = r.Image ? r.Image.trim() : "";
       });
       return dict;
     }
 
-    // --- Markup helpers ---
-    function createFighterHTML(fighter, isWinner) {
-      const winnerClass = isWinner ? "winner" : "";
-      const tbdClass = !fighter.name || fighter.name === 'TBD' ? "tbd" : "";
-      const imgSrc = fighter.img || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-      return `<div class="fighter ${winnerClass} ${tbdClass}"><img src="${imgSrc}" alt="${fighter.name}"><span class="fighter-name">${fighter.name||"TBD"}</span></div>`;
-    }
-
-    // --- Build Bracket: 1. Static R1, 2. Dynamic Later Rounds from Tab ---
-    async function buildBracket() {
-      const container = document.getElementById("bracket-container");
-      const fighters = await getFightersDict();
-
-      // -- Round 1 (Static) --
-      const r1div = document.createElement('div');
-      r1div.className = 'round';
-      r1div.innerHTML = '<h3>Round 1</h3>';
-      round1Matches.forEach(match => {
-        const p1 = fighters[match.p1] || { name: match.p1, img: "" };
-        const p2 = fighters[match.p2] || { name: match.p2, img: "" };
-        const matchupDiv = document.createElement('div');
-        matchupDiv.className = 'matchup';
-        matchupDiv.innerHTML = `
-          <div class="fight-column">${createFighterHTML(p1, false)}</div>
-          <div class="fight-column">${createFighterHTML(p2, false)}</div>
-        `;
-        r1div.appendChild(matchupDiv);
-      });
-      container.appendChild(r1div);
-
-      // -- Later Rounds (dynamic, from sheet) --
+    // ---- PULL MATCHES FOR GIVEN TOURNAMENT ----
+    async function getBracketMatches() {
       const res = await fetch(eventsURL);
-      const eventRows = await res.json();
-      // Only matches for this tournament and with an Event name that is not blank and not a Round 1 marker
-      const filtered = eventRows.filter(row =>
-        row.Tournament && row.Tournament.trim() === TOURNAMENT &&
-        row.Event && row.Event.trim() && !/round[\s\-]?1/i.test(row.Event)
-      );
-      // Group matches by Event (assume "Event" column = round label)
-      const byRound = {};
-      filtered.forEach(row => {
-        const round = row.Event;
-        if (!byRound[round]) byRound[round] = [];
-        byRound[round].push(row);
-      });
-      Object.keys(byRound).forEach(roundLabel => {
-        const rdiv = document.createElement('div');
-        rdiv.className = 'round';
-        rdiv.innerHTML = `<h3>${roundLabel}</h3>`;
-        byRound[roundLabel].forEach(match => {
-          const f1 = fighters[match["Fighter A"]] || { name: match["Fighter A"], img: "" };
-          const f2 = fighters[match["Fighter B"]] || { name: match["Fighter B"], img: "" };
-          const winner = match.Winner && match.Winner.trim();
-          const isDraw = winner && winner.toLowerCase() === "draw";
-          const col1 = createFighterHTML(f1, (!isDraw && winner === f1.name));
-          const col2 = createFighterHTML(f2, (!isDraw && winner === f2.name));
-          const matchupDiv = document.createElement('div');
-          matchupDiv.className = 'matchup';
-          matchupDiv.innerHTML = `
-            <div class="fight-column">${col1}</div>
-            <div class="fight-column">${col2}</div>
-          `;
-          rdiv.appendChild(matchupDiv);
+      const matches = [];
+      const winners = {};
+      const rows = await res.json();
+      // Only grabs matches for the Iron Trial tournament and sorts round/event order
+      rows.filter(r => r.Tournament && r.Tournament.trim() === TOURNAMENT)
+        .forEach(r => {
+          const round = r.Event || "Round";
+          matches.push({
+            round,
+            p1: r["Fighter A"] ? r["Fighter A"].trim() : "",
+            p2: r["Fighter B"] ? r["Fighter B"].trim() : "",
+            winner: r["Winner"] ? r["Winner"].trim() : null
+          });
         });
-        container.appendChild(rdiv);
+      return matches;
+    }
+
+    // ---- BUILD BRACKET DATA FOR LIBRARY ----
+    function buildBracketData(matches) {
+      // Group by rounds (event label)
+      const roundLabels = [];
+      const rounds = [];
+      let matchByRound = {};
+
+      matches.forEach(m => {
+        if (!matchByRound[m.round]) {
+          roundLabels.push(m.round);
+          matchByRound[m.round] = [];
+        }
+        matchByRound[m.round].push([m.p1, m.p2, m.winner]);
+      });
+
+      // First round = teams
+      const teams = matchByRound[roundLabels[0]].map(pair => [pair[0], pair[1]]);
+      // Now convert results to required format: [ [p1 result, p2 result, ...], [next round ...], ... ]
+      const results = [];
+      for (let r = 0; r < roundLabels.length; r++) {
+        const row = [];
+        matchByRound[roundLabels[r]].forEach(([p1,p2,winner]) => {
+          if (!winner) row.push(null);
+          else if (winner === p1) row.push(1);
+          else if (winner === p2) row.push(0);
+          else row.push(null); // handle draws/nulls
+        });
+        results.push(row);
+      }
+      return { teams, results, roundLabels };
+    }
+
+    // ---- RENDER BRACKET ----
+    async function renderBracket() {
+      const [images, rawMatches] = await Promise.all([getFighterImages(), getBracketMatches()]);
+      if (!rawMatches.length) {
+        $('#bracket').html('<div style="color:#f55;font-size:1.2em;padding:2em;text-align:center;">No tournament matches found in your sheet for '+TOURNAMENT+'.</div>');
+        return;
+      }
+      const bracketData = buildBracketData(rawMatches);
+      // Advanced: inject custom team label renderer (with images)
+      $('#bracket').empty().bracket({
+        init: { teams: bracketData.teams, results: bracketData.results },
+        teamLabel: function(teamData) {
+          if (teamData && teamData.name) {
+            const url = images[teamData.name] || '';
+            return (url ? `<img class="team-img" src="${url}"/>` : '') + teamData.name;
+          }
+          return '';
+        }
       });
     }
 
-    buildBracket();
+    renderBracket();
   </script>
 </body>
 </html>
