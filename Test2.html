@@ -15,23 +15,25 @@
   <h2 style="text-align:center;color:#ffd700;">Tournament Bracket</h2>
   <div id="bracket"></div>
   <script>
-    const round1Pairs = [
-      ["Abigail Jones", "Franco Candellini"],
-      ["Sophia Rodriques", "Rocky Brickston"],
-      ["Kumari Twins", "Wade Sansom"],
-      ["Reiko Draven", "Patricia Mavis Stokes"],
-      ["Malik Carter", "Tina Wilder"],
-      ["Kai Lawson", "Natsume Tokonuto"],
-      ["Igor", "Pao Chaiya"],
-      ["Marcus Graves", "Piak Chaiya"],
-      ["Eli Blackfox", "S’ri Prai-Chaiya"],
-      ["The Executioner", "Fernando Riveiro"],
-      ["Master Bo Qin", "Brielle Fontaine"],
-      ["Veronica Kane", "Tina Wilder"],
-      ["Rich Action", "Gabriel Azrael"]
-    ];
-    $('#bracket').bracket({
-      init: { teams: round1Pairs }
+    document.addEventListener("DOMContentLoaded", function() {
+      const round1Pairs = [
+        ["Abigail Jones", "Franco Candellini"],
+        ["Sophia Rodriques", "Rocky Brickston"],
+        ["Kumari Twins", "Wade Sansom"],
+        ["Reiko Draven", "Patricia Mavis Stokes"],
+        ["Malik Carter", "Tina Wilder"],
+        ["Kai Lawson", "Natsume Tokonuto"],
+        ["Igor", "Pao Chaiya"],
+        ["Marcus Graves", "Piak Chaiya"],
+        ["Eli Blackfox", "S’ri Prai-Chaiya"],
+        ["The Executioner", "Fernando Riveiro"],
+        ["Master Bo Qin", "Brielle Fontaine"],
+        ["Veronica Kane", "Tina Wilder"],
+        ["Rich Action", "Gabriel Azrael"]
+      ];
+      $('#bracket').bracket({
+        init: { teams: round1Pairs }
+      });
     });
   </script>
 </body>
