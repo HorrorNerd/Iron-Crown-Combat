@@ -2,33 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>The Iron Trial – Bracket</title>
+  <!-- Bracket.js CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.css"/>
   <style>
-    body { background: #181a1b; color: #fff; font-family: 'Oswald', Arial, sans-serif; margin:0; }
-    .tournament-title { color: #ffd700; font-size:2.1em; text-align:center; margin:1.2em 0 2em 0;}
+    body { background:#181a1b; color:#fff; font-family:'Oswald',Arial,sans-serif; margin:0;}
+    .tournament-title { color:#ffd700; font-size:2em; text-align:center; margin:1.2em 0 1em 0;}
     #bracket { display:flex; justify-content:center; margin-bottom:3em;}
     .team-img { vertical-align:middle; width:32px; height:32px; border-radius:50%; object-fit:cover; background:#23272a; margin-right:0.7em;}
     .jqbracket .highlightWinner { background: #ffd70055 !important; color: #23272a !important;}
   </style>
+  <!-- Load libraries before other scripts -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.js"></script>
 </head>
 <body>
   <h2 class="tournament-title">The Iron Trial – Tournament Bracket</h2>
+  <div style="max-width:500px;margin:0 auto 2em auto;">
+    <pre style="background:#1a1a1a;color:#ffd700;padding:1em;border-radius:9px;font-size:.97em;">
+Google Sheets Setup (for full power):
+
+Tab: Fighter Tracker
+-------------------------------------
+| Fighter             | Image        |
+|---------------------|-------------|
+| Abigail Jones       | https://... |
+| Franco Candellini   | https://... |
+| ... (one row per fighter)          |
+
+Tab: Event
+-------------------------------------
+| Tournament  | Event   | Fighter A       | Fighter B           | Winner     |
+|-------------|---------|-----------------|---------------------|------------|
+| Iron Trial  | Quarterfinals | Winner from R1 | Winner from R1   | (name)     |
+| Iron Trial  | Semifinal     | Winner from QF | Winner from QF   | (name)     |
+| ...         | ...           | ...            | ...              | ...        |
+
+- For Round 1, no need to fill Event tab until matches are scheduled/results known.
+- For all future rounds, add rows with the correct Tournament name.
+    </pre>
+  </div>
   <div id="bracket"></div>
-  <div style="color:#ffd700;text-align:center">To advance rounds, add matches for future rounds<br/>to your Event tab with the correct Tournament name.</div>
+  <div style="color:#ffd700;text-align:center">
+    To advance rounds, add matches for future rounds to your Event tab with the correct Tournament name.
+    <br>Winner highlights live!
+  </div>
   <script>
-    // --- Config ---
-    const SHEETID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-    const FIGHTER_TAB = "Fighter Tracker";
-    const EVENT_TAB = "Event";
-    const TOURNAMENT = "Iron Trial";
+    // --- CONFIG ---
+    const SHEETID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU"; // <<< Your Google Sheet ID
+    const FIGHTER_TAB = "Fighter Tracker"; // tab with Fighter & Image columns
+    const EVENT_TAB = "Event";             // tab with Tournament, Event, Fighter A, Fighter B, Winner columns
+    const TOURNAMENT = "Iron Trial";       // Must match Tournament column exactly!
     const fightersURL = `https://opensheet.elk.sh/${SHEETID}/${encodeURIComponent(FIGHTER_TAB)}`;
     const eventsURL = `https://opensheet.elk.sh/${SHEETID}/${encodeURIComponent(EVENT_TAB)}`;
 
-    // ---- Static Round 1 Matches (always visible) ----
+    // --- STATIC ROUND 1 MATCHUPS (always visible) ---
     const round1Pairs = [
       ["Abigail Jones", "Franco Candellini"],
       ["Sophia Rodriques", "Rocky Brickston"],
@@ -45,7 +74,7 @@
       ["Rich Action", "Gabriel Azrael"]
     ];
 
-    // ---- Get fighter portraits from your sheet ----
+    // --- Get {fighter name: image URL} dict from sheet ---
     async function getFighterImages() {
       const res = await fetch(fightersURL);
       const rows = await res.json();
@@ -57,16 +86,16 @@
       return dict;
     }
 
-    // ---- Get all matches for rounds > 1 from your Event tab ----
+    // --- Get all future round matches from Event tab ---
     async function getLaterRounds() {
       const res = await fetch(eventsURL);
       const rows = await res.json();
-      // Filter for this tournament and not a round 1 event label
+      // Only matches for this tournament, NOT Round 1 (Event can be called "Quarterfinals", etc.)
       const filtered = rows.filter(r =>
         r.Tournament && r.Tournament.trim() === TOURNAMENT &&
         r.Event && !/round[\s\-]?1/i.test(r.Event)
       );
-      // Group matches by round label (Event col)
+      // Group matches by round label
       const rounds = {};
       filtered.forEach(r => {
         const round = r.Event || "Next Round";
@@ -77,25 +106,23 @@
           winner: r["Winner"] ? r["Winner"].trim() : null
         });
       });
+      // Sort rounds as appear in sheet
       return Object.entries(rounds).map(([label, matches]) => ({label, matches}));
     }
 
-    // ---- Markup helpers ----
+    // --- Helper to render fighter with portrait ---
     function teamLabel(name, img) {
-      return (img ? `<img class="team-img" src="${img}"/>` : '') + name;
+      return (img ? `<img class="team-img" src="${img}" alt="">` : '') + name;
     }
 
-    // ---- Build bracket tree: round 1 static, rounds 2+ dynamic ----
+    // --- Build bracket: Round 1 static, others dynamic ---
     async function renderBracket() {
       const images = await getFighterImages();
       const nextRounds = await getLaterRounds();
 
-      // Set up bracket data
-      const teams = round1Pairs;
-      // Initial teams for the bracket library
-      const jqTeams = teams.map(pair => [pair[0], pair[1]]);
+      const teams = round1Pairs.map(pair => [pair[0], pair[1]]);
 
-      // Build progressive results for rounds 2+
+      // Build results for all later rounds
       const results = [];
       nextRounds.forEach(rnd => {
         const rRow = [];
@@ -108,9 +135,9 @@
         results.push(rRow);
       });
 
+      // Render bracket
       $('#bracket').empty().bracket({
-        init: {teams: jqTeams, results: results},
-        // Portrait support
+        init: {teams: teams, results: results},
         teamLabel: function(teamData) {
           if (teamData && teamData.name) {
             const url = images[teamData.name] || '';
