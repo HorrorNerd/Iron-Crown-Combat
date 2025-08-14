@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iron Crown Combat - Tournament</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --c-gold: #ffd700; --c-red: #cc0000; --c-dark-bg: #111; --c-card-bg: #1a1a1a; --c-grey-text: #ccc; }
+        body { margin: 0; font-family: 'Oswald', 'Impact', Arial, sans-serif; background-color: #000; color: #f5f5f5; line-height: 1.6; }
+        header { background-color: var(--c-dark-bg); padding: 1em 0 0.7em; border-bottom: 3px solid var(--c-gold); text-align: center; }
+        .logo { color: var(--c-gold); font-size: 2.2em; font-weight: bold; margin: 0; letter-spacing: 1px; font-family: 'Oswald','Impact',Arial,sans-serif;}
+        nav { margin-top: 1em; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.6em; }
+        nav a { background-color: #1c1c1c; border: 1px solid #333; padding: 8px 16px; border-radius: 6px; color: var(--c-red); text-decoration: none; font-size: 1.1em; font-weight: bold; letter-spacing: 1.2px; transition: background-color 0.2s, color 0.2s; }
+        nav a.active, nav a:hover { background-color: var(--c-gold); color: #181a1b; border-color: #e56915;}
+        main { padding: 2em 1em; }
+        .archive-section { text-align: center; margin-bottom: 2em; padding-bottom: 2em; border-bottom: 2px solid #333; }
+        .archive-section label { font-size: 1.2em; color: var(--c-grey-text); margin-right: 1em; }
+        .archive-dropdown { background-color: var(--c-card-bg); color: #fff; border: 1px solid var(--c-gold); padding: 10px; font-size: 1.1em; border-radius: 5px; }
+        .tournament-title { text-align: center; color: var(--c-gold); font-size: 2.5em; margin-bottom: 1.2em; letter-spacing: 2px;}
+        .bracket { display: flex; justify-content: space-between; max-width: 1400px; margin: 0 auto; }
+        .round { width: 22%; display: flex; flex-direction: column; justify-content: space-around; }
+        .round h3 { text-align: center; color: var(--c-grey-text); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1em;}
+        .matchup { position: relative; margin-bottom: 2em; }
+        .match-connector { display: flex; align-items: center; justify-content: flex-end; }
+        .connector-line { width: 100%; height: 2px; background: var(--c-gold); opacity: 0.5; }
+        .connector-path { position: absolute; right: -16%; top: 50%; width: 16%; height: 50%; border: 2px solid var(--c-gold); border-left: none; opacity: 0.5;}
+        .matchup:nth-of-type(odd) .connector-path { border-top-right-radius: 10px; border-bottom: none; }
+        .matchup:nth-of-type(even) .connector-path { border-bottom-right-radius: 10px; border-top: none; top: 0; }
+        .round-final .connector-path { display: none; }
+        .fighter { display: flex; align-items: center; background-color: var(--c-card-bg); padding: 0.5em; border-radius: 6px; margin: 0.5em 0; border: 2px solid #333; transition: border 0.2s, box-shadow 0.2s;}
+        .fighter img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background-color: #23272a; margin-right: 1em; border:2.5px solid #181a1b;}
+        .fighter-name { font-weight: bold; font-size: 1.1em; letter-spacing: 0.8px;}
+        .winner { border-color: var(--c-gold); box-shadow: 0 0 10px var(--c-gold); background: linear-gradient(93deg,#23272a 56%,#ffd70024 120%); }
+        .winner .fighter-name { color: var(--c-gold); }
+        .tbd .fighter-name { color: var(--c-grey-text); font-style: italic; }
+        @media (max-width: 1100px) { .bracket { max-width: 98vw; gap: 0.5em; } }
+        @media (max-width: 900px) {
+            .bracket { flex-direction: column; align-items: center; }
+            .round { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; margin-bottom: 2em;}
+            .round h3 { width: 100%; margin-bottom: 1em; }
+            .matchup { width: 45%; margin: 1em 2.5%; }
+            .match-connector { display: none; }
+        }
+        @media (max-width: 600px) { .matchup { width: 93%; } .tournament-title { font-size: 1.3em; }}
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="fighters.html">Fighters</a>
+            <a href="events.html">Events</a>
+            <a href="rankings.html">Rankings</a>
+            <a href="news.html">News</a>
+            <a href="tournament.html" class="active">Tournament</a>
+            <a href="about.html">About</a>
+            <a href="rules.html">Test Your Metal</a>
+            <a href="guestbook.html">Guestbook</a>
+        </nav>
+    </header>
+    <main>
+        <div class="archive-section">
+            <label for="archive-select">View Past Tournaments:</label>
+            <select id="archive-select" class="archive-dropdown" onchange="if (this.value) window.location.href=this.value;">
+                <option value="">Select an Archive...</option>
+                <!-- Example Archive: -->
+                <!-- <option value="crucible-10-results.html">Crucible 10</option> -->
+                <!-- <option value="crucible-9-results.html">Crucible 9</option> -->
+            </select>
+        </div>
+        <h2 class="tournament-title">Live Crucible Tournament</h2>
+        <div class="bracket" id="bracket-container"></div>
+    </main>
+    <footer class="footer">
+        &copy; 2025 Iron Crown Combat. All rights reserved.
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // -- Tournament Data --
+            const fighters = {
+                "Shiv":             { name: "Shiv", img: "https://i.postimg.cc/bNCHpPDL/Shiv.png" },
+                "Cole Maddox":      { name: "Cole Maddox", img: "https://i.postimg.cc/mDH6FDMb/Maddox.png" },
+                "Abigail Jones":    { name: "Abigail Jones", img: "https://i.postimg.cc/fW5YfsKZ/Abigail-Jones.png" },
+                "Sophia Rodriques": { name: "Sophia Rodriques", img: "https://i.postimg.cc/NFNTs8ML/Sophia-Rodriques.png" },
+                "Dante Marcheli":   { name: "Dante Marcheli", img: "https://i.postimg.cc/yNXD6hpB/Dante-Marcheli.png" },
+                "Veronica Kane":    { name: "Veronica Kane", img: "https://i.postimg.cc/Wbb6Bz3h/Veronica-Kane.png" },
+                "The Kumari Twins": { name: "The Kumari Twins", img: "https://i.postimg.cc/pdySRkL5/Kumari-Twins.png" },
+                "Kai Lawson":       { name: "Kai Lawson", img: "https://i.postimg.cc/43MSdtYL/KAI-LAWSON.png" }
+            };
+
+            // -- Update this as results are entered (see user instructions above) --
+            const tournament = {
+                round1: [
+                    { p1: "Shiv", p2: "Cole Maddox", winner: "Cole Maddox" },
+                    { p1: "Abigail Jones", p2: "Sophia Rodriques", winner: "Sophia Rodriques" },
+                    { p1: "Dante Marcheli", p2: "Veronica Kane", winner: "Dante Marcheli" },
+                    { p1: "The Kumari Twins", p2: "Kai Lawson", winner: "The Kumari Twins" }
+                ],
+                round2: [
+                    { winner: "Cole Maddox" }, // Semifinal 1 winner
+                    { winner: "The Kumari Twins" } // Semifinal 2 winner
+                ],
+                round3: [
+                    { winner: "Cole Maddox" } // Final winner (Champion). Set to null for not-yet-finished.
+                ]
+            };
+
+            const TBD_FIGHTER = { name: "TBD", img: "" };
+
+            function createFighterHTML(fighter, isWinner) {
+                const winnerClass = isWinner ? "winner" : "";
+                const tbdClass = fighter.name === "TBD" ? "tbd" : "";
+                const imgSrc = fighter.img || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+                return `<div class="fighter ${winnerClass} ${tbdClass}">
+                    <img src="${imgSrc}" alt="${fighter.name}">
+                    <span class="fighter-name">${fighter.name}</span>
+                </div>`;
+            }
+
+            function buildBracket() {
+                const container = document.getElementById('bracket-container');
+                container.innerHTML = '';
+                const roundTitles = ["Round 1", "Semi-Finals", "Finals", "Champion"];
+
+                // Round 1
+                const r1Div = document.createElement('div');
+                r1Div.className = 'round';
+                r1Div.innerHTML = `<h3>${roundTitles[0]}</h3>`;
+                tournament.round1.forEach(match => {
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'matchup';
+                    matchDiv.innerHTML = `
+                        ${createFighterHTML(fighters[match.p1], match.winner === match.p1)}
+                        ${createFighterHTML(fighters[match.p2], match.winner === match.p2)}
+                        <div class="match-connector">
+                            <div class="connector-line"></div>
+                            <div class="connector-path"></div>
+                        </div>`;
+                    r1Div.appendChild(matchDiv);
+                });
+                container.appendChild(r1Div);
+
+                // Round 2 (Semi-Finals)
+                const r2Div = document.createElement('div');
+                r2Div.className = 'round';
+                r2Div.innerHTML = `<h3>${roundTitles[1]}</h3>`;
+                // Participants are winners from round1
+                const r2_match1_p1 = tournament.round1[0].winner ? fighters[tournament.round1[0].winner] : TBD_FIGHTER;
+                const r2_match1_p2 = tournament.round1[1].winner ? fighters[tournament.round1[1].winner] : TBD_FIGHTER;
+                const r2_match2_p1 = tournament.round1[2].winner ? fighters[tournament.round1[2].winner] : TBD_FIGHTER;
+                const r2_match2_p2 = tournament.round1[3].winner ? fighters[tournament.round1[3].winner] : TBD_FIGHTER;
+                const r2_match1_winner = tournament.round2[0].winner;
+                const r2_match2_winner = tournament.round2[1].winner;
+                r2Div.innerHTML += `<div class="matchup">
+                    ${createFighterHTML(r2_match1_p1, r2_match1_winner === r2_match1_p1.name)}
+                    ${createFighterHTML(r2_match1_p2, r2_match1_winner === r2_match1_p2.name)}
+                    <div class="match-connector"><div class="connector-line"></div><div class="connector-path"></div></div>
+                </div>`;
+                r2Div.innerHTML += `<div class="matchup">
+                    ${createFighterHTML(r2_match2_p1, r2_match2_winner === r2_match2_p1.name)}
+                    ${createFighterHTML(r2_match2_p2, r2_match2_winner === r2_match2_p2.name)}
+                    <div class="match-connector"><div class="connector-line"></div><div class="connector-path"></div></div>
+                </div>`;
+                container.appendChild(r2Div);
+
+                // Round 3 (Final)
+                const r3Div = document.createElement('div');
+                r3Div.className = 'round';
+                r3Div.innerHTML = `<h3>${roundTitles[2]}</h3>`;
+                const r3_match1_p1 = r2_match1_winner ? fighters[r2_match1_winner] : TBD_FIGHTER;
+                const r3_match1_p2 = r2_match2_winner ? fighters[r2_match2_winner] : TBD_FIGHTER;
+                const r3_match1_winner = tournament.round3[0].winner;
+                r3Div.innerHTML += `<div class="matchup">
+                    ${createFighterHTML(r3_match1_p1, r3_match1_winner === r3_match1_p1.name)}
+                    ${createFighterHTML(r3_match1_p2, r3_match1_winner === r3_match1_p2.name)}
+                </div>`;
+                container.appendChild(r3Div);
+
+                // Champion
+                const champDiv = document.createElement('div');
+                champDiv.className = 'round round-final';
+                champDiv.innerHTML = `<h3>${roundTitles[3]}</h3>`;
+                const champion = r3_match1_winner ? fighters[r3_match1_winner] : TBD_FIGHTER;
+                champDiv.innerHTML += `<div class="matchup">${createFighterHTML(champion, true)}</div>`;
+                container.appendChild(champDiv);
+            }
+            buildBracket();
+        });
+    </script>
+</body>
+</html>
