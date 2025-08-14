@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8"/>
-  <title>Bracket Test</title>
+  <title>Tournament Bracket Demo</title>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.css"/>
@@ -12,7 +12,7 @@
   </style>
 </head>
 <body>
-  <h2 style="text-align:center;color:#ffd700;">Tournament Demo</h2>
+  <h2 style="text-align:center;color:#ffd700;">Tournament Bracket</h2>
   <div id="bracket"></div>
   <script>
     const round1Pairs = [
@@ -30,7 +30,9 @@
       ["Veronica Kane", "Tina Wilder"],
       ["Rich Action", "Gabriel Azrael"]
     ];
-    $('#bracket').bracket({ init: { teams: round1Pairs } });
+    $('#bracket').bracket({
+      init: { teams: round1Pairs }
+    });
   </script>
 </body>
 </html>
