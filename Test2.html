@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.css"/>
+  <style>
+    #bracket { margin: 40px auto; width: 90vw; max-width: 800px; }
+  </style>
+</head>
+<body>
+  <div id="bracket"></div>
+  <script>
+    const round1Pairs = [
+      ["Abigail Jones", "Franco Candellini"],
+      ["Sophia Rodriques", "Rocky Brickston"],
+      ["Kumari Twins", "Wade Sansom"],
+      ["Reiko Draven", "Patricia Mavis Stokes"],
+      ["Malik Carter", "Tina Wilder"],
+      ["Kai Lawson", "Natsume Tokonuto"],
+      ["Igor", "Pao Chaiya"],
+      ["Marcus Graves", "Piak Chaiya"],
+      ["Eli Blackfox", "S’ri Prai-Chaiya"],
+      ["The Executioner", "Fernando Riveiro"],
+      ["Master Bo Qin", "Brielle Fontaine"],
+      ["Veronica Kane", "Tina Wilder"],
+      ["Rich Action", "Gabriel Azrael"]
+    ];
+    $('#bracket').bracket({ init: { teams: round1Pairs } });
+  </script>
+</body>
+</html>
