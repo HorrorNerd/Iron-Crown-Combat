@@ -63,102 +63,115 @@
     <footer class="footer">
         &copy; 2025 Iron Crown Combat. All rights reserved.
     </footer>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // -- CONFIGURATION --
-            const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU"; // your sheet ID
-            const FIGHTER_TAB = "Fighter Tracker";
-            const EVENT_TAB = "Event";
-            const TOURNAMENT = "Iron Trial"; // Set exactly as in your sheet
+    <<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // -- CONFIGURATION --
+    const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+    const FIGHTER_TAB = "Fighter Tracker";
+    const EVENT_TAB = "Event";
+    const TOURNAMENT = "Iron Trial"; // Must match your Tournament column
 
-            const fightersUrl = `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(FIGHTER_TAB)}`;
-            const eventsUrl = `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(EVENT_TAB)}`;
+    // ROUND 1 SEEDS: your full initial bracket matches
+    const round1Pairs = [
+        ["Abigail Jones", "Franco Candellini"],
+        ["Sophia Rodriques", "Rocky Brickston"],
+        ["Kumari Twins", "Wade Sansom"],
+        ["Reiko Draven", "Patricia Mavis Stokes"],
+        ["Malik Carter", "Tina Wilder"],
+        ["Kai Lawson", "Natsume Tokonuto"],
+        ["Igor", "Pao Chaiya"],
+        ["Marcus Graves", "Piak Chaiya"],
+        ["Eli Blackfox", "S’ri Prai-Chaiya"],
+        ["The Executioner", "Fernando Riveiro"],
+        ["Master Bo Qin", "Brielle Fontaine"],
+        ["Veronica Kane", "Tina Wilder"],
+        ["Rich Action", "Gabriel Azrael"]
+    ];
 
-            // -- Fetch all fighters with images --
-            async function getFightersDict() {
-                const res = await fetch(fightersUrl);
-                const rows = await res.json();
-                const dict = {};
-                rows.forEach(row => {
-                    if (row.Fighter)
-                        dict[row.Fighter.trim()] = {
-                            name: row.Fighter.trim(),
-                            img: (row.Image || "").trim()
-                        };
-                });
-                return dict;
-            }
+    const fightersUrl = `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(FIGHTER_TAB)}`;
+    const eventsUrl = `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(EVENT_TAB)}`;
 
-            // -- Fetch all matches for this tournament --
-            async function getTournamentMatches() {
-                const res = await fetch(eventsUrl);
-                const rows = await res.json();
-                return rows.filter(row =>
-                    row.Tournament && row.Tournament.trim() === TOURNAMENT &&
-                    row["Fighter A"] && row["Fighter B"]
-                );
-            }
-
-            // -- Group matches by round or event --
-            function groupMatchesByRound(matches) {
-                const grouped = {};
-                matches.forEach(row => {
-                    const roundLabel = row.Event || "Unlabeled Round";
-                    if (!grouped[roundLabel]) grouped[roundLabel] = [];
-                    grouped[roundLabel].push({
-                        p1: row["Fighter A"].trim(),
-                        p2: row["Fighter B"].trim(),
-                        winner: (row["Winner"]||"").trim()
-                    });
-                });
-                // Sort by order of first appearance in sheet
-                return Object.entries(grouped).map(([label, matches]) => ({ label, matches }));
-            }
-
-            function createFighterHTML(fighter, isWinner) {
-                const winnerClass = isWinner ? "winner" : "";
-                const tbdClass = (fighter.name === "TBD" || !fighter.name) ? "tbd" : "";
-                const imgSrc = fighter.img || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-                return `<div class="fighter ${winnerClass} ${tbdClass}">
-                    <img src="${imgSrc}" alt="${fighter.name}">
-                    <span class="fighter-name">${fighter.name || "TBD"}</span>
-                </div>`;
-            }
-
-            // -- Build the entire bracket from sheet data --
-            async function buildBracket() {
-                const fighters = await getFightersDict();
-                const matches = await getTournamentMatches();
-                const groupedRounds = groupMatchesByRound(matches);
-
-                const container = document.getElementById('bracket-container');
-                container.innerHTML = '';
-
-                groupedRounds.forEach((round, i) => {
-                    const roundDiv = document.createElement('div');
-                    roundDiv.className = 'round' + (i === groupedRounds.length-1 ? ' round-final' : '');
-                    roundDiv.innerHTML = `<h3>${round.label}</h3>`;
-                    round.matches.forEach(match => {
-                        const p1 = fighters[match.p1] || { name: match.p1 || "TBD", img: "" };
-                        const p2 = fighters[match.p2] || { name: match.p2 || "TBD", img: "" };
-                        const isWinner1 = match.winner && match.winner === p1.name;
-                        const isWinner2 = match.winner && match.winner === p2.name;
-                        const matchDiv = document.createElement('div');
-                        matchDiv.className = 'matchup';
-                        matchDiv.innerHTML = `
-                            ${createFighterHTML(p1, isWinner1)}
-                            ${createFighterHTML(p2, isWinner2)}
-                            <div class="match-connector"><div class="connector-line"></div>
-                                <div class="connector-path"></div>
-                            </div>`;
-                        roundDiv.appendChild(matchDiv);
-                    });
-                    container.appendChild(roundDiv);
-                });
-            }
-
-            buildBracket();
+    // Fetch fighters with images
+    async function getFightersDict() {
+        const res = await fetch(fightersUrl);
+        const rows = await res.json();
+        const dict = {};
+        rows.forEach(row => {
+            if (row.Fighter)
+                dict[row.Fighter.trim()] = {
+                    name: row.Fighter.trim(),
+                    img: (row.Image || "").trim()
+                };
         });
-    </script>
+        return dict;
+    }
+
+    // Fetch any completed matches for this tournament (for winner highlight)
+    async function getCompletedRound1Winners() {
+        const res = await fetch(eventsUrl);
+        const rows = await res.json();
+        // Find only round 1 results for this tournament that have a winner
+        const winners = {};
+        rows.filter(row =>
+            row.Tournament && row.Tournament.trim() === TOURNAMENT &&
+            row["Fighter A"] && row["Fighter B"] &&
+            row.Event && /round *1/i.test(row.Event) &&
+            row.Winner && row.Winner.trim().length > 0
+        ).forEach(row => {
+            // Key is "A vs B" (alphabetical)
+            const k1 = [row["Fighter A"].trim(), row["Fighter B"].trim()].sort().join(" vs ");
+            winners[k1] = row.Winner.trim();
+        });
+        return winners;
+    }
+
+    function createFighterHTML(fighter, isWinner) {
+        const winnerClass = isWinner ? "winner" : "";
+        const tbdClass = (!fighter.name) ? "tbd" : "";
+        const imgSrc = fighter.img || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+        return `<div class="fighter ${winnerClass} ${tbdClass}">
+            <img src="${imgSrc}" alt="${fighter.name}">
+            <span class="fighter-name">${fighter.name || "TBD"}</span>
+        </div>`;
+    }
+
+    async function buildBracket() {
+        const fighters = await getFightersDict();
+        const round1Winners = await getCompletedRound1Winners();
+        const container = document.getElementById('bracket-container');
+        container.innerHTML = "";
+
+        // -- ROUND 1 --
+        const roundDiv = document.createElement('div');
+        roundDiv.className = 'round';
+        roundDiv.innerHTML = `<h3>Round 1</h3>`;
+        round1Pairs.forEach(([f1, f2]) => {
+            const nameA = f1.trim(), nameB = f2.trim();
+            const k = [nameA, nameB].sort().join(" vs ");
+            const winner = round1Winners[k] || "";
+            const isWinnerA = winner && winner === nameA;
+            const isWinnerB = winner && winner === nameB;
+            const fighterA = fighters[nameA] || { name: nameA, img: "" };
+            const fighterB = fighters[nameB] || { name: nameB, img: "" };
+            const matchDiv = document.createElement('div');
+            matchDiv.className = 'matchup';
+            matchDiv.innerHTML = `
+                ${createFighterHTML(fighterA, isWinnerA)}
+                ${createFighterHTML(fighterB, isWinnerB)}
+                <div class="match-connector"><div class="connector-line"></div>
+                    <div class="connector-path"></div>
+                </div>`;
+            roundDiv.appendChild(matchDiv);
+        });
+        container.appendChild(roundDiv);
+
+        // -- Future Rounds (optional, based on live sheet data, add here if you wish) --
+        // You can expand with later rounds by grouping other events in your sheet as before.
+    }
+
+    buildBracket();
+});
+</script>
+
 </body>
 </html>
