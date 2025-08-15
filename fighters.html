@@ -3,91 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="referrer" content="no-referrer">
   <title>Iron Crown Combat - Fighters</title>
-  <link rel="stylesheet" href="style.css">
   <style>
-    .fighter-card {
-      border:2px solid #332;
-      padding:1em;
-      margin:1em;
-      background:#181a1b;
-      border-radius:10px;
-      max-width:240px;
-      text-align:center;
-      color:#ffd700;
-      display:inline-block;
-      vertical-align:top;
-      box-sizing:border-box;
+    body { background:#000; color:#ffd700; font-family:'Oswald',Arial,sans-serif; margin:0; }
+    .header { background:#181a1b; border-bottom:3px solid #ffd700; padding:1em 0; text-align:center;}
+    .logo { font-size:2.2em; font-weight:bold; color:#ffd700;}
+    nav a { color:#e56915; text-decoration:none; margin:0 7px; padding:8px 16px; border-radius:6px; font-weight:bold;}
+    nav a.active, nav a:hover { background:#ffd700; color:#181a1b;}
+    .roster-grid { text-align:center; margin:2em auto; }
+    .fighter-card { 
+      background:#181a1b; color:#ffd700; border-radius:10px; border:2px solid #332;
+      display:inline-block; margin:1em; padding:1em; max-width:240px; vertical-align:top;
     }
-    .fighter-photo {
-      width:100px; height:100px;
-      border-radius:50%;
-      object-fit:cover;
-      margin-bottom:8px;
-      border:2px solid #444;
-      background: #222;
-      display:block;
-      margin:8px auto;
-    }
-    .fighter-name {
-      font-size:1.13em;
-      font-weight:bold;
-      color:#fff;
-      margin-bottom:4px;
-    }
-    .fighter-earnings {
-      font-size:1em;
-      color:#ffd700;
-      margin-top:6px;
-      font-weight:600;
-    }
-    .view-bio-btn {
-      background:#ffd700;
-      color:#181a1b;
-      border-radius:5px;
-      border:none;
-      padding:6px 16px;
-      cursor:pointer;
-      margin-top:7px;
-      font-weight:bold;
-      transition:background 0.2s;
-    }
+    .fighter-photo { display:block; margin:0 auto 8px; width:100px; height:100px; object-fit:cover; border-radius:50%; border:2px solid #444; background:#222; }
+    .fighter-name { font-weight:bold; color:#fff; font-size:1.13em; margin-bottom:6px; }
+    .fighter-earnings { color:#ffd700; font-size:1em; margin-top:3px; font-weight:600;}
+    .view-bio-btn { background:#ffd700; color:#181a1b; border-radius:5px; border:none; padding:6px 16px; font-weight:bold; margin-top:7px; cursor:pointer;}
     .view-bio-btn:hover { background:#e56915; }
-    #modal {
-      position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.7); display: none; justify-content:center; align-items:center; z-index:1001;
-    }
-    #modal-content {
-      background: #181a1b; color: #ffd700; border-radius:12px; padding:2em; min-width: 260px; max-width: 98vw;
-      text-align: center; position: relative;
-    }
-    #close-modal-btn {
-      position: absolute; top: 14px; right: 18px; background:none; border:none; color: #ffd700;
-      font-size: 1.5em; cursor:pointer;
-    }
-    .fighter-modal-details {
-      color:#eee; font-size:1em; margin:10px 0 1px;
-    }
-    .awards-list {
-      background: #222;
-      color: #ffd700;
-      margin: 7px auto 10px;
-      padding: 8px;
-      border-radius: 6px;
-      max-width: 90%;
-      font-size:0.97em;
-      text-align:left;
-      display:inline-block;
-    }
-    .roster-grid { text-align:center; }
+    #modal {display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.83); justify-content:center; align-items:center; z-index:10;}
+    #modal-content { background:#181a1b; color:#ffd700; border-radius:14px; padding:2em; min-width:260px; max-width:99vw; text-align:center; position:relative;}
+    #close-modal-btn { position:absolute; top:16px; right:20px; font-size:1.5em; border:none; background:none; color:#ffd700; cursor:pointer;}
+    .fighter-modal-details { color:#eee; font-size:1em; margin:10px 0 1px;}
+    .awards-list { background: #222; color: #ffd700; margin:7px auto 10px; padding:8px; border-radius:6px; max-width:90%; font-size:0.97em; text-align:left; display:inline-block;}
+    .footer { margin-top:3em; padding:1em 0; border-top:2px solid #ffd700; text-align:center; background:#181a1b; font-size:0.95em; color:#e56915;}
   </style>
 </head>
 <body>
   <header class="header">
-    <h1 class="logo">
-      <span class="iron">IRON </span><span class="crown">CROWN</span> <span class="combat">COMBAT</span>
-    </h1>
+    <div class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</div>
     <nav>
       <a href="index.html">Home</a>
       <a href="fighters.html" class="active">Fighters</a>
@@ -112,9 +55,7 @@
     <div id="modal-content"></div>
   </div>
 
-  <footer class="footer">
-    &copy; 2025 Iron Crown Combat. All rights reserved.
-  </footer>
+  <footer class="footer">&copy; 2025 Iron Crown Combat. All rights reserved.</footer>
 
   <script>
     const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
@@ -123,7 +64,7 @@
 
     let fighterAwards = {};
 
-    // First, fetch awards (bonuses) for each fighter from Event Results tab:
+    // Fetch achievements/awards from Event Results
     fetch(EVENT_RESULTS_URL)
       .then(res => res.json())
       .then(resultRows => {
@@ -145,7 +86,6 @@
             container.innerHTML = "";
 
             rows.forEach(row => {
-              // If your sheet uses different column names, update them here:
               const name = row.Fighter || "Unknown";
               const earnings = row.Earnings || "$0";
               const image = row.Image || "";
@@ -171,7 +111,6 @@
               container.appendChild(fighterDiv);
             });
 
-            // Modal logic, hooks up all details and live awards
             window.showModal = (name, bio, image, record, stats, earnings) => {
               const overlay = document.getElementById('modal');
               const content = document.getElementById('modal-content');
