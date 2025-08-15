@@ -2,15 +2,46 @@ const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
 const fighterSheet = "Fighter Tracker";
 const eventSheet = "Event Results";
 const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fighterSheet)}`;
-const eventURL   = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheet)}`;
+const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheet)}`;
 const BONUS_VALUE = 5000;
-const WINNER_BONUSES = ['ko of the night', 'submission of the night'];
-const SHARED_BONUSES = ['fight of the night', 'match of the night'];
+const TOURNAMENT_BONUS = 15000;
+
+// Cache settings (in milliseconds)
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 let fightersData = [];
 let eventData = [];
 
+// Basic browser cache using localStorage
+async function fetchWithCache(url, cacheKey) {
+  const now = Date.now();
+  let cached;
+  try {
+    cached = JSON.parse(localStorage.getItem(cacheKey));
+  } catch (e) {}
+
+  if (cached && cached.expires > now) {
+    return cached.data;
+  }
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch " + url);
+  const data = await res.json();
+  localStorage.setItem(cacheKey, JSON.stringify({
+    expires: now + CACHE_TTL,
+    data
+  }));
+  return data;
+}
+
 function extractFighterName(row) {
   return row.Fighter || row.Name || row["Fighter Name"] || row["name"] || "";
+}
+
+function normalizeRating(value) {
+  let rating = parseFloat(value?.toString().replace("%", "").trim());
+  if (isNaN(rating)) return 0;
+  if (rating > 1) rating = rating / 100; // Convert e.g. 98 → 0.98
+  return rating;
 }
 
 function calculateFighterStats(fighterName, allEvents) {
@@ -18,24 +49,49 @@ function calculateFighterStats(fighterName, allEvents) {
   const history = allEvents.filter(e =>
     (e["Fighter A"]?.trim() === trimmed) || (e["Fighter B"]?.trim() === trimmed)
   );
-  let totalEarnings = 0, wins = 0, bonusCount = 0;
+
+  let totalEarnings = 0, wins = 0, losses = 0, draws = 0, bonusCount = 0;
+
   history.forEach(match => {
-    const rating = parseInt(match["Match Rating"]?.replace("%", "")) || 0;
-    const purse = rating * 100;
-    const winner = match.Winner?.trim();
+    const rating = normalizeRating(match["Match Rating"]);
+    const purseWinner = rating * 10000;
+    const purseLoser = rating * 5000;
+
+    const winner = (match.Winner || "").trim();
     const isWinner = winner === trimmed;
-    const bonusType = (match["bonus type"] || "").trim().toLowerCase();
+    const isDraw = winner.toLowerCase() === "draw";
+
+    // Bonus: any bonus type is +5,000
     let currentBonus = 0;
-    if (SHARED_BONUSES.includes(bonusType)) currentBonus = BONUS_VALUE;
-    else if (isWinner && WINNER_BONUSES.includes(bonusType)) currentBonus = BONUS_VALUE;
-    const earnings = (isWinner || winner === "Draw")
-      ? (purse + currentBonus)
-      : (purse / 2 + currentBonus);
+    if (match["bonus type"] && match["bonus type"].trim() !== "") {
+      currentBonus = BONUS_VALUE;
+      bonusCount++;
+    }
+
+    // Tournament: +15,000 for "Yes" or "King Of The Crown"
+    let tournamentBonus = 0;
+    const tournText = (match["Tournament"] || "").toLowerCase();
+    if (tournText.includes("yes") || tournText.includes("king of the crown")) {
+      tournamentBonus = TOURNAMENT_BONUS;
+    }
+
+    let earnings = 0;
+    if (isWinner) {
+      earnings = purseWinner;
+      wins++;
+    } else if (isDraw) {
+      earnings = purseWinner / 2;
+      draws++;
+    } else {
+      earnings = purseLoser;
+      losses++;
+    }
+
+    earnings += currentBonus + tournamentBonus;
     totalEarnings += earnings;
-    if (isWinner) wins++;
-    if (currentBonus > 0) bonusCount++;
   });
-  return { totalEarnings, wins, bonusCount, history };
+
+  return { totalEarnings, wins, losses, draws, bonusCount, history };
 }
 
 function getChampionshipBadgeHtml() {
@@ -72,22 +128,27 @@ function getChampionshipBadgeHtml() {
 async function loadFighters() {
   const container = document.getElementById("fighters-container");
   try {
-    const [fighterRes, eventRes] = await Promise.all([fetch(fighterURL), fetch(eventURL)]);
-    if (!fighterRes.ok || !eventRes.ok) throw new Error("Failed to fetch spreadsheet data.");
-    fightersData = await fighterRes.json();
-    eventData = await eventRes.json();
+    const [fighters, events] = await Promise.all([
+      fetchWithCache(fighterURL, "fightersCache"),
+      fetchWithCache(eventURL, "eventsCache")
+    ]);
+    fightersData = fighters;
+    eventData = events;
     container.innerHTML = "";
     let cards = 0;
     fightersData.forEach(fighter => {
       const fighterName = extractFighterName(fighter);
       if (!fighterName) return;
       const stats = calculateFighterStats(fighterName, eventData);
+
       const winsVal = fighter.Wins ?? stats.wins;
-      const lossVal = fighter.Losses ?? 0;
-      const drawVal = fighter.Draws ?? 0;
+      const lossVal = fighter.Losses ?? stats.losses;
+      const drawVal = fighter.Draws ?? stats.draws;
+
       const imageUrl = fighter["Image URL"] || fighter["image url"] || fighter.Image || "https://i.imgur.com/sNo2MNm.png";
       const isKing = fighterName.toLowerCase() === "cole maddox";
       const badgeHtml = isKing ? getChampionshipBadgeHtml() : '';
+
       const card = document.createElement("div");
       card.className = "fighter-card";
       card.innerHTML = `
@@ -131,7 +192,6 @@ window.openModal = function(fighterName) {
   const isKing = fighterName.toLowerCase() === "cole maddox";
   const badgeHtml = isKing ? getChampionshipBadgeHtml() : "";
 
-  // Generate Awards & Bonuses list with normalized names
   const awardsSet = new Set();
   const normalizedFighterName = fighterName.toLowerCase();
   eventData.forEach(match => {
@@ -145,42 +205,18 @@ window.openModal = function(fighterName) {
   });
   const awardsArray = Array.from(awardsSet);
   let awardsHtml = '<h3>Awards & Bonuses</h3>';
-  if (awardsArray.length > 0) {
-    awardsHtml += '<ul>';
-    awardsArray.forEach(award => {
-      awardsHtml += `<li>${award}</li>`;
-    });
-    awardsHtml += '</ul>';
-  } else {
-    awardsHtml += '<p>No awards or bonuses recorded.</p>';
-  }
+  awardsHtml += awardsArray.length > 0
+    ? `<ul>${awardsArray.map(award => `<li>${award}</li>`).join('')}</ul>`
+    : '<p>No awards or bonuses recorded.</p>';
 
   const bioDetailsHtml = `
     <div class="bio-details">
-      <div class="detail-item">
-          <strong>Record</strong>
-          <span>${fighter.Wins ?? stats.wins} W - ${fighter.Losses ?? 0} L - ${fighter.Draws ?? 0} D</span>
-      </div>
-      <div class="detail-item">
-          <strong>Earnings</strong>
-          <span>$${stats.totalEarnings.toLocaleString()}</span>
-      </div>
-      <div class="detail-item">
-          <strong>Height</strong>
-          <span>${fighter.Height || 'N/A'}</span>
-      </div>
-      <div class="detail-item">
-          <strong>Weight</strong>
-          <span>${fighter.Weight || 'N/A'}</span>
-      </div>
-      <div class="detail-item">
-          <strong>Nationality</strong>
-          <span>${fighter.Nationality || 'N/A'}</span>
-      </div>
-      <div class="detail-item">
-          <strong>Fighting Style</strong>
-          <span>${fighter['Fighting Style'] || fighter.Style || 'N/A'}</span>
-      </div>
+      <div class="detail-item"><strong>Record</strong><span>${stats.wins} W - ${stats.losses} L - ${stats.draws} D</span></div>
+      <div class="detail-item"><strong>Earnings</strong><span>$${stats.totalEarnings.toLocaleString()}</span></div>
+      <div class="detail-item"><strong>Height</strong><span>${fighter.Height || 'N/A'}</span></div>
+      <div class="detail-item"><strong>Weight</strong><span>${fighter.Weight || 'N/A'}</span></div>
+      <div class="detail-item"><strong>Nationality</strong><span>${fighter.Nationality || 'N/A'}</span></div>
+      <div class="detail-item"><strong>Fighting Style</strong><span>${fighter['Fighting Style'] || fighter.Style || 'N/A'}</span></div>
     </div>
   `;
 
@@ -189,9 +225,7 @@ window.openModal = function(fighterName) {
     historyHtml += '<ul>';
     stats.history.forEach(match => {
       const opponent =
-        match["Fighter A"]?.trim() === fighterName
-          ? match["Fighter B"]
-          : match["Fighter A"];
+        match["Fighter A"]?.trim() === fighterName ? match["Fighter B"] : match["Fighter A"];
       let result = 'Loss';
       if (match.Winner === fighterName) result = 'Win';
       if (match.Winner === 'Draw') result = 'Draw';
@@ -222,7 +256,6 @@ window.closeModal = function() {
   document.getElementById("modal").style.display = "none";
 };
 
-// Opens the fullscreen image viewer with the given image SRC and alt text
 function openImageViewer(src, alt) {
   const overlay = document.getElementById('image-viewer-overlay');
   const img = document.getElementById('fullsize-image');
@@ -231,18 +264,13 @@ function openImageViewer(src, alt) {
   overlay.style.display = 'flex';
 }
 
-// Closes the fullscreen image viewer
 function closeImageViewer() {
-  const overlay = document.getElementById('image-viewer-overlay');
-  overlay.style.display = 'none';
-  const img = document.getElementById('fullsize-image');
-  img.src = '';
+  document.getElementById('image-viewer-overlay').style.display = 'none';
+  document.getElementById('fullsize-image').src = '';
 }
 
-// Add click handlers to fighter images to open fullscreen viewer
 function addImageClickHandlers() {
-  const images = document.querySelectorAll('.fighter-image');
-  images.forEach(img => {
+  document.querySelectorAll('.fighter-image').forEach(img => {
     img.style.cursor = 'zoom-in';
     img.onclick = () => openImageViewer(img.src, img.alt);
   });
