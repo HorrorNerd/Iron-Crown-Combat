@@ -42,11 +42,6 @@
       margin-top:6px;
       font-weight:600;
     }
-    .fighter-bio {
-      font-size:0.93em;
-      color:#ccc;
-      margin-top:4px;
-    }
     .view-bio-btn {
       background:#ffd700;
       color:#181a1b;
@@ -64,12 +59,26 @@
       background: rgba(0,0,0,0.7); display: none; justify-content:center; align-items:center; z-index:1001;
     }
     #modal-content {
-      background: #181a1b; color: #ffd700; border-radius:12px; padding:2em; min-width: 220px; max-width: 98vw;
+      background: #181a1b; color: #ffd700; border-radius:12px; padding:2em; min-width: 260px; max-width: 98vw;
       text-align: center; position: relative;
     }
     #close-modal-btn {
       position: absolute; top: 14px; right: 18px; background:none; border:none; color: #ffd700;
       font-size: 1.5em; cursor:pointer;
+    }
+    .fighter-modal-details {
+      color:#eee; font-size:1em; margin:10px 0 1px;
+    }
+    .achievements-list {
+      background: #222;
+      color: #ffd700;
+      margin: 7px auto 10px;
+      padding: 8px;
+      border-radius: 6px;
+      max-width: 90%;
+      font-size:0.98em;
+      text-align:left;
+      display:inline-block;
     }
     .roster-grid { text-align:center; }
   </style>
@@ -110,64 +119,101 @@
   <script>
     const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
     const TRACKER_URL = `https://opensheet.elk.sh/${SHEET_ID}/Fighter Tracker`;
+    const RESULTS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Event Results`;
 
-    fetch(TRACKER_URL)
+    let eventBonuses = {};
+
+    // First, fetch all Event Results bonuses by fighter
+    fetch(RESULTS_URL)
       .then(res => res.json())
-      .then(rows => {
-        const container = document.getElementById('fighters-container');
-        container.innerHTML = ""; // Remove loading message
-
-        rows.forEach(row => {
-          const name = row.Fighter || "Unknown";
-          const earnings = row.Earnings || "$0";
-          const image = row.Image ? row.Image : "";
-          const bio = row.Bio || "";
-
-          // Card layout
-          const fighterDiv = document.createElement('div');
-          fighterDiv.className = "fighter-card";
-          fighterDiv.innerHTML = `
-            <img src="${image}" alt="${name}" class="fighter-photo" />
-            <div class="fighter-name">${name}</div>
-            <div class="fighter-earnings">Earnings: <span>${earnings}</span></div>
-            <button class="view-bio-btn" onclick="showModal('${escapeHTML(name)}','${escapeHTML(bio)}','${image}')">View Bio</button>
-          `;
-          container.appendChild(fighterDiv);
+      .then(resultsRows => {
+        // Group bonuses by fighter
+        eventBonuses = {}; // fighter name => array of bonus types
+        resultsRows.forEach(row => {
+          const fName = row['Fighter']?.trim() || "";
+          const bonus = row['Bonus Type']?.trim();
+          if(fName && bonus){
+            if(!eventBonuses[fName]) eventBonuses[fName] = [];
+            eventBonuses[fName].push(bonus);
+          }
         });
+
+        // Now fetch fighter roster and render all cards
+        fetch(TRACKER_URL)
+          .then(res => res.json())
+          .then(rows => {
+            const container = document.getElementById('fighters-container');
+            container.innerHTML = "";
+
+            rows.forEach(row => {
+              // Replace these fields with actual column names if needed
+              const name = row.Fighter || "Unknown";
+              const earnings = row.Earnings || "$0";
+              const image = row.Image || "";
+              const bio = row.Bio || "";
+              const record = row.Record || "";
+              const stats = row.Stats || "";
+              const awards = row.Awards || "";
+
+              // Card layout
+              const fighterDiv = document.createElement('div');
+              fighterDiv.className = "fighter-card";
+              fighterDiv.innerHTML = `
+                <img src="${image}" alt="${name}" class="fighter-photo" />
+                <div class="fighter-name">${name}</div>
+                <div class="fighter-earnings">Earnings: <span>${earnings}</span></div>
+                <button class="view-bio-btn" onclick="showModal(
+                  '${escapeHTML(name)}',
+                  '${escapeHTML(bio)}',
+                  '${image}',
+                  '${escapeHTML(record)}',
+                  '${escapeHTML(stats)}',
+                  '${escapeHTML(earnings)}'
+                )">View Details</button>
+              `;
+              container.appendChild(fighterDiv);
+            });
+
+            // Define the modal logic now that we have bonuses/roster
+            window.showModal = (name, bio, image, record, stats, earnings) => {
+              const overlay = document.getElementById('modal');
+              const content = document.getElementById('modal-content');
+              let bonusHtml = '';
+              const bonuses = eventBonuses[name] || [];
+              if(bonuses.length){
+                bonusHtml = `<div style="font-weight:bold;margin-bottom:5px;">Achievements:</div>
+                  <div class="achievements-list">
+                    ${bonuses.map(b=>`<div>• ${b}</div>`).join('')}
+                  </div>`;
+              }
+              content.innerHTML = `
+                <button id="close-modal-btn" onclick="hideModal()">&#x2715;</button>
+                <img src="${image}" alt="${name}" style="width:86px;height:86px;border-radius:60px;object-fit:cover;border:2px solid #444;background:#222;margin-bottom:12px;">
+                <div style="font-weight:bold;font-size:1.2em;color:#ffd700; margin-bottom:7px;">${name}</div>
+                <div class="fighter-modal-details"><span style="color:#ffd700;">Record:</span> ${record}</div>
+                <div class="fighter-modal-details"><span style="color:#ffd700;">Earnings:</span> ${earnings}</div>
+                <div class="fighter-modal-details"><span style="color:#ffd700;">Stats:</span> ${stats}</div>
+                ${bonusHtml}
+                <div style="margin:10px 0 7px;color:#ccc;">${bio ? bio : "No biography available."}</div>
+              `;
+              overlay.style.display = "flex";
+            };
+            window.hideModal = () => {
+              document.getElementById('modal').style.display = "none";
+            };
+            document.addEventListener('keydown', function(e){
+              if(e.key==='Escape'){hideModal();}
+            });
+            document.getElementById('modal').addEventListener('click', function(e){
+              if(e.target === this){hideModal();}
+            });
+          });
       });
 
-    // Helper to safely encode text for HTML-in-JS
     function escapeHTML(txt) {
-      return String(txt).replace(/&/g, '&amp;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#39;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;');
+      return String(txt||"").replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+                            .replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
-
-    // Modal logic
-    window.showModal = (name, bio, image) => {
-      const overlay = document.getElementById('modal');
-      const content = document.getElementById('modal-content');
-      content.innerHTML = `
-        <button id="close-modal-btn" onclick="hideModal()">&#x2715;</button>
-        <img src="${image}" alt="${name}" style="width:86px;height:86px;border-radius:60px;object-fit:cover;border:2px solid #444;background:#222;margin-bottom:12px;">
-        <div style="font-weight:bold;font-size:1.2em;color:#ffd700;">${name}</div>
-        <div style="margin:10px 0 7px;color:#ccc;">${bio ? bio : "No biography available."}</div>
-      `;
-      overlay.style.display = "flex";
-    };
-    window.hideModal = () => {
-      document.getElementById('modal').style.display = "none";
-    };
-    // Hide with Escape key
-    document.addEventListener('keydown', function(e){
-      if(e.key==='Escape'){hideModal();}
-    });
-    // Hide when clicking outside modal-content
-    document.getElementById('modal').addEventListener('click', function(e){
-      if(e.target === this){hideModal();}
-    });
   </script>
 </body>
 </html>
