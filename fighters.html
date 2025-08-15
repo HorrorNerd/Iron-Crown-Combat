@@ -64,7 +64,6 @@
 
     let fighterAwards = {};
 
-    // Fetch achievements/awards from Event Results
     fetch(EVENT_RESULTS_URL)
       .then(res => res.json())
       .then(resultRows => {
@@ -78,7 +77,6 @@
           }
         });
 
-        // Now fetch Fighter Tracker data and render fighters
         fetch(TRACKER_URL)
           .then(res => res.json())
           .then(rows => {
@@ -96,8 +94,8 @@
               const gender = row.Gender || "";
               const gym = row.Gym || "";
               const winpct = row["Win %"] || "";
-              
-              // Card view shows image, name, gym, earnings
+
+              // Use JSON.stringify in onclick for bulletproof argument passing
               const fighterDiv = document.createElement('div');
               fighterDiv.className = "fighter-card";
               fighterDiv.innerHTML = `
@@ -105,18 +103,18 @@
                 <div class="fighter-name">${name}</div>
                 <div style="color:#e56915;font-size:0.98em;margin-bottom:3px;">${gym ? gym : ""}</div>
                 <div class="fighter-earnings">Earnings: <span>${earnings}</span></div>
-                <button class="view-bio-btn" onclick="showModal(
-                  '${escapeHTML(name)}',
-                  '${escapeHTML(bio)}',
-                  '${image}',
-                  '${escapeHTML(wins)}',
-                  '${escapeHTML(losses)}',
-                  '${escapeHTML(draws)}',
-                  '${escapeHTML(gender)}',
-                  '${escapeHTML(gym)}',
-                  '${escapeHTML(winpct)}',
-                  '${escapeHTML(earnings)}'
-                )">View Details</button>
+                <button class="view-bio-btn" onclick='showModal(
+                  ${JSON.stringify(name)},
+                  ${JSON.stringify(bio)},
+                  ${JSON.stringify(image)},
+                  ${JSON.stringify(wins)},
+                  ${JSON.stringify(losses)},
+                  ${JSON.stringify(draws)},
+                  ${JSON.stringify(gender)},
+                  ${JSON.stringify(gym)},
+                  ${JSON.stringify(winpct)},
+                  ${JSON.stringify(earnings)}
+                )'>View Details</button>
               `;
               container.appendChild(fighterDiv);
             });
@@ -135,7 +133,7 @@
                 <img src="${image}" alt="${name}" style="width:86px;height:86px;border-radius:60px;object-fit:cover;border:2px solid #444;background:#222;margin-bottom:12px;">
                 <div style="font-weight:bold;font-size:1.2em;color:#ffd700; margin-bottom:7px;">${name}</div>
                 <div class="fighter-modal-details">
-                  <span style="color:#ffd700;">Record:</span> ${wins}W - ${losses}L ${draws>0 ? "- "+draws+"D" : ""}
+                  <span style="color:#ffd700;">Record:</span> ${wins}W - ${losses}L${draws>0 ? " - "+draws+"D" : ""}
                   ${winpct ? `(<span style="color:#ffd700;">${winpct} win&nbsp;%</span>)` : ""}
                 </div>
                 <div class="fighter-modal-details"><span style="color:#ffd700;">Gym:</span> ${gym}</div>
@@ -157,11 +155,6 @@
             });
           });
       });
-
-    function escapeHTML(txt) {
-      return String(txt||"").replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-                            .replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
   </script>
 </body>
 </html>
