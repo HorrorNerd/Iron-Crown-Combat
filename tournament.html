@@ -1,101 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat — Tournament Bracket</title>
-  <style>
-    :root {
-      --c-gold: #ffd700; --c-red: #cc0000; --c-dark-bg: #111; --c-card-bg: #1a1a1a; --c-grey-text: #ccc;
-    }
-    body {
-      margin: 0;
-      font-family: 'Oswald', Arial, sans-serif;
-      background: #000;
-      color: #f5f5f5;
-    }
-    header {
-      background: var(--c-dark-bg);
-      padding: 1em 0 0.7em;
-      border-bottom: 3px solid var(--c-gold);
-      text-align: center;
-    }
-    .logo {
-      color: var(--c-gold); font-size: 2.2em; font-weight: bold; letter-spacing: 1px;
-    }
-    main { padding: 2em 0; }
-    .tournament-title {
-      text-align: center; color: var(--c-gold);
-      font-size: 2em; margin-bottom: 2em;
-      letter-spacing: 2px;
-    }
-    .bracket-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.7em 2em;
-      min-width: 980px;
-      max-width: 1600px;
-      margin: 0 auto;
-    }
-    .round-col {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .round-header {
-      color: var(--c-grey-text);
-      text-transform: uppercase;
-      margin-bottom: 1em;
-      font-size: 1.1em;
-      letter-spacing: 2px;
-    }
-    .match {
-      background: var(--c-card-bg);
-      border: 2px solid #333;
-      border-radius: 6px;
-      color: #ffd700;
-      margin: 1em 0;
-      width: 230px;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .fighter {
-      font-size: 1.05em;
-      font-weight: bold;
-      color: #eee;
-      padding: 2px 8px 2px 0;
-      border-radius: 3px;
-    }
-    .fighter:last-child { margin-bottom: 0; }
-    .winner {
-      color: #ffd700;
-      background: #181a1b;
-    }
-    .tbd {
-      color: var(--c-grey-text);
-      font-style: italic;
-    }
-    @media (max-width: 1160px) {
-      .bracket-grid { min-width: 660px; grid-template-columns: 1fr 1fr 1fr 1fr; }
-      .match { width: 150px; }
-    }
-    @media (max-width: 900px) {
-      .bracket-grid { min-width: 420px; grid-template-columns: 1fr 1fr; }
-      .match { width: 95vw; max-width: 160px; }
-    }
-    @media (max-width: 600px) {
-      .bracket-grid { min-width: 180px; grid-template-columns: 1fr; }
-      .match { width: 93vw; }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iron Crown Combat - Tournament</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --c-gold: #ffd700; --c-red: #cc0000; --c-dark-bg: #111; --c-card-bg: #1a1a1a; --c-grey-text: #ccc; }
+        body { margin: 0; font-family: 'Oswald', 'Impact', Arial, sans-serif; background-color: #000; color: #f5f5f5; line-height: 1.6; }
+        header { background-color: var(--c-dark-bg); padding: 1em 0 0.7em; border-bottom: 3px solid var(--c-gold); text-align: center; }
+        .logo { color: var(--c-gold); font-size: 2.2em; font-weight: bold; margin: 0; letter-spacing: 1px; font-family: 'Oswald','Impact',Arial,sans-serif;}
+        nav { margin-top: 1em; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.6em; }
+        nav a { background-color: #1c1c1c; border: 1px solid #333; padding: 8px 16px; border-radius: 6px; color: var(--c-red); text-decoration: none; font-size: 1.1em; font-weight: bold; letter-spacing: 1.2px; transition: background-color 0.2s, color 0.2s; }
+        nav a.active, nav a:hover { background-color: var(--c-gold); color: #181a1b; border-color: #e56915;}
+        main { padding: 2em 1em; }
+        .archive-section { text-align: center; margin-bottom: 2em; padding-bottom: 2em; border-bottom: 2px solid #333; }
+        .archive-section label { font-size: 1.2em; color: var(--c-grey-text); margin-right: 1em; }
+        .archive-dropdown { background-color: var(--c-card-bg); color: #fff; border: 1px solid var(--c-gold); padding: 10px; font-size: 1.1em; border-radius: 5px; }
+        .tournament-title { text-align: center; color: var(--c-gold); font-size: 2.5em; margin-bottom: 1.2em; letter-spacing: 2px;}
+        .bracket { display: flex; justify-content: space-between; max-width: 1400px; margin: 0 auto; }
+        .round { width: 22%; display: flex; flex-direction: column; justify-content: space-around; }
+        .round h3 { text-align: center; color: var(--c-grey-text); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1em;}
+        .matchup { position: relative; margin-bottom: 2em; }
+        .match-connector { display: flex; align-items: center; justify-content: flex-end; }
+        .connector-line { width: 100%; height: 2px; background: var(--c-gold); opacity: 0.5; }
+        .connector-path { position: absolute; right: -16%; top: 50%; width: 16%; height: 50%; border: 2px solid var(--c-gold); border-left: none; opacity: 0.5;}
+        .matchup:nth-of-type(odd) .connector-path { border-top-right-radius: 10px; border-bottom: none; }
+        .matchup:nth-of-type(even) .connector-path { border-bottom-right-radius: 10px; border-top: none; top: 0; }
+        .round-final .connector-path { display: none; }
+        .fighter { display: flex; align-items: center; background-color: var(--c-card-bg); padding: 0.5em; border-radius: 6px; margin: 0.5em 0; border: 2px solid #333; transition: border 0.2s, box-shadow 0.2s;}
+        .fighter img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background-color: #23272a; margin-right: 1em; border:2.5px solid #181a1b;}
+        .fighter-name { font-weight: bold; font-size: 1.1em; letter-spacing: 0.8px;}
+        .winner { border-color: var(--c-gold); box-shadow: 0 0 10px var(--c-gold); background: linear-gradient(93deg,#23272a 56%,#ffd70024 120%); }
+        .winner .fighter-name { color: var(--c-gold); }
+        .tbd .fighter-name { color: var(--c-grey-text); font-style: italic; }
+        @media (max-width: 1100px) { .bracket { max-width: 98vw; gap: 0.5em; } }
+        @media (max-width: 900px) {
+            .bracket { flex-direction: column; align-items: center; }
+            .round { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; margin-bottom: 2em;}
+            .round h3 { width: 100%; margin-bottom: 1em; }
+            .matchup { width: 45%; margin: 1em 2.5%; }
+            .match-connector { display: none; }
+        }
+        @media (max-width: 600px) { .matchup { width: 93%; } .tournament-title { font-size: 1.3em; }}
+    </style>
 </head>
 <body>
-  <header>
-    <div class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</div>
-  </header>
-  <main>
+    <header>
+        <h1 class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="fighters.html">Fighters</a>
+            <a href="events.html">Events</a>
+            <a href="rankings.html">Rankings</a>
+            <a href="news.html">News</a>
+            <a href="tournament.html" class="active">Tournament</a>
+            <a href="about.html">About</a>
+            <a href="rules.html">Test Your Metal</a>
+            <a href="guestbook.html">Guestbook</a>
+        </nav>
+    </header>
+    <main>
+        <div class="archive-section">
+            <label for="archive-select">View Past Tournaments:</label>
+            <select id="archive-select" class="archive-dropdown" onchange="if (this.value) window.location.href=this.value;">
+                <option value="">Select an Archive...</option>
+                <!-- Example Archive: -->
+                <!-- <option value="crucible-10-results.html">Crucible 10</option> -->
+                <!-- <option value="crucible-9-results.html">Crucible 9</option> -->
+            </select>
+        </div>
+        <h2 class="tournament-title">Live Crucible Tournament</h2>
+        <div class="bracket" id="bracket-container"></div>
+    </main>
+    <footer class="footer">
+        &copy; 2025 Iron Crown Combat. All rights reserved.
+    </footer>
     <div class="tournament-title">Live Crucible Tournament Bracket</div>
     <div class="bracket-grid">
 
