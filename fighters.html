@@ -6,6 +6,73 @@
   <meta name="referrer" content="no-referrer">
   <title>Iron Crown Combat - Fighters</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .fighter-card {
+      border:2px solid #332;
+      padding:1em;
+      margin:1em;
+      background:#181a1b;
+      border-radius:10px;
+      max-width:240px;
+      text-align:center;
+      color:#ffd700;
+      display:inline-block;
+      vertical-align:top;
+      box-sizing:border-box;
+    }
+    .fighter-photo {
+      width:100px; height:100px;
+      border-radius:50%;
+      object-fit:cover;
+      margin-bottom:8px;
+      border:2px solid #444;
+      background: #222;
+      display:block;
+      margin:8px auto;
+    }
+    .fighter-name {
+      font-size:1.13em;
+      font-weight:bold;
+      color:#fff;
+      margin-bottom:4px;
+    }
+    .fighter-earnings {
+      font-size:1em;
+      color:#ffd700;
+      margin-top:6px;
+      font-weight:600;
+    }
+    .fighter-bio {
+      font-size:0.93em;
+      color:#ccc;
+      margin-top:4px;
+    }
+    .view-bio-btn {
+      background:#ffd700;
+      color:#181a1b;
+      border-radius:5px;
+      border:none;
+      padding:6px 16px;
+      cursor:pointer;
+      margin-top:7px;
+      font-weight:bold;
+      transition:background 0.2s;
+    }
+    .view-bio-btn:hover { background:#e56915; }
+    #modal {
+      position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.7); display: none; justify-content:center; align-items:center; z-index:1001;
+    }
+    #modal-content {
+      background: #181a1b; color: #ffd700; border-radius:12px; padding:2em; min-width: 220px; max-width: 98vw;
+      text-align: center; position: relative;
+    }
+    #close-modal-btn {
+      position: absolute; top: 14px; right: 18px; background:none; border:none; color: #ffd700;
+      font-size: 1.5em; cursor:pointer;
+    }
+    .roster-grid { text-align:center; }
+  </style>
 </head>
 <body>
   <header class="header">
@@ -26,24 +93,81 @@
   </header>
 
   <main>
+    <h2 style="text-align:center;color:#ffd700;">Fighter Roster</h2>
     <div class="roster-grid" id="fighters-container">
       <p style="text-align:center; font-size:1.2em; color:#ffd700;">Loading fighter roster...</p>
     </div>
   </main>
 
-  <div id="modal" style="display:none;">
+  <div id="modal">
     <div id="modal-content"></div>
-  </div>
-
-  <!-- Fullscreen image overlay -->
-  <div id="image-viewer-overlay" onclick="closeImageViewer()">
-    <img id="fullsize-image" src="" alt="Full size fighter photo" />
   </div>
 
   <footer class="footer">
     &copy; 2025 Iron Crown Combat. All rights reserved.
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+    const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+    const TRACKER_URL = `https://opensheet.elk.sh/${SHEET_ID}/Fighter Tracker`;
+
+    fetch(TRACKER_URL)
+      .then(res => res.json())
+      .then(rows => {
+        const container = document.getElementById('fighters-container');
+        container.innerHTML = ""; // Remove loading message
+
+        rows.forEach(row => {
+          const name = row.Fighter || "Unknown";
+          const earnings = row.Earnings || "$0";
+          const image = row.Image ? row.Image : "";
+          const bio = row.Bio || "";
+
+          // Card layout
+          const fighterDiv = document.createElement('div');
+          fighterDiv.className = "fighter-card";
+          fighterDiv.innerHTML = `
+            <img src="${image}" alt="${name}" class="fighter-photo" />
+            <div class="fighter-name">${name}</div>
+            <div class="fighter-earnings">Earnings: <span>${earnings}</span></div>
+            <button class="view-bio-btn" onclick="showModal('${escapeHTML(name)}','${escapeHTML(bio)}','${image}')">View Bio</button>
+          `;
+          container.appendChild(fighterDiv);
+        });
+      });
+
+    // Helper to safely encode text for HTML-in-JS
+    function escapeHTML(txt) {
+      return String(txt).replace(/&/g, '&amp;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+    }
+
+    // Modal logic
+    window.showModal = (name, bio, image) => {
+      const overlay = document.getElementById('modal');
+      const content = document.getElementById('modal-content');
+      content.innerHTML = `
+        <button id="close-modal-btn" onclick="hideModal()">&#x2715;</button>
+        <img src="${image}" alt="${name}" style="width:86px;height:86px;border-radius:60px;object-fit:cover;border:2px solid #444;background:#222;margin-bottom:12px;">
+        <div style="font-weight:bold;font-size:1.2em;color:#ffd700;">${name}</div>
+        <div style="margin:10px 0 7px;color:#ccc;">${bio ? bio : "No biography available."}</div>
+      `;
+      overlay.style.display = "flex";
+    };
+    window.hideModal = () => {
+      document.getElementById('modal').style.display = "none";
+    };
+    // Hide with Escape key
+    document.addEventListener('keydown', function(e){
+      if(e.key==='Escape'){hideModal();}
+    });
+    // Hide when clicking outside modal-content
+    document.getElementById('modal').addEventListener('click', function(e){
+      if(e.target === this){hideModal();}
+    });
+  </script>
 </body>
 </html>
