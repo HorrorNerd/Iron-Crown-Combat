@@ -16,7 +16,7 @@
       display:inline-block; margin:1em; padding:1em; max-width:240px; vertical-align:top;
     }
     .fighter-photo { display:block; margin:0 auto 8px; width:100px; height:100px; object-fit:cover; border-radius:50%; border:2px solid #444; background:#222; }
-    .fighter-name { font-weight:bold; color:#fff; font-size:1.13em; margin-bottom:6px; }
+    .fighter-name { font-weight:bold; color:#fff; font-size:1.13em; margin-bottom:5px; }
     .fighter-earnings { color:#ffd700; font-size:1em; margin-top:3px; font-weight:600;}
     .view-bio-btn { background:#ffd700; color:#181a1b; border-radius:5px; border:none; padding:6px 16px; font-weight:bold; margin-top:7px; cursor:pointer;}
     .view-bio-btn:hover { background:#e56915; }
@@ -90,28 +90,38 @@
               const earnings = row.Earnings || "$0";
               const image = row.Image || "";
               const bio = row.Bio || "";
-              const record = row.Record || "";
-              const stats = row.Stats || "";
-
+              const wins = row.Wins || "0";
+              const losses = row.Losses || "0";
+              const draws = row.Draws || "0";
+              const gender = row.Gender || "";
+              const gym = row.Gym || "";
+              const winpct = row["Win %"] || "";
+              
+              // Card view shows image, name, gym, earnings
               const fighterDiv = document.createElement('div');
               fighterDiv.className = "fighter-card";
               fighterDiv.innerHTML = `
                 <img src="${image}" alt="${name}" class="fighter-photo" />
                 <div class="fighter-name">${name}</div>
+                <div style="color:#e56915;font-size:0.98em;margin-bottom:3px;">${gym ? gym : ""}</div>
                 <div class="fighter-earnings">Earnings: <span>${earnings}</span></div>
                 <button class="view-bio-btn" onclick="showModal(
                   '${escapeHTML(name)}',
                   '${escapeHTML(bio)}',
                   '${image}',
-                  '${escapeHTML(record)}',
-                  '${escapeHTML(stats)}',
+                  '${escapeHTML(wins)}',
+                  '${escapeHTML(losses)}',
+                  '${escapeHTML(draws)}',
+                  '${escapeHTML(gender)}',
+                  '${escapeHTML(gym)}',
+                  '${escapeHTML(winpct)}',
                   '${escapeHTML(earnings)}'
                 )">View Details</button>
               `;
               container.appendChild(fighterDiv);
             });
 
-            window.showModal = (name, bio, image, record, stats, earnings) => {
+            window.showModal = (name, bio, image, wins, losses, draws, gender, gym, winpct, earnings) => {
               const overlay = document.getElementById('modal');
               const content = document.getElementById('modal-content');
               let awardsHtml = '';
@@ -124,9 +134,13 @@
                 <button id="close-modal-btn" onclick="hideModal()">&#x2715;</button>
                 <img src="${image}" alt="${name}" style="width:86px;height:86px;border-radius:60px;object-fit:cover;border:2px solid #444;background:#222;margin-bottom:12px;">
                 <div style="font-weight:bold;font-size:1.2em;color:#ffd700; margin-bottom:7px;">${name}</div>
-                <div class="fighter-modal-details"><span style="color:#ffd700;">Record:</span> ${record}</div>
+                <div class="fighter-modal-details">
+                  <span style="color:#ffd700;">Record:</span> ${wins}W - ${losses}L ${draws>0 ? "- "+draws+"D" : ""}
+                  ${winpct ? `(<span style="color:#ffd700;">${winpct} win&nbsp;%</span>)` : ""}
+                </div>
+                <div class="fighter-modal-details"><span style="color:#ffd700;">Gym:</span> ${gym}</div>
+                <div class="fighter-modal-details"><span style="color:#ffd700;">Gender:</span> ${gender}</div>
                 <div class="fighter-modal-details"><span style="color:#ffd700;">Earnings:</span> ${earnings}</div>
-                <div class="fighter-modal-details"><span style="color:#ffd700;">Stats:</span> ${stats}</div>
                 ${awardsHtml}
                 <div style="margin:10px 0 7px;color:#ccc;">${bio ? bio : "No biography available."}</div>
               `;
