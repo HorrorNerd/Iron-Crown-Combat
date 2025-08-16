@@ -64,6 +64,7 @@
 
     let fighterAwards = {};
 
+    // Fetch Event Results tab for bonuses/awards first
     fetch(EVENT_RESULTS_URL)
       .then(res => res.json())
       .then(resultRows => {
@@ -77,6 +78,7 @@
           }
         });
 
+        // Then load fighters
         fetch(TRACKER_URL)
           .then(res => res.json())
           .then(rows => {
@@ -95,7 +97,6 @@
               const gym = row.Gym || "";
               const winpct = row["Win %"] || "";
 
-              // Use JSON.stringify in onclick for bulletproof argument passing
               const fighterDiv = document.createElement('div');
               fighterDiv.className = "fighter-card";
               fighterDiv.innerHTML = `
@@ -103,20 +104,14 @@
                 <div class="fighter-name">${name}</div>
                 <div style="color:#e56915;font-size:0.98em;margin-bottom:3px;">${gym ? gym : ""}</div>
                 <div class="fighter-earnings">Earnings: <span>${earnings}</span></div>
-                <button class="view-bio-btn" onclick='showModal(
-                  ${JSON.stringify(name)},
-                  ${JSON.stringify(bio)},
-                  ${JSON.stringify(image)},
-                  ${JSON.stringify(wins)},
-                  ${JSON.stringify(losses)},
-                  ${JSON.stringify(draws)},
-                  ${JSON.stringify(gender)},
-                  ${JSON.stringify(gym)},
-                  ${JSON.stringify(winpct)},
-                  ${JSON.stringify(earnings)}
-                )'>View Details</button>
+                <button class="view-bio-btn">View Details</button>
               `;
               container.appendChild(fighterDiv);
+
+              // Attach click handler safely (no inline HTML, so no issues with quotes/special chars)
+              fighterDiv.querySelector('.view-bio-btn').addEventListener('click', function() {
+                showModal(name, bio, image, wins, losses, draws, gender, gym, winpct, earnings);
+              });
             });
 
             window.showModal = (name, bio, image, wins, losses, draws, gender, gym, winpct, earnings) => {
