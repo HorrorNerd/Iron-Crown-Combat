@@ -1,129 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Iron Crown Combat - Tournament</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        :root { --c-gold: #ffd700; --c-red: #cc0000; --c-dark-bg: #111; --c-card-bg: #1a1a1a; --c-grey-text: #ccc; }
-        body { margin: 0; font-family: 'Oswald', 'Impact', Arial, sans-serif; background-color: #000; color: #f5f5f5; line-height: 1.6; }
-        header { background-color: var(--c-dark-bg); padding: 1em 0 0.7em; border-bottom: 3px solid var(--c-gold); text-align: center; }
-        .logo { color: var(--c-gold); font-size: 2.2em; font-weight: bold; margin: 0; letter-spacing: 1px; font-family: 'Oswald','Impact',Arial,sans-serif;}
-        nav { margin-top: 1em; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.6em; }
-        nav a { background-color: #1c1c1c; border: 1px solid #333; padding: 8px 16px; border-radius: 6px; color: var(--c-red); text-decoration: none; font-size: 1.1em; font-weight: bold; letter-spacing: 1.2px; transition: background-color 0.2s, color 0.2s; }
-        nav a.active, nav a:hover { background-color: var(--c-gold); color: #181a1b; border-color: #e56915;}
-        main { padding: 2em 1em; }
-        .archive-section { text-align: center; margin-bottom: 2em; padding-bottom: 2em; border-bottom: 2px solid #333; }
-        .archive-section label { font-size: 1.2em; color: var(--c-grey-text); margin-right: 1em; }
-        .archive-dropdown { background-color: var(--c-card-bg); color: #fff; border: 1px solid var(--c-gold); padding: 10px; font-size: 1.1em; border-radius: 5px; }
-        .tournament-title { text-align: center; color: var(--c-gold); font-size: 2.5em; margin-bottom: 1.2em; letter-spacing: 2px;}
-        .bracket { display: flex; justify-content: space-between; max-width: 1400px; margin: 0 auto; }
-        .round { width: 22%; display: flex; flex-direction: column; justify-content: space-around; }
-        .round h3 { text-align: center; color: var(--c-grey-text); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1em;}
-        .matchup { position: relative; margin-bottom: 2em; }
-        .match-connector { display: flex; align-items: center; justify-content: flex-end; }
-        .connector-line { width: 100%; height: 2px; background: var(--c-gold); opacity: 0.5; }
-        .connector-path { position: absolute; right: -16%; top: 50%; width: 16%; height: 50%; border: 2px solid var(--c-gold); border-left: none; opacity: 0.5;}
-        .matchup:nth-of-type(odd) .connector-path { border-top-right-radius: 10px; border-bottom: none; }
-        .matchup:nth-of-type(even) .connector-path { border-bottom-right-radius: 10px; border-top: none; top: 0; }
-        .round-final .connector-path { display: none; }
-        .fighter { display: flex; align-items: center; background-color: var(--c-card-bg); padding: 0.5em; border-radius: 6px; margin: 0.5em 0; border: 2px solid #333; transition: border 0.2s, box-shadow 0.2s;}
-        .fighter img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background-color: #23272a; margin-right: 1em; border:2.5px solid #181a1b;}
-        .fighter-name { font-weight: bold; font-size: 1.1em; letter-spacing: 0.8px;}
-        .winner { border-color: var(--c-gold); box-shadow: 0 0 10px var(--c-gold); background: linear-gradient(93deg,#23272a 56%,#ffd70024 120%); }
-        .winner .fighter-name { color: var(--c-gold); }
-        .tbd .fighter-name { color: var(--c-grey-text); font-style: italic; }
-        @media (max-width: 1100px) { .bracket { max-width: 98vw; gap: 0.5em; } }
-        @media (max-width: 900px) {
-            .bracket { flex-direction: column; align-items: center; }
-            .round { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; margin-bottom: 2em;}
-            .round h3 { width: 100%; margin-bottom: 1em; }
-            .matchup { width: 45%; margin: 1em 2.5%; }
-            .match-connector { display: none; }
-        }
-        @media (max-width: 600px) { .matchup { width: 93%; } .tournament-title { font-size: 1.3em; }}
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iron Crown Combat - Tournament</title>
+  <style>
+    body { background:#000; color:#ffd700; font-family:'Oswald',Arial,sans-serif; margin:0; }
+    .header { background:#181a1b; border-bottom:3px solid #ffd700; padding:1em 0; text-align:center;}
+    .logo { font-size:2.2em; font-weight:bold; color:#ffd700;}
+    nav { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; }
+    nav ul { list-style:none; margin:0; padding:0; display:flex; }
+    nav li { margin:0 7px; }
+    nav a { color:#e56915; text-decoration:none; padding:8px 16px; border-radius:6px; font-weight:bold; display:block;}
+    nav a.active, nav a:hover { background:#ffd700; color:#181a1b;}
+    #nav-toggle { display:none; background:none; border:none; color:#ffd700; font-size:2.1em; position:absolute; top:25px; right:16px; cursor:pointer; z-index:20; }
+    @media (max-width:760px) {
+      .logo { font-size:1.3em; padding-bottom:0.5em;}
+      nav ul { 
+        flex-direction:column; 
+        position:absolute; top:75px; left:0; width:100vw; 
+        background:#181a1b; 
+        border-top:2px solid #ffd700;
+        display:none;
+      }
+      nav ul.show { display:flex; }
+      nav li { margin:8px 0; }
+      #nav-toggle { display:block; }
+      nav { position:relative; }
+    }
+    .bracket-section { max-width:800px; margin:2em auto; background:#1a1a1a; border-radius:12px; border:2px solid #ffd700; padding:2em 1em; }
+    .bracket-section h2 { text-align:center; color:#ffd700; margin-bottom:1.4em;}
+    .bracket { margin:0 auto; max-width:600px;}
+    .round { margin-bottom:2.5em; }
+    .round h3 { color:#e56915; margin-bottom:1.2em; text-align:left; }
+    .match { background:#222; color:#ffd700; padding:12px 2vw; margin-bottom:10px; border-radius:8px; font-size:1.14em; border-left:5px solid #e56915; box-shadow:0 1px 4px #111;}
+    .footer { margin-top:3em; padding:1em 0; border-top:2px solid #ffd700; text-align:center; background:#181a1b; font-size:0.95em; color:#e56915;}
+  </style>
 </head>
 <body>
-    <header>
-        <h1 class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</h1>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="fighters.html">Fighters</a>
-            <a href="events.html">Events</a>
-            <a href="rankings.html">Rankings</a>
-            <a href="news.html">News</a>
-            <a href="tournament.html" class="active">Tournament</a>
-            <a href="about.html">About</a>
-            <a href="rules.html">Test Your Metal</a>
-            <a href="guestbook.html">Guestbook</a>
-        </nav>
-    </header>
-    <main>
-        <div class="archive-section">
-            <label for="archive-select">View Past Tournaments:</label>
-            <select id="archive-select" class="archive-dropdown" onchange="if (this.value) window.location.href=this.value;">
-                <option value="">Select an Archive...</option>
-                <!-- Example Archive: -->
-                <!-- <option value="crucible-10-results.html">Crucible 10</option> -->
-                <!-- <option value="crucible-9-results.html">Crucible 9</option> -->
-            </select>
+  <header class="header">
+    <div class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</div>
+    <!-- Hamburger menu for mobile -->
+    <button id="nav-toggle" aria-label="Show navigation">&#9776;</button>
+    <nav>
+      <ul id="nav-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="fighters.html">Fighters</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="news.html">News</a></li>
+        <li><a href="tournament.html" class="active">Tournament</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="rules.html">Test Your Metal</a></li>
+        <li><a href="guestbook.html">Guestbook</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="bracket-section">
+      <h2>Live Crucible Tournament Bracket</h2>
+      <div class="bracket">
+        <div class="round">
+          <h3>Quarterfinals</h3>
+          <div class="match">Abigail Jones vs Hotarubi Kendo</div>
+          <div class="match">Dante Marcheli vs Rich Action</div>
+          <div class="match">Sophia Rodriques vs Fernando Riveiro</div>
+          <div class="match">Kumari Twins vs Augg Action</div>
         </div>
-        <h2 class="tournament-title">Live Crucible Tournament</h2>
-        <div class="bracket" id="bracket-container"></div>
-    </main>
-    <footer class="footer">
-        &copy; 2025 Iron Crown Combat. All rights reserved.
-    </footer>
-    <div class="tournament-title">Live Crucible Tournament Bracket</div>
-    <div class="bracket-grid">
-
-      <!-- Round 1 (13 matches = 26 fighters) -->
-      <div class="round-col">
-        <div class="round-header">Round 1</div>
-        <div class="match"><div class="fighter">Abigail Jones</div><div class="fighter">Franco Candellini</div></div>
-        <div class="match"><div class="fighter">Sophia Rodriques</div><div class="fighter">Rocky Brickston</div></div>
-        <div class="match"><div class="fighter">Kumari Twins</div><div class="fighter">Wade Sansom</div></div>
-        <div class="match"><div class="fighter">Reiko Draven</div><div class="fighter">Patricia Mavis Stokes</div></div>
-        <div class="match"><div class="fighter">Malik Carter</div><div class="fighter">Tina Wilder</div></div>
-        <div class="match"><div class="fighter">Kai Lawson</div><div class="fighter">Natsume Tokonuto</div></div>
-        <div class="match"><div class="fighter">Igor</div><div class="fighter">Pao Chaiya</div></div>
-        <div class="match"><div class="fighter">Marcus Graves</div><div class="fighter">Piak Chaiya</div></div>
-        <div class="match"><div class="fighter">Eli Blackfox</div><div class="fighter">S’ri Prai-Chaiya</div></div>
-        <div class="match"><div class="fighter">The Executioner</div><div class="fighter">Fernando Riveiro</div></div>
-        <div class="match"><div class="fighter">Master Bo Qin</div><div class="fighter">Brielle Fontaine</div></div>
-        <div class="match"><div class="fighter">Veronica Kane</div><div class="fighter">Tina Wilder</div></div>
-        <div class="match"><div class="fighter">Rich Action</div><div class="fighter">Gabriel Azrael</div></div>
+        <div class="round">
+          <h3>Semifinals</h3>
+          <div class="match">Winner QF1 vs Winner QF4</div>
+          <div class="match">Winner QF2 vs Winner QF3</div>
+        </div>
+        <div class="round">
+          <h3>Final</h3>
+          <div class="match">Semifinal Winner 1 vs Semifinal Winner 2</div>
+        </div>
       </div>
-
-      <!-- Quarterfinals (labels will be filled as results come in) -->
-      <div class="round-col">
-        <div class="round-header">Quarterfinals</div>
-        <div class="match"><div class="fighter tbd">Winner R1 M1</div><div class="fighter tbd">Winner R1 M2</div></div>
-        <div class="match"><div class="fighter tbd">Winner R1 M3</div><div class="fighter tbd">Winner R1 M4</div></div>
-        <div class="match"><div class="fighter tbd">Winner R1 M5</div><div class="fighter tbd">Winner R1 M6</div></div>
-        <div class="match"><div class="fighter tbd">Winner R1 M7</div><div class="fighter tbd">Winner R1 M8</div></div>
-        <div class="match"><div class="fighter tbd">Winner R1 M9</div><div class="fighter tbd">Winner R1 M10</div></div>
-        <div class="match"><div class="fighter tbd">Winner R1 M11</div><div class="fighter tbd">Winner R1 M12</div></div>
-        <div class="match"><div class="fighter tbd">Winner R1 M13</div><div class="fighter tbd">BYE/Qualifier</div></div>
-      </div>
-
-      <!-- Semifinals -->
-      <div class="round-col">
-        <div class="round-header">Semifinals</div>
-        <div class="match"><div class="fighter tbd">QF Winner 1</div><div class="fighter tbd">QF Winner 2</div></div>
-        <div class="match"><div class="fighter tbd">QF Winner 3</div><div class="fighter tbd">QF Winner 4</div></div>
-      </div>
-
-      <!-- Finals -->
-      <div class="round-col">
-        <div class="round-header">Finals</div>
-        <div class="match"><div class="fighter tbd">SF Winner 1</div><div class="fighter tbd">SF Winner 2</div></div>
-        <div class="match"><div class="fighter tbd">Champion</div></div>
-      </div>
-
-    </div>
+    </section>
   </main>
+  
+  <footer class="footer">&copy; 2025 Iron Crown Combat. All rights reserved.</footer>
+  <script>
+    // Hamburger nav logic
+    document.getElementById('nav-toggle').onclick = function() {
+      var navList = document.getElementById('nav-list');
+      navList.classList.toggle('show');
+    };
+  </script>
 </body>
 </html>
