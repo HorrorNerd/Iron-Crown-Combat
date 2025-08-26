@@ -56,7 +56,26 @@ nav a.active, nav a:hover {
   border: 1.5px solid #ffd700;
   text-shadow: 0 0 4px #ffd70090, 0 0 14px #e5691540;
 }
-
+nav { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; }
+    nav ul { list-style:none; margin:0; padding:0; display:flex; }
+    nav li { margin:0 7px; }
+    nav a { color:#e56915; text-decoration:none; padding:8px 16px; border-radius:6px; font-weight:bold; display:block;}
+    nav a.active, nav a:hover { background:#ffd700; color:#181a1b;}
+    #nav-toggle { display:none; background:none; border:none; color:#ffd700; font-size:2.1em; position:absolute; top:25px; right:16px; cursor:pointer; z-index:20; }
+    @media (max-width:760px) {
+      .logo { font-size:1.3em; padding-bottom:0.5em;}
+      nav ul { 
+        flex-direction:column; 
+        position:absolute; top:75px; left:0; width:100vw; 
+        background:#181a1b; 
+        border-top:2px solid #ffd700;
+        display:none;
+      }
+      nav ul.show { display:flex; }
+      nav li { margin:8px 0; }
+      #nav-toggle { display:block; }
+      nav { position:relative; }
+    }
 /* Roster Grid */
 .roster-grid {
   display: grid;
