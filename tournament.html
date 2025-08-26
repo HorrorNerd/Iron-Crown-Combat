@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat - The Iron Trial Tournament</title>
+  <title>Iron Crown Combat - Tournament</title>
   <style>
     body { background:#000; color:#ffd700; font-family:'Oswald',Arial,sans-serif; margin:0; }
     .header { background:#181a1b; border-bottom:3px solid #ffd700; padding:1em 0; text-align:center;}
@@ -34,13 +34,13 @@
     .round { margin-bottom:2.5em; }
     .round h3 { color:#e56915; margin-bottom:1.2em; text-align:left; }
     .match { background:#222; color:#ffd700; padding:12px 2vw; margin-bottom:10px; border-radius:8px; font-size:1.14em; border-left:5px solid #e56915; box-shadow:0 1px 4px #111;}
+    .winner { background:#2a201a; color:#ffd700; font-weight:bold; border-left:5px solid #ffd700;}
     .footer { margin-top:3em; padding:1em 0; border-top:2px solid #ffd700; text-align:center; background:#181a1b; font-size:0.95em; color:#e56915;}
   </style>
 </head>
 <body>
   <header class="header">
     <div class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</div>
-    <!-- Hamburger menu for mobile -->
     <button id="nav-toggle" aria-label="Show navigation">&#9776;</button>
     <nav>
       <ul id="nav-list">
@@ -63,19 +63,19 @@
       <div class="bracket">
         <div class="round">
           <h3>Quarterfinals</h3>
-          <div class="match">Abigail Jones vs Hotarubi Kendo</div>
-          <div class="match">Dante Marcheli vs Rich Action</div>
+          <div class="match winner">Abigail Jones <span>(Winner)</span> vs Hotarubi Kendo</div>
+          <div class="match winner">Rich Action <span>(Winner)</span> vs Dante Marcheli</div>
           <div class="match">Sophia Rodriques vs Fernando Riveiro</div>
           <div class="match">Kumari Twins vs Augg Action</div>
         </div>
         <div class="round">
           <h3>Semifinals</h3>
-          <div class="match">Winner QF1 vs Winner QF4</div>
-          <div class="match">Winner QF2 vs Winner QF3</div>
+          <div class="match">Abigail Jones vs Winner of Kumari Twins/Augg Action</div>
+          <div class="match">Rich Action vs Winner of Sophia Rodriques/Fernando Riveiro</div>
         </div>
         <div class="round">
           <h3>Final</h3>
-          <div class="match">Semifinal Winner 1 vs Semifinal Winner 2</div>
+          <div class="match">Winner of Abigail’s Semi vs Winner of Rich’s Semi</div>
         </div>
       </div>
     </section>
@@ -83,7 +83,6 @@
   
   <footer class="footer">&copy; 2025 Iron Crown Combat. All rights reserved.</footer>
   <script>
-    // Hamburger nav logic
     document.getElementById('nav-toggle').onclick = function() {
       var navList = document.getElementById('nav-list');
       navList.classList.toggle('show');
@@ -91,3 +90,4 @@
   </script>
 </body>
 </html>
+
