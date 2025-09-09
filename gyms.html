@@ -1,141 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat - Gyms</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Iron Crown Combat - Gym Stats</title>
   <style>
-    body { background: url('image.png') no-repeat center/cover fixed; color: #f1f1f1; margin: 0; min-height: 100vh; font-family: 'Oswald','Impact',Arial,sans-serif; }
-    header { text-align: center; background: rgba(35,39,42,.97); border-bottom: 3px solid #ffd700; padding: 2em 0 1em 0;}
-    .logo { font-size: 2.2rem; color: #ffd700; text-shadow: 0 2px 10px #23272a; margin-bottom: 1em;}
-    nav { display: flex; flex-wrap: wrap; justify-content: center; gap: .7em; margin-bottom: 1.5em;}
-    nav a { text-decoration: none; font-weight: bold; background: #181a1b; color: #ffd700; border: 1.5px solid #e56915; border-radius: 8px; padding: .7em 1.3em; letter-spacing: 2px; transition: background .18s, color .12s;}
-    nav a.active, nav a:hover { background: #ffd700; color: #23272a;}
-    main { max-width: 900px; margin: 3em auto 4em auto; padding: 0 1.5em;}
-    .gyms-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:2em; margin-bottom:3em;}
-    .gym-card { background: rgba(30,32,33,0.92); border-radius:22px; text-align:center; padding:1.5em 1em; cursor:pointer; border-left: 8px solid #e56915; transition: box-shadow .19s;}
-    .gym-card:hover { box-shadow: 0 4px 24px #ffd70032, 0 3px 28px #e5691555 inset;}
-    .gym-logo { width: 120px; height: 120px; object-fit: cover; border-radius: 18px; background: #23272a; margin-bottom: 1em; border: 3px solid #ffd700;}
-    .gym-name { color: #ffd700; font-size:1.2em; font-weight:bold; margin-bottom:.5em; letter-spacing:2px;}
-    .manager-name { color:#e56915; font-size:1.08em; font-weight:bold; margin-bottom:.3em;}
-    .gym-modal { display:none; position:fixed; z-index:20; left:0; top:0; width:100vw; height:100vh; background:rgba(20,20,20,.83); align-items:center; justify-content:center;}
-    .modal-content { background:#23272a; border-radius:22px; box-shadow:0 2px 32px #181a1b99; padding:2em; max-width:500px; width:90vw; position:relative; color:#f1f1f1;}
-    .modal-close { position:absolute; top:1.2em; right:1.5em; background:none; border:none; color:#ffd700; font-size:2em; font-weight:bold; cursor:pointer; z-index:3;}
-    .modal-title { color:#ffd700; font-size:1.23em; font-weight:bold; margin-bottom:.6em; letter-spacing:2px;}
-    .modal-subtitle { color:#e56915; font-size:1.05em; font-weight:bold; margin:.7em 0 .2em 0;}
-    .modal-list { list-style: disc; margin-left:1em; margin-bottom:1em; color: #ffd700;}
-    .manager-img { width:90px; height:90px; border-radius:16px; object-fit:cover; border:3px solid #e56915; margin: 1em 0 .7em 0; background:#181a1b;}
-    .modal-gym-logo { width: 110px; height: 110px; object-fit: cover; border-radius: 16px; border: 3px solid #ffd700; display:block; margin:0 auto 1em auto;}
-    @media (max-width:600px){
-      main{padding:1em;} 
-      .gym-card{padding:1.1em .6em;} 
-      .modal-content{padding:1em; font-size:1em;}
-      .manager-img, .modal-gym-logo{width:64px; height:64px;}
+    body { background: #000; color: #ffd700; font-family: 'Oswald',Arial,sans-serif; margin: 0; }
+    .header { background: #181a1b; border-bottom: 3px solid #ffd700; padding: 1em 0; text-align: center; }
+    .logo { font-size: 2.2em; font-weight: bold; color: #ffd700; }
+    nav { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
+    nav ul { list-style: none; margin: 0; padding: 0; display: flex; }
+    nav li { margin: 0 7px; }
+    nav a { color: #e56915; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; display: block; }
+    nav a.active, nav a:hover { background: #ffd700; color: #181a1b; }
+    #nav-toggle { display: none; background: none; border: none; color: #ffd700; font-size: 2.1em; position: absolute; top: 25px; right: 16px; cursor: pointer; z-index: 20;}
+    @media (max-width:760px) {
+      .logo { font-size: 1.3em; padding-bottom: 0.5em; }
+      nav ul { flex-direction: column; position: absolute; top: 75px; left: 0; width: 100vw; background: #181a1b; border-top: 2px solid #ffd700; display: none;}
+      nav ul.show { display: flex; }
+      nav li { margin: 8px 0; }
+      #nav-toggle { display: block; }
+      nav { position: relative; }
     }
+    .stats-section { max-width: 800px; margin: 2em auto; background: #181a1b; border-radius: 12px; border: 2px solid #ffd700; padding: 2em 1em; }
+    h2 { color: #ffd700; text-align: center; margin-bottom: 1em; }
+    table { width: 100%; border-collapse: collapse; color: #ffd700; }
+    th, td { padding: 8px; border-bottom: 2px solid #e56915; text-align: center; }
+    th { background: #222; }
+    tr:nth-child(odd) { background: #232323; }
+    tr:nth-child(even) { background: #222; }
+    .gym-link { color: #ffd700; text-decoration: underline; cursor:pointer; font-weight:bold;}
+    #modal {display:none; position:fixed; left:0; top:0; z-index:200; width:100vw; height:100vh; background:rgba(0,0,0,0.87); justify-content:center; align-items:center;}
+    #modal-content { background:#181a1b; color:#ffd700; border-radius:14px; padding:2em; min-width:260px; max-width:95vw; text-align:center; position:relative; font-size:1.08em;}
+    #close-modal-btn { position:absolute; top:18px; right:22px; font-size:1.5em; border:none; background:none; color:#ffd700; cursor:pointer; }
+    .fighter-info { margin: 1.2em 0; }
+    .fighter-row { background:#222; border-radius:7px; margin-bottom:10px; padding:7px; color:#ffd700;}
+    .fighter-name-link { color:#e56915; text-decoration:underline; }
   </style>
 </head>
 <body>
-  <header>
-    <h1 class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</h1>
+  <header class="header">
+    <div class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</div>
+    <button id="nav-toggle" aria-label="Show navigation">&#9776;</button>
     <nav>
-      <a href="index.html">Home</a>
-      <a href="fighters.html">Fighters</a>
-      <a href="events.html">Events</a>
-      <a href="rankings.html">Rankings</a>
-      <a href="news.html">News</a>
-      <a href="tournament.html">Tournament</a>
-      <a href="about.html">About</a>
-      <a href="rules.html">Test Your Metal</a>
-      <a href="gyms.html" class="active">Gyms</a>
+      <ul id="nav-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="fighters.html">Fighters</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="rankings.html">Rankings</a></li>
+        <li><a href="news.html">News</a></li>
+        <li><a href="tournament.html">Tournament</a></li>
+        <li><a href="gyms.html" class="active">Gyms & Stats</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="rules.html">Test Your Metal</a></li>
+        <li><a href="guestbook.html">Guestbook</a></li>
+      </ul>
     </nav>
   </header>
+
   <main>
-    <h2 style="color:#ffd700; text-align:center; margin-bottom:2em;">Iron Crown Combat Gyms</h2>
-    <div class="gyms-grid" id="gyms-grid"></div>
-    <div class="gym-modal" id="gym-modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="document.getElementById('gym-modal').style.display='none';">&times;</button>
-        <!-- Modal details injected by JS -->
-      </div>
+    <section class="stats-section">
+      <h2>Gym Total Records & Earnings</h2>
+      <table id="gyms-table">
+        <thead>
+          <tr>
+            <th>Gym</th>
+            <th>Total Record (W–L–D)</th>
+            <th>Total Earnings</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Filled by JS -->
+        </tbody>
+      </table>
+    </section>
+    <div id="modal">
+      <div id="modal-content"></div>
     </div>
   </main>
-  <footer class="footer" style="margin-top:2em; text-align:center;">
-    &copy; 2025 Iron Crown Combat. All rights reserved.
-  </footer>
+  <footer class="footer">&copy; 2025 Iron Crown Combat. All rights reserved.</footer>
   <script>
-    // Use your real tab names!
-    const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-    const managersSheet = "Managers"; // tab with Manager, Gym Name, Manager Url, Gym Url
-    const fightersSheet = "Fighter Tracker";
-    const managersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(managersSheet)}`;
-    const fightersURL = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(fightersSheet)}`;
+    document.getElementById('nav-toggle').onclick = function() {
+      var navList = document.getElementById('nav-list');
+      navList.classList.toggle('show');
+    };
 
-    // Fetch data and map fighters to gyms
-    async function fetchGymsAndFighters() {
-      const [managersRes, fightersRes] = await Promise.all([fetch(managersURL), fetch(fightersURL)]);
-      const managersData = await managersRes.json();
-      const fightersData = await fightersRes.json();
-      // Build gyms list with logos and manager photos
-      const gyms = managersData.map(mgr => ({
-        name: mgr["Gym Name"],
-        manager: mgr["Manager"],
-        logo: mgr["Gym Url"], // gym logo url
-        managerPhoto: mgr["Manager Url"], // manager photo url
-        fighters: []
-      }));
-      const gymMap = Object.fromEntries(gyms.map(g => [g.name, g]));
-      fightersData.forEach(f => {
-        const fighterName = f["Fighter"] && f["Fighter"].trim();
-        const gymName = f["Gym"] && f["Gym"].trim();
-        if (gymName && gymMap[gymName] && fighterName) {
-          gymMap[gymName].fighters.push(fighterName);
-        }
+    const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
+    const TRACKER_URL = `https://opensheet.elk.sh/${SHEET_ID}/Fighter Tracker`;
+
+    // Hold both gym stats and fighter lists
+    let gyms = {}, gymFighters = {};
+
+    fetch(TRACKER_URL)
+      .then(res => res.json())
+      .then(rows => {
+        gyms = {};
+        gymFighters = {};
+
+        rows.forEach(row => {
+          const gym = (row.Gym && row.Gym.trim()) ? row.Gym.trim() : "(No Gym Listed)";
+          if (!gyms[gym]) gyms[gym] = { wins: 0, losses: 0, draws: 0, earnings: 0 };
+          if (!gymFighters[gym]) gymFighters[gym] = [];
+          gyms[gym].wins += Number(row.Wins) || 0;
+          gyms[gym].losses += Number(row.Losses) || 0;
+          gyms[gym].draws += Number(row.Draws) || 0;
+          const earningStr = (row.Earnings || "").replace(/[^0-9.]/g, "");
+          gyms[gym].earnings += Number(earningStr) || 0;
+          gymFighters[gym].push({
+            name: row.Fighter || "Unknown",
+            wins: row.Wins || "0",
+            losses: row.Losses || "0",
+            draws: row.Draws || "0",
+            earnings: row.Earnings || "$0.00",
+            bio: row.Bio || "",
+            image: row.Image || "",
+            url: `fighters.html#${encodeURIComponent(row.Fighter||"")}` // your fighter info page (customize link)
+          });
+        });
+
+        // Output table with clickable gym links
+        const tbody = document.querySelector('#gyms-table tbody');
+        tbody.innerHTML = "";
+        Object.keys(gyms).forEach(gym => {
+          const g = gyms[gym];
+          tbody.innerHTML += `
+            <tr>
+              <td><span class="gym-link" onclick="showGymModal('${encodeURIComponent(gym)}')">${gym}</span></td>
+              <td>${g.wins}-${g.losses}-${g.draws}</td>
+              <td>$${g.earnings.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+            </tr>
+          `;
+        });
       });
-      return gyms;
-    }
 
-    // Display gyms as cards
-    function renderGyms(gyms) {
-      const grid = document.getElementById("gyms-grid");
-      grid.innerHTML = "";
-      gyms.forEach(gym => {
-        if (!gym.name || !gym.manager) return;
-        const card = document.createElement("div");
-        card.className = "gym-card";
-        card.innerHTML = `
-          <img src="${gym.logo}" alt="${gym.name} Logo" class="gym-logo"/>
-          <div class="gym-name">${gym.name}</div>
-          <div class="manager-name">Managed by: ${gym.manager}</div>
-        `;
-        card.addEventListener('click', () => showGymModal(gym));
-        grid.appendChild(card);
-      });
-    }
-
-    // Modal: show details and roster
-    function showGymModal(gym) {
-      const modal = document.getElementById("gym-modal");
-      const content = modal.querySelector(".modal-content");
-      content.innerHTML = `
-        <button class="modal-close" onclick="document.getElementById('gym-modal').style.display='none';">&times;</button>
-        <div class="modal-title">${gym.name}</div>
-        <img src="${gym.logo}" alt="${gym.name} Logo" class="modal-gym-logo"/>
-        <div class="modal-subtitle">Manager</div>
-        <img src="${gym.managerPhoto}" alt="${gym.manager}" class="manager-img"/>
-        <div style="font-weight:bold; margin-bottom:.9em; color:#e56915;">${gym.manager}</div>
-        <div class="modal-subtitle">Fighters</div>
-        <ul class="modal-list">
-          ${gym.fighters.length ? gym.fighters.map(f => `<li>${f}</li>`).join('') : "<li>No fighters listed.</li>"}
-        </ul>
-      `;
-      modal.style.display = "flex";
-    }
-
-    document.getElementById("gym-modal").addEventListener("click", function(e) {
-      if (e.target === this) this.style.display='none';
+    // Modal logic
+    window.showGymModal = function(gymEncoded) {
+      const gym = decodeURIComponent(gymEncoded);
+      const fighters = gymFighters[gym] || [];
+      let fightersHtml = `<h3>${gym} Fighters</h3>`;
+      if (!fighters.length) {
+        fightersHtml += '<div class="fighter-info">No fighters listed for this gym.</div>';
+      } else {
+        fightersHtml += fighters.map(f =>
+          `<div class="fighter-row">
+            <a class="fighter-name-link" href="${f.url}">${f.name}</a> 
+            (${f.wins}-${f.losses}-${f.draws}) 
+            <span style="margin-left:7px;color:#ffd700;">${f.earnings}</span>
+          </div>`
+        ).join("");
+      }
+      fightersHtml += `<button id="close-modal-btn" onclick="hideGymModal()">&#x2715;</button>`;
+      document.getElementById('modal-content').innerHTML = fightersHtml;
+      document.getElementById('modal').style.display = "flex";
+    };
+    window.hideGymModal = function() {
+      document.getElementById('modal').style.display = "none";
+    };
+    document.getElementById('modal').onclick = function(e) {
+      if (e.target === this) hideGymModal();
+    };
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape') hideGymModal();
     });
-    fetchGymsAndFighters().then(renderGyms);
   </script>
 </body>
 </html>
