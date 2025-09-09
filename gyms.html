@@ -88,7 +88,6 @@
     const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
     const TRACKER_URL = `https://opensheet.elk.sh/${SHEET_ID}/Fighter Tracker`;
 
-    // Hold both gym stats and fighter lists
     let gyms = {}, gymFighters = {};
 
     fetch(TRACKER_URL)
@@ -96,9 +95,10 @@
       .then(rows => {
         gyms = {};
         gymFighters = {};
-
         rows.forEach(row => {
-          const gym = (row.Gym && row.Gym.trim()) ? row.Gym.trim() : "(No Gym Listed)";
+          const gym = (row.Gym && row.Gym.trim()) ? row.Gym.trim() : "";
+          // Ignore fighters with no gym listed
+          if(!gym) return;
           if (!gyms[gym]) gyms[gym] = { wins: 0, losses: 0, draws: 0, earnings: 0 };
           if (!gymFighters[gym]) gymFighters[gym] = [];
           gyms[gym].wins += Number(row.Wins) || 0;
@@ -114,11 +114,11 @@
             earnings: row.Earnings || "$0.00",
             bio: row.Bio || "",
             image: row.Image || "",
-            url: `fighters.html#${encodeURIComponent(row.Fighter||"")}` // your fighter info page (customize link)
+            url: `fighters.html#${encodeURIComponent(row.Fighter||"")}`
           });
         });
 
-        // Output table with clickable gym links
+        // Output (no blank gym section shown)
         const tbody = document.querySelector('#gyms-table tbody');
         tbody.innerHTML = "";
         Object.keys(gyms).forEach(gym => {
@@ -133,7 +133,6 @@
         });
       });
 
-    // Modal logic
     window.showGymModal = function(gymEncoded) {
       const gym = decodeURIComponent(gymEncoded);
       const fighters = gymFighters[gym] || [];
