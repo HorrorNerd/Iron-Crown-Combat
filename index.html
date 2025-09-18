@@ -3,37 +3,103 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Iron Crown Combat — %%PAGE_TITLE%%</title>
-  <meta name="description" content="Official site for Iron Crown Combat — SWA’s shoot‑style league: events, rankings, fighters, gyms, rules, and news." />
+  <title>Iron Crown Combat — Home</title>
+
+  <meta name="description" content="Official site for Iron Crown Combat — SWA’s shoot-style league: events, rankings, fighters, gyms, rules, and news." />
   <meta property="og:title" content="Iron Crown Combat" />
   <meta property="og:description" content="Events, rankings, fighters, gyms, rules, and news." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="/assets/image/og-cover.png" />
+  <meta property="og:image" content="assets/img/og-cover.png" />
   <meta name="theme-color" content="#0f1115" />
-  <link rel="icon" href="/assets/image/favicon.png" />
-  <link rel="preload" href="/assets/css/main.css" as="style" />
-  <link rel="stylesheet" href="assets/css/main.css?v=1" />
 
+  <link rel="icon" href="assets/img/favicon.png" />
+  <link rel="preload" href="assets/css/main.css" as="style" />
+  <link rel="stylesheet" href="assets/css/main.css" />
 </head>
 <body>
   <header class="header">
     <div class="container nav" data-nav>
-      <a class="logo" href="/index.html" aria-label="Iron Crown Combat home">
-        <img src="/assets/image/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
+      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
         <span>Iron Crown Combat</span>
       </a>
       <nav class="menu" aria-label="Primary">
-        <a href="/events.html">Events</a>
-        <a href="/rankings.html">Rankings</a>
-        <a href="/fighters.html">Fighters</a>
-        <a href="/gyms.html">Gyms</a>
-        <a href="/news.html">News</a>
-        <a href="/rules.html">Rules</a>
-        <a href="/tournament.html">Tournaments</a>
-        <a href="/about.html">About</a>
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html">Tournaments</a>
+        <a href="about.html">About</a>
       </nav>
       <div class="actions" style="display:flex;gap:.5rem;align-items:center">
         <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
+        <button class="btn burger" data-drawer aria-label="Open menu">☰</button>
+      </div>
+    </div>
+    <div id="drawer" class="drawer" hidden>
+      <div class="container">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html">Tournaments</a>
+        <a href="about.html">About</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="ring"></div>
+      <div class="container">
+        <h1>The Crucible Awaits.</h1>
+        <p>Welcome to Iron Crown Combat — SWA’s shoot-style league. Three rounds. Five minutes. No cages. Glory is earned under the lights.</p>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem">
+          <a class="btn gold" href="events.html">Upcoming Events</a>
+          <a class="btn" href="rankings.html">See Rankings</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="container grid grid-3">
+      <article class="card">
+        <h3>Latest Event</h3>
+        <p class="prose">Catch up on the most recent Crucible: full results, bonuses, and highlights.</p>
+        <a class="btn" href="events.html">View event</a>
+      </article>
+      <article class="card">
+        <h3>Iron Trial</h3>
+        <p class="prose">Track the Iron Trial tournament bracket and past champions.</p>
+        <a class="btn" href="tournament.html">View bracket</a>
+      </article>
+      <article class="card">
+        <h3>News</h3>
+        <p class="prose">Shiv’s vendetta. New signings. Gym rivalries. Get the latest ICC storyline beats.</p>
+        <a class="btn" href="news.html">Read updates</a>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container cols">
+      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
+      <div style="display:flex;gap:.6rem">
+        <a class="chip" href="https://youtube.com/@SwtTNGaming" target="_blank" rel="noopener">YouTube</a>
+        <a class="chip" href="https://www.twitch.tv/" target="_blank" rel="noopener">Twitch</a>
+        <a class="chip" href="https://beacons.ai/tngamingyt" target="_blank" rel="noopener">Links</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js" defer></script>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>
+```
         <button class="btn burger" data-drawer aria-label="Open menu">☰</button>
       </div>
     </div>
