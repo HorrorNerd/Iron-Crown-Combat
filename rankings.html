@@ -1,415 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat - Rankings</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      background: url('image.png') no-repeat center/cover fixed;
-      margin: 0;
-      color: #f1f1f1;
-      min-height: 100vh;
-    }
-    .rankings-body-overlay {
-      background: rgba(10,12,16,0.81);
-      min-height: 100vh;
-      padding-bottom: 3em;
-      position: relative;
-    }
-    header {
-      text-align: center;
-      padding: 2em 0 1em 0;
-    }
-    .logo {
-      font-size: 2rem;
-      font-family: 'Oswald','Impact',Arial,sans-serif;
-      color: #ffd700;
-      text-shadow: 0 2px 10px #181a1b;
-      margin-bottom: 1em;
-    }
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.6em;
-      margin-bottom: 2em;
-    }
-    nav a {
-      background: #23272a;
-      color: #ffd700;
-      font-weight: bold;
-      letter-spacing: 1.4px;
-      text-decoration: none;
-      padding: 0.55em 1.1em;
-      border-radius: 8px;
-      border: 1.4px solid #e56915;
-      transition: background 0.19s;
-    }
-    nav a.active, nav a:hover {
-      background: #ffd700;
-      color: #23272a;
-      border: 1.4px solid #e56915;
-      text-shadow: 0 0 5px #e5691540;
-    }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iron Crown Combat — Home</title>
 
-    /* Champion Card Styling */
-    .champion-section {
-      max-width: 600px;
-      margin: 0 auto 2em;
-      background: linear-gradient(95deg,#23272a 60%,#ffd70022 140%);
-      border-radius: 24px;
-      box-shadow: 0 6px 28px #ffd70033 inset, 0 2px 12px #23272a77;
-      padding: 2em 1.2em 1.8em 1.2em;
-      position: relative;
-      text-align: center;
-      border-left: 10px solid #ffd700;
-    }
-    .champ-crown {
-      font-size: 3.6rem;
-      color: #ffd700;
-      text-shadow: 0 2px 20px #ffd70090, 0 1px 8px #23272a55;
-      vertical-align: middle;
-      margin-bottom: -0.1em;
-      letter-spacing: 0.1em;
-    }
-    .champion-section h2 {
-      color: #ffd700;
-      font-family: 'Oswald','Impact','Arial Narrow',sans-serif;
-      letter-spacing: 2px;
-      font-size: 1.36em;
-      padding-bottom: 0.4em;
-      margin-bottom: 0.3em;
-      border-bottom: 2px solid #e56915;
-      text-shadow: 0 1px 5px #ffd70055;
-    }
-    #champion-name {
-      font-size: 1.36em;
-      color: #e56915;
-      font-weight: bold;
-      margin: 1.1em 0 0.5em;
-      letter-spacing: 2px;
-      text-shadow: 0 1px 8px #181a1b44, 0 0 8px #ffd70044;
-    }
-    .champ-belt-badge {
-      margin-top: -1.1em;
-      margin-bottom: 0.7em;
-      display: block;
-    }
-    .champ-belt-badge .belt-svg {
-      width: 120px;
-      max-width: 120px;
-      margin: 0 auto 0.2em auto;
-      display: block;
-    }
-    .champion-label {
-      color: #ffd700;
-      font-size: 1.02em;
-      font-family: 'Oswald','Impact',Arial,sans-serif;
-      letter-spacing: 1.7px;
-      background: #23272a;
-      border-radius: 20px 12px 20px 12px;
-      padding: 0.12em 1.3em;
-      display: inline-block;
-      font-weight: bold;
-      border: 2px solid #ffd700;
-      box-shadow: 0 2px 7px #ffd70044;
-      text-shadow: 0 2px 8px #23272a99, 0 1px 8px #ffd70066;
-      margin-bottom: 0.3em;
-    }
+  <meta name="description" content="Official site for Iron Crown Combat — SWA’s shoot-style league: events, rankings, fighters, gyms, rules, and news." />
+  <meta property="og:title" content="Iron Crown Combat" />
+  <meta property="og:description" content="Events, rankings, fighters, gyms, rules, and news." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/img/og-cover.png" />
+  <meta name="theme-color" content="#0f1115" />
 
-    /* Rankings Grid Layout */
-    .rankings-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2em;
-      max-width: 980px;
-      margin: 2em auto 3em;
-      padding: 0 1em;
-      align-items: flex-start;
-    }
-    .ranking-list {
-      background: rgba(35,39,42,0.98);
-      border-radius: 19px;
-      border-left: 8px solid #e56915;
-      box-shadow: 0 4px 22px rgba(0,0,0,0.53), 0 0 22px #ffd70022 inset;
-      padding: 1.3em 1em 1.8em 1em;
-      margin-bottom: 1em;
-      min-width: 220px;
-      max-width: 430px;
-      overflow-x: auto;
-    }
-    .ranking-list h2 {
-      color: #ffd700;
-      font-family: 'Oswald','Impact',Arial,sans-serif;
-      letter-spacing: 1.3px;
-      font-size: 1.17em;
-      margin-bottom: 0.7em;
-      padding-bottom: 0.3em;
-      border-bottom: 2px solid #e56915;
-      text-shadow: 0 1px 5px #ffd70066;
-      text-align: center;
-    }
-    .ranking-list ol {
-      padding: 0;
-      margin: 0;
-      list-style: none;
-      counter-reset: ranklist;
-    }
-    .ranking-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: linear-gradient(87deg, #23272a 80%, #ffd70011 125%);
-      border-radius: 11px;
-      padding: 0.68em 1.1em;
-      margin-bottom: 0.53em;
-      border-left: 6px solid #e56915;
-      font-size: 1.06em;
-      box-shadow: 0 2px 8px #23272a22;
-      transition: border-color 0.18s, background 0.16s;
-      counter-increment: ranklist;
-      position: relative;
-    }
-    .ranking-list li a {
-      color: #f1f1f1;
-      text-decoration: none;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      position: relative;
-      z-index: 2;
-      cursor: pointer;
-      transition: color 0.17s;
-    }
-    .ranking-list li:hover, .ranking-list li a:hover {
-      border-left: 6px solid #ffd700;
-      background: linear-gradient(95deg, #ffd70016 70%, #e56915 120%);
-      color: #e56915;
-      box-shadow: 0 2px 12px #ffd70033, 0 2px 18px #e5691509 inset;
-    }
-    .ranking-list li::before {
-      content: counter(ranklist) ".";
-      color: #ffd700;
-      font-weight: bold;
-      font-size: 1.08em;
-      margin-right: 1.2em;
-      left: 0.3em;
-      position: absolute;
-    }
-    .fighter-name {
-      color: #ffd700;
-      font-family: 'Oswald','Impact',Arial,sans-serif;
-      font-weight: bold;
-      font-size: 1.04em;
-      letter-spacing: 0.8px;
-    }
-    .fighter-stat {
-      color: #e56915;
-      font-size: 1.05em;
-      margin-left: 2em;
-      font-family: 'Oswald','Arial',sans-serif;
-      background: #23272a;
-      border-radius: 12px;
-      padding: 0.08em 1em;
-      border: 2px solid #e56915;
-      font-weight: bold;
-      box-shadow: 0 1px 10px #ffd70022;
-      text-shadow: 0 1px 6px #ffd7002a;
-    }
-
-    /* Responsive Adj */
-    @media (max-width:900px) {
-      .champion-section { max-width: 98vw; }
-      .rankings-grid { grid-template-columns: 1fr; gap: 1.5em;}
-      .ranking-list { max-width: 98vw; }
-    }
-    @media (max-width:600px) {
-      .champion-section, .rankings-grid { padding: 0.6em; }
-      .champ-belt-badge .belt-svg { width: 71px; max-width:71px;}
-      .champion-section h2 { font-size: 1em;}
-      .ranking-list h2 { font-size: 1em;}
-      .ranking-list li { font-size: 0.97em; padding: 0.53em 0.7em;}
-      .fighter-stat { font-size: 1em; padding: 0.05em 0.8em;}
-    }
-  </style>
+  <link rel="icon" href="assets/img/favicon.png" />
+  <link rel="preload" href="assets/css/main.css" as="style" />
+  <link rel="stylesheet" href="assets/css/main.css" />
 </head>
 <body>
-  <div class="rankings-body-overlay">
-    <header>
-      <h1 class="logo">Iron Crown Combat</h1>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="fighters.html">Fighters</a>
+  <header class="header">
+    <div class="container nav" data-nav>
+      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
+        <span>Iron Crown Combat</span>
+      </a>
+      <nav class="menu" aria-label="Primary">
         <a href="events.html">Events</a>
-        <a href="rankings.html" class="active">Rankings</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
         <a href="news.html">News</a>
-        <a href="tournament.html">Tournament</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html">Tournaments</a>
         <a href="about.html">About</a>
-        <a href="rules.html">Test Your Metal</a>
       </nav>
-    </header>
-    <main>
-      <div class="champion-section" id="champion-section">
-        <span class="champ-crown">👑</span>
-        <h2>Current Champion</h2>
-        <div id="champion-badge"></div>
-        <p id="champion-name">TBD</p>
+      <div class="actions" style="display:flex;gap:.5rem;align-items:center">
+        <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
+        <button class="btn burger" data-drawer aria-label="Open menu">☰</button>
       </div>
-      <div class="rankings-grid">
-        <div class="ranking-list" id="top-wins-container">
-          <h2>Top Fighters <span style="color:#e56915;font-size:0.9em;">by Wins</span></h2>
-          <p>Loading rankings...</p>
-        </div>
-        <div class="ranking-list" id="top-earners-container">
-          <h2>Top Earners <span style="color:#e56915;font-size:0.9em;">by Prize Money</span></h2>
-          <p>Loading rankings...</p>
-        </div>
+    </div>
+    <div id="drawer" class="drawer" hidden>
+      <div class="container">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html">Tournaments</a>
+        <a href="about.html">About</a>
       </div>
-    </main>
-  </div>
-  <footer class="footer">
-    &copy; 2025 Iron Crown Combat. All rights reserved.
+    </div>
+  </header>
+  <section id="champion-box" class="container" style="margin-bottom:1rem;">
+  <div class="card">Loading champion…</div>
+</section>
+
+<div class="grid grid-2">
+  <section class="card">
+    <h3>Most Money Earned</h3>
+    <table class="table">
+      <thead><tr><th>#</th><th>Fighter</th><th>Gym</th><th>Earnings</th></tr></thead>
+      <tbody id="earnings-body"><tr><td colspan="4">Loading…</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h3>Most Wins</h3>
+    <table class="table">
+      <thead><tr><th>#</th><th>Fighter</th><th>Gym</th><th>Wins</th></tr></thead>
+      <tbody id="wins-body"><tr><td colspan="4">Loading…</td></tr></tbody>
+    </table>
+  </section>
+</div>
+
+  
+<footer class="footer">
+    <div class="container cols">
+      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
+      <div style="display:flex;gap:.6rem">
+        <a class="chip" href="https://youtube.com/@SwtTNGaming" target="_blank" rel="noopener">YouTube</a>
+        <a class="chip" href="https://www.twitch.tv/" target="_blank" rel="noopener">Twitch</a>
+        <a class="chip" href="https://beacons.ai/tngamingyt" target="_blank" rel="noopener">Links</a>
+      </div>
+    </div>
   </footer>
-  <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-  const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-  const fighterSheetName = "Fighter Tracker";
-  const eventSheetName = "Event Results";
-  const fighterURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(fighterSheetName)}`;
-  const eventURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(eventSheetName)}`;
-  const BONUS_VALUE = 5000;
-  const IGNORED_BONUS_TEXT = new Set(['tournament', 'non tournament']);
 
-  function extractFighterName(f) {
-    return f.Fighter || f.Name || f["Fighter Name"] || f["name"] || "";
-  }
-
-  // Returns {wins, totalEarnings}
-  function calculateFighterStats(fighterName, eventData) {
-    const history = eventData.filter(
-      e => e["Fighter A"]?.trim() === fighterName || e["Fighter B"]?.trim() === fighterName
-    );
-    let wins = 0;
-    let totalEarnings = 0;
-    history.forEach(match => {
-      const purse = parseInt(match["Match Rating"]?.replace('%', '')) * 100 || 0;
-      const winner = match.Winner?.trim();
-      const isWinner = winner === fighterName;
-      if (isWinner) wins++;
-      const originalBonusType = (match["Bonus Type"] || match["bonus type"] || "").trim();
-      const cleanBonusType = originalBonusType.toLowerCase();
-      let currentBonus = 0;
-      if (!IGNORED_BONUS_TEXT.has(cleanBonusType) && cleanBonusType) {
-        if (cleanBonusType.includes('fight') || cleanBonusType.includes('match')) {
-          currentBonus = BONUS_VALUE;
-        } else if (cleanBonusType.includes('ko') || cleanBonusType.includes('submission')) {
-          if (isWinner) currentBonus = BONUS_VALUE;
-        }
-      }
-      const earnings = (isWinner || winner === 'Draw') ? (purse + currentBonus) : (purse / 2 + currentBonus);
-      totalEarnings += earnings;
-    });
-    return { wins, totalEarnings };
-  }
-
-  async function loadRankings() {
-    const winsContainer = document.getElementById('top-wins-container');
-    const earnersContainer = document.getElementById('top-earners-container');
-    const championSection = document.getElementById('champion-section');
-    const championName = document.getElementById('champion-name');
-    const championBadge = document.getElementById('champion-badge');
-    try {
-      const [fighterRes, eventRes] = await Promise.all([fetch(fighterURL), fetch(eventURL)]);
-      if (!fighterRes.ok || !eventRes.ok) throw new Error("Failed to fetch spreadsheet data.");
-      const fightersData = await fighterRes.json();
-      const eventData = await eventRes.json();
-
-      // Compute stats for ranking and find the belt holder
-      const rankedFighters = fightersData.map(fighter => {
-        const name = extractFighterName(fighter);
-        if (!name) return null;
-        const stats = calculateFighterStats(name, eventData);
-        return { name, wins: parseInt(fighter.Wins, 10) || stats.wins, totalEarnings: stats.totalEarnings };
-      }).filter(Boolean);
-
-      // Champion logic: Cole Maddox as King of the Crown
-      let champ = rankedFighters.find(f => f.name.toLowerCase() === "cole maddox");
-      if (champ) {
-        championName.textContent = champ.name;
-        championBadge.innerHTML = getChampionshipBadgeHtml();
-      } else {
-        const topWins = [...rankedFighters].sort((a,b) => b.wins - a.wins)[0];
-        championName.textContent = topWins ? topWins.name : "TBD";
-        championBadge.innerHTML = "";
-      }
-
-      // Top 10 fighters lists
-      displayRankings(winsContainer, rankedFighters.slice().sort((a, b) => b.wins - a.wins).slice(0,10), 'wins');
-      displayRankings(earnersContainer, rankedFighters.slice().sort((a, b) => b.totalEarnings - a.totalEarnings).slice(0,10), 'earnings');
-    } catch (error) {
-      winsContainer.innerHTML = `<p style="color: red;">Error loading rankings.</p>`;
-      earnersContainer.innerHTML = `<p style="color: red;">Error loading rankings.</p>`;
-    }
-  }
-
-  // Add rank number inline for perfect spacing on all devices
-  function displayRankings(container, data, type) {
-    const title = container.querySelector('h2').outerHTML;
-    const list = document.createElement('ol');
-    data.forEach((fighter, i) => {
-      const item = document.createElement('li');
-      const stat = type === 'wins' ? `${fighter.wins} Wins` : `$${fighter.totalEarnings.toLocaleString()}`;
-      item.innerHTML = `
-        <span class="rank-number">${i+1}.</span>
-        <a href="fighters.html?fighter=${encodeURIComponent(fighter.name)}">
-          <span class="fighter-name">${fighter.name}</span>
-          <span class="fighter-stat">${stat}</span>
-        </a>`;
-      list.appendChild(item);
-    });
-    container.innerHTML = title;
-    container.appendChild(list);
-  }
-
-  // Belt badge SVG
-  function getChampionshipBadgeHtml() {
-    return `
-      <div class="champ-belt-badge" title="King Of The Crown">
-        <svg viewBox="0 0 360 120" class="belt-svg" aria-label="Championship Belt">
-          <rect x="10" y="48" width="75" height="24" rx="12" fill="#23272a" stroke="#b8b8b8" stroke-width="3"/>
-          <rect x="275" y="48" width="75" height="24" rx="12" fill="#23272a" stroke="#b8b8b8" stroke-width="3"/>
-          <ellipse cx="180" cy="60" rx="85" ry="44" fill="url(#plateGrad)" stroke="#ffd700" stroke-width="5"/>
-          <g>
-            <ellipse cx="180" cy="60" rx="38" ry="16" fill="#565e64" stroke="#b8b8b8" stroke-width="2"/>
-            <polygon points="152,60 158,32 166,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
-            <polygon points="166,58 176,22 180,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
-            <polygon points="180,58 184,22 194,58" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
-            <polygon points="194,58 202,32 208,60" fill="#a3a8ab" stroke="#181a1b" stroke-width="2"/>
-            <ellipse cx="180" cy="56" rx="33" ry="7" fill="#7e848b" opacity="0.9"/>
-          </g>
-          <text x="180" y="97" font-size="18" text-anchor="middle" fill="#ffd700" font-family="'Oswald','Impact',Arial,sans-serif" letter-spacing="2" font-weight="bold">KING OF THE CROWN</text>
-          <defs>
-            <linearGradient id="plateGrad" x1="95" y1="16" x2="265" y2="104" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#ffc600"/>
-              <stop offset="0.35" stop-color="#ffe38b"/>
-              <stop offset="0.45" stop-color="#ffd700"/>
-              <stop offset="0.85" stop-color="#ae8800"/>
-              <stop offset="1" stop-color="#ffc600"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <span class="champion-label">Cole Maddox</span>
-      </div>
-    `;
-  }
-
-  loadRankings();
-});
-      
-  </script>
+  <script src="assets/js/main.js" defer></script>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 </body>
 </html>
