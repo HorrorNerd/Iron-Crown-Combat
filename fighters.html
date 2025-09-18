@@ -1,155 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat - Fighters</title>
-  <style>
-    body { background:#000; color:#ffd700; font-family:'Oswald',Arial,sans-serif; margin:0; }
-    .header { background:#181a1b; border-bottom:3px solid #ffd700; padding:1em 0; text-align:center;}
-    .logo { font-size:2.2em; font-weight:bold; color:#ffd700;}
-    nav a { color:#e56915; text-decoration:none; margin:0 7px; padding:8px 16px; border-radius:6px; font-weight:bold;}
-    nav a.active, nav a:hover { background:#ffd700; color:#181a1b;}
-    .roster-grid { text-align:center; margin:2em auto; }
-    .fighter-card { 
-      background:#181a1b; color:#ffd700; border-radius:10px; border:2px solid #332;
-      display:inline-block; margin:1em; padding:1em; max-width:240px; vertical-align:top;
-    }
-    .fighter-photo { display:block; margin:0 auto 8px; width:100px; height:100px; object-fit:cover; border-radius:50%; border:2px solid #444; background:#222; }
-    .fighter-name { font-weight:bold; color:#fff; font-size:1.13em; margin-bottom:5px; }
-    .fighter-earnings { color:#ffd700; font-size:1em; margin-top:3px; font-weight:600;}
-    .view-bio-btn { background:#ffd700; color:#181a1b; border-radius:5px; border:none; padding:6px 16px; font-weight:bold; margin-top:7px; cursor:pointer;}
-    .view-bio-btn:hover { background:#e56915; }
-    #modal {display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.83); justify-content:center; align-items:center; z-index:10;}
-    #modal-content { background:#181a1b; color:#ffd700; border-radius:14px; padding:2em; min-width:260px; max-width:99vw; text-align:center; position:relative;}
-    #close-modal-btn { position:absolute; top:16px; right:20px; font-size:1.5em; border:none; background:none; color:#ffd700; cursor:pointer;}
-    .fighter-modal-details { color:#eee; font-size:1em; margin:10px 0 1px;}
-    .awards-list { background: #222; color: #ffd700; margin:7px auto 10px; padding:8px; border-radius:6px; max-width:90%; font-size:0.97em; text-align:left; display:inline-block;}
-    .footer { margin-top:3em; padding:1em 0; border-top:2px solid #ffd700; text-align:center; background:#181a1b; font-size:0.95em; color:#e56915;}
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iron Crown Combat — Home</title>
+
+  <meta name="description" content="Official site for Iron Crown Combat — SWA’s shoot-style league: events, rankings, fighters, gyms, rules, and news." />
+  <meta property="og:title" content="Iron Crown Combat" />
+  <meta property="og:description" content="Events, rankings, fighters, gyms, rules, and news." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/img/og-cover.png" />
+  <meta name="theme-color" content="#0f1115" />
+
+  <link rel="icon" href="assets/img/favicon.png" />
+  <link rel="preload" href="assets/css/main.css" as="style" />
+  <link rel="stylesheet" href="assets/css/main.css" />
 </head>
 <body>
   <header class="header">
-    <div class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="fighters.html" class="active">Fighters</a>
-      <a href="events.html">Events</a>
-      <a href="rankings.html">Rankings</a>
-      <a href="news.html">News</a>
-      <a href="tournament.html">Tournament</a>
-      <a href="about.html">About</a>
-      <a href="rules.html">Test Your Metal</a>
-      <a href="guestbook.html">Guestbook</a>
-    </nav>
-  </header>
-
-  <main>
-    <h2 style="text-align:center;color:#ffd700;">Fighter Roster</h2>
-    <div class="roster-grid" id="fighters-container">
-      <p style="text-align:center; font-size:1.2em; color:#ffd700;">Loading fighter roster...</p>
+    <div class="container nav" data-nav>
+      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
+        <span>Iron Crown Combat</span>
+      </a>
+      <nav class="menu" aria-label="Primary">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html">Tournaments</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="actions" style="display:flex;gap:.5rem;align-items:center">
+        <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
+        <button class="btn burger" data-drawer aria-label="Open menu">☰</button>
+      </div>
     </div>
-  </main>
+    <div id="drawer" class="drawer" hidden>
+      <div class="container">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html">Tournaments</a>
+        <a href="about.html">About</a>
+      </div>
+    </div>
+  </header>
+  <div class="grid grid-3" id="fighters-grid">
+  <div class="card">Loading fighters…</div>
+</div>
 
-  <div id="modal">
-    <div id="modal-content"></div>
-  </div>
+  
+<footer class="footer">
+    <div class="container cols">
+      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
+      <div style="display:flex;gap:.6rem">
+        <a class="chip" href="https://youtube.com/@SwtTNGaming" target="_blank" rel="noopener">YouTube</a>
+        <a class="chip" href="https://www.twitch.tv/" target="_blank" rel="noopener">Twitch</a>
+        <a class="chip" href="https://beacons.ai/tngamingyt" target="_blank" rel="noopener">Links</a>
+      </div>
+    </div>
+  </footer>
 
-  <footer class="footer">&copy; 2025 Iron Crown Combat. All rights reserved.</footer>
-
-  <script>
-    const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-    const TRACKER_URL = `https://opensheet.elk.sh/${SHEET_ID}/Fighter Tracker`;
-    const EVENT_RESULTS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Event Results`;
-
-    let fighterAwards = {};
-
-    // Fetch Event Results tab for bonuses/awards first
-    fetch(EVENT_RESULTS_URL)
-      .then(res => res.json())
-      .then(resultRows => {
-        fighterAwards = {};
-        resultRows.forEach(row => {
-          const fName = row["Fighter"]?.trim();
-          const bonusType = row["Bonus Type"]?.trim();
-          if (fName && bonusType) {
-            if (!fighterAwards[fName]) fighterAwards[fName] = [];
-            fighterAwards[fName].push(bonusType);
-          }
-        });
-
-        // Then load fighters
-        fetch(TRACKER_URL)
-          .then(res => res.json())
-          .then(rows => {
-            const container = document.getElementById('fighters-container');
-            container.innerHTML = "";
-
-            rows.forEach(row => {
-              const name = row.Fighter || "Unknown";
-              const earnings = row.Earnings || "$0";
-              const image = row.Image || "";
-              const bio = row.Bio || "";
-              const wins = row.Wins || "0";
-              const losses = row.Losses || "0";
-              const draws = row.Draws || "0";
-              const gender = row.Gender || "";
-              const gym = row.Gym || "";
-              const winpct = row["Win %"] || "";
-
-              const fighterDiv = document.createElement('div');
-              fighterDiv.className = "fighter-card";
-              fighterDiv.innerHTML = `
-                <img src="${image}" alt="${name}" class="fighter-photo" />
-                <div class="fighter-name">${name}</div>
-                <div style="color:#e56915;font-size:0.98em;margin-bottom:3px;">${gym ? gym : ""}</div>
-                <div class="fighter-earnings">Earnings: <span>${earnings}</span></div>
-                <button class="view-bio-btn">View Details</button>
-              `;
-              container.appendChild(fighterDiv);
-
-              // Attach click handler safely (no inline HTML, so no issues with quotes/special chars)
-              fighterDiv.querySelector('.view-bio-btn').addEventListener('click', function() {
-                showModal(name, bio, image, wins, losses, draws, gender, gym, winpct, earnings);
-              });
-            });
-
-            window.showModal = (name, bio, image, wins, losses, draws, gender, gym, winpct, earnings) => {
-              const overlay = document.getElementById('modal');
-              const content = document.getElementById('modal-content');
-              let awardsHtml = '';
-              const awards = fighterAwards[name] || [];
-              if (awards.length) {
-                awardsHtml = `<div style="font-weight:bold;margin-bottom:5px;">Awards / Bonuses:</div>
-                  <div class="awards-list">${awards.map(a => `<div>• ${a}</div>`).join('')}</div>`;
-              }
-              content.innerHTML = `
-                <button id="close-modal-btn" onclick="hideModal()">&#x2715;</button>
-                <img src="${image}" alt="${name}" style="width:86px;height:86px;border-radius:60px;object-fit:cover;border:2px solid #444;background:#222;margin-bottom:12px;">
-                <div style="font-weight:bold;font-size:1.2em;color:#ffd700; margin-bottom:7px;">${name}</div>
-                <div class="fighter-modal-details">
-                  <span style="color:#ffd700;">Record:</span> ${wins}W - ${losses}L${draws>0 ? " - "+draws+"D" : ""}
-                  ${winpct ? `(<span style="color:#ffd700;">${winpct} win&nbsp;%</span>)` : ""}
-                </div>
-                <div class="fighter-modal-details"><span style="color:#ffd700;">Gym:</span> ${gym}</div>
-                <div class="fighter-modal-details"><span style="color:#ffd700;">Gender:</span> ${gender}</div>
-                <div class="fighter-modal-details"><span style="color:#ffd700;">Earnings:</span> ${earnings}</div>
-                ${awardsHtml}
-                <div style="margin:10px 0 7px;color:#ccc;">${bio ? bio : "No biography available."}</div>
-              `;
-              overlay.style.display = "flex";
-            };
-            window.hideModal = () => {
-              document.getElementById('modal').style.display = "none";
-            };
-            document.addEventListener('keydown', function(e){
-              if(e.key==='Escape'){hideModal();}
-            });
-            document.getElementById('modal').addEventListener('click', function(e){
-              if(e.target === this){hideModal();}
-            });
-          });
-      });
-  </script>
+  <script src="assets/js/main.js" defer></script>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 </body>
 </html>
