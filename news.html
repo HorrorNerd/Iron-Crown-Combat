@@ -52,9 +52,29 @@
     </div>
   </header>
   
+  <main class="container">
+  <div class="pagehead"><h1>News</h1></div>
+
+  <!-- List populated from Google Sheets (News tab) -->
   <section class="grid grid-2" id="news-list">
-  <div class="card">Loading news…</div>
-</section>
+    <div class="card">Loading news…</div>
+  </section>
+
+  <!-- Accessible modal -->
+  <div class="modal-backdrop" id="news-modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="news-modal-title">
+      <header>
+        <h3 id="news-modal-title">Title</h3>
+        <button class="btn" data-modal-close aria-label="Close">✕</button>
+      </header>
+      <div class="content">
+        <div id="news-modal-date" class="meta"></div>
+        <div id="news-modal-body" class="prose"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
 
 <footer class="footer">
     <div class="container cols">
