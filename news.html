@@ -1,261 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Iron Crown Combat - News</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            background: url('image.png') no-repeat center/cover fixed;
-            color: #f1f1f1;
-            margin: 0;
-            min-height: 100vh;
-        }
-        .header {
-            background: rgba(35,39,42,0.98);
-            border-bottom: 3px solid #b7850b;
-            box-shadow: 0 2px 16px #11191f99;
-            padding: 1.2em 0 0.7em;
-            text-align: center;
-        }
-        .logo {
-            font-size: 2.2rem;
-            font-family: 'Oswald','Impact','Arial Narrow',sans-serif;
-            color: #ffd700;
-            text-shadow: 0 2px 10px #141414;
-            margin-bottom: 0.5em;
-        }
-        nav {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.6em;
-            margin: 0.2em 0 0;
-        }
-        nav a {
-            background: #181a1b;
-            color: #b8b8b8;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-decoration: none;
-            padding: 0.6em 1.2em;
-            border-radius: 6px;
-            border: 1.5px solid #b8b8b8;
-            box-shadow: 0 1px 4px #23272a30;
-            margin: 0.15em 0;
-            transition: all 0.2s;
-        }
-        nav a.active, nav a:hover {
-            background: #e56915;
-            color: #181a1b;
-            border: 1.5px solid #ffd700;
-        }
-        #news-container {
-            max-width: 700px;
-            margin: 3em auto 3em auto;
-            padding: 0 1em 4em 1em;
-        }
-        .card {
-            background: rgba(24,26,27,0.97);
-            border-radius: 18px;
-            box-shadow: 0 4px 26px #181a1b64, 0 0 22px #ffd70022 inset;
-            margin-bottom: 2em;
-            padding: 1.7em 1.3em 1.3em 1.3em;
-        }
-        .news-header.card {
-            display: flex;
-            align-items: center;
-            gap: 1.4em;
-            background: linear-gradient(90deg, #181a1b 85%, #ffd70019 100%);
-            box-shadow: 0 4px 24px #ffd70045 inset;
-        }
-        .announcer-img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 15px;
-            border: 5px solid #e56915;
-            box-shadow: 0 2px 10px #23272a44;
-            background: #23272a;
-        }
-        .header-text h2 {
-            color: #ffd700;
-            text-shadow: 0 1px 8px #23272a80, 0 0 8px #ffd70033;
-            font-family: 'Oswald','Impact',Arial,sans-serif;
-            font-size: 1.4em;
-            margin-bottom: 0.25em;
-            letter-spacing: 2px;
-        }
-        .header-text p {
-            color: #e56915;
-            margin: 0;
-            font-style: italic;
-            font-weight: bold;
-            font-size: 1.07em;
-        }
-        .loading-text {
-            text-align: center;
-            font-size: 1.15em;
-            letter-spacing: 1px;
-            color: #ffd700;
-            margin-top: 3em;
-        }
-        .news-article.card {
-            border-left: 8px solid #e56915;
-            margin-bottom: 2.3em;
-        }
-        .news-article h3 {
-            color: #ffd700;
-            font-family: 'Oswald', 'Impact', Arial, sans-serif;
-            font-size: 1.23em;
-            margin-bottom: 0.5em;
-            letter-spacing: 1.4px;
-        }
-        .news-article .date {
-            color: #b8b8b8;
-            font-size: 0.96em;
-            margin-bottom: 0.6em;
-            letter-spacing: 0.8px;
-        }
-        .news-article .content {
-            font-size: 1.07em;
-            line-height: 1.7;
-            color: #f1f1f1;
-        }
-        .news-article strong {
-            color: #e56915;
-        }
-        .news-article em {
-            color: #ffd700;
-            font-style: italic;
-        }
-        .news-article ul {
-            background: none;
-            margin-left: 1.1em;
-            margin-bottom: 0.7em;
-            padding-left: 1em;
-            list-style: disc;
-        }
-        .news-article li {
-            margin-bottom: 0.35em;
-            color: #ffd700;
-            font-size: 1em;
-        }
-        @media (max-width: 700px) {
-            #news-container { max-width: 98vw; }
-            .news-header.card { gap: 0.7em; }
-            .announcer-img { width: 70px; height: 70px; }
-        }
-        @media (max-width:480px) {
-            .header-text h2 { font-size: 1.09em; }
-            .news-article h3 { font-size: 1.07em; }
-            .news-header.card { flex-direction: column; align-items: flex-start; padding: 1em 0.7em;}
-            .announcer-img { width: 54px; height: 54px; border-width: 3px; }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iron Crown Combat — Home</title>
+
+  <meta name="description" content="Official site for Iron Crown Combat — SWA’s shoot-style league: events, rankings, fighters, gyms, rules, and news." />
+  <meta property="og:title" content="Iron Crown Combat" />
+  <meta property="og:description" content="Events, rankings, fighters, gyms, rules, and news." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/img/og-cover.png" />
+  <meta name="theme-color" content="#0f1115" />
+
+  <link rel="icon" href="assets/img/favicon.png" />
+  <link rel="preload" href="assets/css/main.css" as="style" />
+  <link rel="stylesheet" href="assets/css/main.css" />
 </head>
 <body>
-    <header class="header">
-        <h1 class="logo">
-            <span class="iron">IRON </span><span class="crown">CROWN</span> <span class="combat">COMBAT</span>
-        </h1>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="fighters.html">Fighters</a>
-            <a href="events.html">Events</a>
-            <a href="rankings.html">Rankings</a>
-            <a href="news.html" class="active">News</a>
-            <a href="tournament.html">Tournament</a>
-            <a href="about.html">About</a>
-            <a href="rules.html">Test Your Metal</a>
-        </nav>
-    </header>
-    <main id="news-container">
-        <div class="news-header card">
-            <img src="https://i.postimg.cc/PqLSBxSm/Announcer-Jaimey.png" alt="Jaimey Jameson" class="announcer-img">
-            <div class="header-text">
-                <h2 class="metal-title">From The Foundry</h2>
-                <p>with Jaimey Jameson</p>
-            </div>
-        </div>
-        <p class="loading-text">Loading latest news...</p>
-    </main>
-    <footer class="footer">
-        &copy; 2025 Iron Crown Combat. All rights reserved.
-    </footer>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sheetID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-            const newsSheetName = "News";
-            const newsURL = `https://opensheet.vercel.app/${sheetID}/${encodeURIComponent(newsSheetName)}`;
+  <header class="header">
+    <div class="container nav" data-nav>
+      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
+        <span>Iron Crown Combat</span>
+      </a>
+      <nav class="menu" aria-label="Primary">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html">Tournaments</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="actions" style="display:flex;gap:.5rem;align-items:center">
+        <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
+        <button class="btn burger" data-drawer aria-label="Open menu">☰</button>
+      </div>
+    </div>
+    <div id="drawer" class="drawer" hidden>
+      <div class="container">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html">Tournaments</a>
+        <a href="about.html">About</a>
+      </div>
+    </div>
+  </header>
+  
+  <section class="grid grid-2" id="news-list">
+  <div class="card">Loading news…</div>
+</section>
 
-            // --- Improved Markdown to HTML Converter ---
-            function parseMarkdown(text) {
-                if (!text) return "";
-                // Bulleted lists: - item
-                text = text.replace(/(^|[\n\r])\s*-\s(.*)/g, '$1<li>$2</li>');
-                // Bold: *text*
-                text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-                // Italic: _text_
-                text = text.replace(/_(.*?)_/g, '<em>$1</em>');
-                // Paragraphs: two newlines
-                text = text.replace(/\n\s*\n/g, '</p><p>');
-                // Wrap bullet points in <ul> (easy version)
-                text = text.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>');
-                return text;
-            }
+<footer class="footer">
+    <div class="container cols">
+      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
+      <div style="display:flex;gap:.6rem">
+        <a class="chip" href="https://youtube.com/@SwtTNGaming" target="_blank" rel="noopener">YouTube</a>
+        <a class="chip" href="https://www.twitch.tv/" target="_blank" rel="noopener">Twitch</a>
+        <a class="chip" href="https://beacons.ai/tngamingyt" target="_blank" rel="noopener">Links</a>
+      </div>
+    </div>
+  </footer>
 
-            async function loadNews() {
-                const container = document.getElementById('news-container');
-                try {
-                    const res = await fetch(newsURL);
-                    if (!res.ok) throw new Error("Failed to fetch news data.");
-
-                    const articles = await res.json();
-                    // Sort newest date first
-                    articles.sort((a, b) => new Date(b.Date) - new Date(a.Date));
-
-                    // Retain the news header
-                    const header = document.querySelector('.news-header');
-                    container.innerHTML = '';
-                    if (header) container.appendChild(header);
-
-                    if (!articles.length) {
-                        container.innerHTML += `<p style="color: #ffd700; text-align:center;">No news articles found.</p>`;
-                        return;
-                    }
-
-                    articles.forEach(article => {
-                        const title = article.Title;
-                        const content = article.Article;
-                        const date = article.Date;
-
-                        if (!title || !content) return;
-
-                        const articleDiv = document.createElement('div');
-                        articleDiv.className = 'news-article card';
-
-                        const formattedDate = new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                        const htmlContent = parseMarkdown(content);
-
-                        articleDiv.innerHTML = `
-                            <h3>${title}</h3>
-                            <p class="date">${formattedDate}</p>
-                            <div class="content"><p>${htmlContent}</p></div>
-                        `;
-                        container.appendChild(articleDiv);
-                    });
-                } catch (error) {
-                    const header = document.querySelector('.news-header');
-                    container.innerHTML = '';
-                    if (header) container.appendChild(header);
-                    container.innerHTML += `<p style="color: #e56915; text-align:center;">Error: Could not load news. Please check the 'News' sheet and ensure it is shared publicly.</p>`;
-                    console.error("News Loading Error:", error);
-                }
-            }
-            loadNews();
-        });
-    </script>
+  <script src="assets/js/main.js" defer></script>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 </body>
 </html>
