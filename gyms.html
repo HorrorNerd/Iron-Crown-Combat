@@ -1,166 +1,114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat - Gym Stats</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iron Crown Combat — Gyms</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
   <style>
-    body { background: #000; color: #ffd700; font-family: 'Oswald',Arial,sans-serif; margin: 0; }
-    .header { background: #181a1b; border-bottom: 3px solid #ffd700; padding: 1em 0; text-align: center; }
-    .logo { font-size: 2.2em; font-weight: bold; color: #ffd700; }
-    nav { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
-    nav ul { list-style: none; margin: 0; padding: 0; display: flex; }
-    nav li { margin: 0 7px; }
-    nav a { color: #e56915; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; display: block; }
-    nav a.active, nav a:hover { background: #ffd700; color: #181a1b; }
-    #nav-toggle { display: none; background: none; border: none; color: #ffd700; font-size: 2.1em; position: absolute; top: 25px; right: 16px; cursor: pointer; z-index: 20;}
-    @media (max-width:760px) {
-      .logo { font-size: 1.3em; padding-bottom: 0.5em; }
-      nav ul { flex-direction: column; position: absolute; top: 75px; left: 0; width: 100vw; background: #181a1b; border-top: 2px solid #ffd700; display: none;}
-      nav ul.show { display: flex; }
-      nav li { margin: 8px 0; }
-      #nav-toggle { display: block; }
-      nav { position: relative; }
-    }
-    .stats-section { max-width: 800px; margin: 2em auto; background: #181a1b; border-radius: 12px; border: 2px solid #ffd700; padding: 2em 1em; }
-    h2 { color: #ffd700; text-align: center; margin-bottom: 1em; }
-    table { width: 100%; border-collapse: collapse; color: #ffd700; }
-    th, td { padding: 8px; border-bottom: 2px solid #e56915; text-align: center; }
-    th { background: #222; }
-    tr:nth-child(odd) { background: #232323; }
-    tr:nth-child(even) { background: #222; }
-    .gym-link { color: #ffd700; text-decoration: underline; cursor:pointer; font-weight:bold;}
-    #modal {display:none; position:fixed; left:0; top:0; z-index:200; width:100vw; height:100vh; background:rgba(0,0,0,0.87); justify-content:center; align-items:center;}
-    #modal-content { background:#181a1b; color:#ffd700; border-radius:14px; padding:2em; min-width:260px; max-width:95vw; text-align:center; position:relative; font-size:1.08em;}
-    #close-modal-btn { position:absolute; top:18px; right:22px; font-size:1.5em; border:none; background:none; color:#ffd700; cursor:pointer; }
-    .fighter-info { margin: 1.2em 0; }
-    .fighter-row { background:#222; border-radius:7px; margin-bottom:10px; padding:7px; color:#ffd700;}
-    .fighter-name-link { color:#e56915; text-decoration:underline; }
+    .gym-header { display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+    .gym-header:hover { color: var(--icc-gold); }
+    .roster { margin-top:.6rem; }
   </style>
 </head>
 <body>
   <header class="header">
-    <div class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</div>
-    <button id="nav-toggle" aria-label="Show navigation">&#9776;</button>
-    <nav>
-      <ul id="nav-list">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="fighters.html">Fighters</a></li>
-        <li><a href="events.html">Events</a></li>
-        <li><a href="rankings.html">Rankings</a></li>
-        <li><a href="news.html">News</a></li>
-        <li><a href="tournament.html">Tournament</a></li>
-        <li><a href="gyms.html" class="active">Gyms & Stats</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="rules.html">Test Your Metal</a></li>
-        <li><a href="guestbook.html">Guestbook</a></li>
-      </ul>
-    </nav>
+    <div class="container nav" data-nav>
+      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
+        <span>Iron Crown Combat</span>
+      </a>
+      <nav class="menu" aria-label="Primary">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html" aria-current="page">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html">Tournaments</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="actions" style="display:flex;gap:.5rem;align-items:center">
+        <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <section class="stats-section">
-      <h2>Gym Total Records & Earnings</h2>
-      <table id="gyms-table">
-        <thead>
-          <tr>
-            <th>Gym</th>
-            <th>Total Record (W–L–D)</th>
-            <th>Total Earnings</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Filled by JS -->
-        </tbody>
-      </table>
+  <main class="container">
+    <div class="pagehead"><h1>Gyms</h1></div>
+
+    <section class="grid grid-2" id="gyms-grid">
+      <div class="card">Loading gyms…</div>
     </section>
-    <div id="modal">
-      <div id="modal-content"></div>
-    </div>
   </main>
-  <footer class="footer">&copy; 2025 Iron Crown Combat. All rights reserved.</footer>
+
+  <footer class="footer">
+    <div class="container cols">
+      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
+    </div>
+  </footer>
+
   <script>
-    document.getElementById('nav-toggle').onclick = function() {
-      var navList = document.getElementById('nav-list');
-      navList.classList.toggle('show');
-    };
+    // year + theme toggle
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    (function(){ const root=document.documentElement; const saved=localStorage.getItem('icc:theme'); if(saved==='light') root.classList.add('light');
+      document.addEventListener('click',e=>{ const t=e.target.closest('[data-theme-toggle]'); if(!t) return;
+        root.classList.toggle('light'); localStorage.setItem('icc:theme', root.classList.contains('light')?'light':'dark'); }); })();
 
-    const SHEET_ID = "1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU";
-    const TRACKER_URL = `https://opensheet.elk.sh/${SHEET_ID}/Fighter Tracker`;
+    (function(){
+      const SHEET_ID='1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
+      const GID='1277877160';
+      const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
-    let gyms = {}, gymFighters = {};
+      const grid = document.getElementById('gyms-grid');
+      function parseGViz(text){
+        const start=text.indexOf('{'), end=text.lastIndexOf('}'); const json=JSON.parse(text.slice(start,end+1));
+        const cols=json.table.cols.map(c=>c.label||c.id);
+        return (json.table.rows||[]).map(r=>{ const o={}; cols.forEach((lab,i)=>o[lab]=r.c[i]?r.c[i].v:''); return o; });
+      }
 
-    fetch(TRACKER_URL)
-      .then(res => res.json())
-      .then(rows => {
-        gyms = {};
-        gymFighters = {};
-        rows.forEach(row => {
-          const gym = (row.Gym && row.Gym.trim()) ? row.Gym.trim() : "";
-          // Ignore fighters with no gym listed
-          if(!gym) return;
-          if (!gyms[gym]) gyms[gym] = { wins: 0, losses: 0, draws: 0, earnings: 0 };
-          if (!gymFighters[gym]) gymFighters[gym] = [];
-          gyms[gym].wins += Number(row.Wins) || 0;
-          gyms[gym].losses += Number(row.Losses) || 0;
-          gyms[gym].draws += Number(row.Draws) || 0;
-          const earningStr = (row.Earnings || "").replace(/[^0-9.]/g, "");
-          gyms[gym].earnings += Number(earningStr) || 0;
-          gymFighters[gym].push({
-            name: row.Fighter || "Unknown",
-            wins: row.Wins || "0",
-            losses: row.Losses || "0",
-            draws: row.Draws || "0",
-            earnings: row.Earnings || "$0.00",
-            bio: row.Bio || "",
-            image: row.Image || "",
-            url: `fighters.html#${encodeURIComponent(row.Fighter||"")}`
-          });
-        });
+      function render(groups){
+        const gyms = Object.keys(groups).sort((a,b)=> groups[b].length - groups[a].length);
+        grid.innerHTML = gyms.map(gym=>{
+          const list = groups[gym].map(r=>{
+            const name = r['Fighter'] || 'Unknown';
+            const wins = r['Wins'] || 0;
+            const losses = r['Losses'] || 0;
+            const earnings = r['Earnings'] ? ` · $${String(r['Earnings']).replace(/[^0-9.]/g,'')}` : '';
+            return `<li>${name} — ${wins}-${losses}${earnings ? `<span class="meta">${earnings}</span>` : ''}</li>`;
+          }).join('');
+          return `<article class="card">
+            <div class="gym-header" data-acc>
+              <h3>${gym || 'Independent'}</h3>
+              <span class="chip">${groups[gym].length} fighter${groups[gym].length===1?'':'s'}</span>
+            </div>
+            <div class="roster prose" hidden>
+              <ul style="margin-left:1rem">${list}</ul>
+            </div>
+          </article>`;
+        }).join('') || '<div class="card">No gyms found.</div>';
+      }
 
-        // Output (no blank gym section shown)
-        const tbody = document.querySelector('#gyms-table tbody');
-        tbody.innerHTML = "";
-        Object.keys(gyms).forEach(gym => {
-          const g = gyms[gym];
-          tbody.innerHTML += `
-            <tr>
-              <td><span class="gym-link" onclick="showGymModal('${encodeURIComponent(gym)}')">${gym}</span></td>
-              <td>${g.wins}-${g.losses}-${g.draws}</td>
-              <td>$${g.earnings.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-            </tr>
-          `;
-        });
+      document.addEventListener('click', (e)=>{
+        const acc = e.target.closest('[data-acc]');
+        if (!acc) return;
+        const roster = acc.parentElement.querySelector('.roster');
+        roster.hidden = !roster.hidden;
       });
 
-    window.showGymModal = function(gymEncoded) {
-      const gym = decodeURIComponent(gymEncoded);
-      const fighters = gymFighters[gym] || [];
-      let fightersHtml = `<h3>${gym} Fighters</h3>`;
-      if (!fighters.length) {
-        fightersHtml += '<div class="fighter-info">No fighters listed for this gym.</div>';
-      } else {
-        fightersHtml += fighters.map(f =>
-          `<div class="fighter-row">
-            <a class="fighter-name-link" href="${f.url}">${f.name}</a> 
-            (${f.wins}-${f.losses}-${f.draws}) 
-            <span style="margin-left:7px;color:#ffd700;">${f.earnings}</span>
-          </div>`
-        ).join("");
+      async function boot(){
+        try{
+          const res=await fetch(url,{cache:'no-store'}); const text=await res.text(); const rows=parseGViz(text);
+          const groups={};
+          for (const r of rows){
+            const g = r['Gym'] || 'Independent';
+            (groups[g] = groups[g] || []).push(r);
+          }
+          render(groups);
+        }catch(e){ grid.innerHTML='<div class="card">Failed to load gyms.</div>'; console.error(e); }
       }
-      fightersHtml += `<button id="close-modal-btn" onclick="hideGymModal()">&#x2715;</button>`;
-      document.getElementById('modal-content').innerHTML = fightersHtml;
-      document.getElementById('modal').style.display = "flex";
-    };
-    window.hideGymModal = function() {
-      document.getElementById('modal').style.display = "none";
-    };
-    document.getElementById('modal').onclick = function(e) {
-      if (e.target === this) hideGymModal();
-    };
-    document.addEventListener('keydown',function(e){
-      if(e.key==='Escape') hideGymModal();
-    });
+      boot();
+    })();
   </script>
 </body>
 </html>
