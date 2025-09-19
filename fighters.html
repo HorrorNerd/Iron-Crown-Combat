@@ -59,85 +59,130 @@
   </footer>
 
   <script>
-    // year + theme toggle
-    document.getElementById('yr').textContent = new Date().getFullYear();
-    (function(){ const root=document.documentElement; const saved=localStorage.getItem('icc:theme'); if(saved==='light') root.classList.add('light');
-      document.addEventListener('click',e=>{ const t=e.target.closest('[data-theme-toggle]'); if(!t) return;
-        root.classList.toggle('light'); localStorage.setItem('icc:theme', root.classList.contains('light')?'light':'dark'); }); })();
+  // year + theme toggle
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  (function(){ const root=document.documentElement; const saved=localStorage.getItem('icc:theme'); if(saved==='light') root.classList.add('light');
+    document.addEventListener('click',e=>{ const t=e.target.closest('[data-theme-toggle]'); if(!t) return;
+      root.classList.toggle('light'); localStorage.setItem('icc:theme', root.classList.contains('light')?'light':'dark'); }); })();
 
-    (function(){
-      const SHEET_ID='1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
-      const GID='1277877160';
-      const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+  (function(){
+    const SHEET_ID='1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
+    const GID='1277877160'; // Fighter Tracker
+    const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
-      const grid = document.getElementById('fighters-grid');
-      const q = document.getElementById('q');
-      const gymFilter = document.getElementById('gymFilter');
-      const genderFilter = document.getElementById('genderFilter');
-      const clearBtn = document.getElementById('clearFilters');
+    const grid = document.getElementById('fighters-grid');
+    const q = document.getElementById('q');
+    const gymFilter = document.getElementById('gymFilter');
+    const genderFilter = document.getElementById('genderFilter');
+    const clearBtn = document.getElementById('clearFilters');
 
-      let ROWS = [];
-      function parseGViz(text){
-        const start=text.indexOf('{'), end=text.lastIndexOf('}'); const json=JSON.parse(text.slice(start,end+1));
-        const cols=json.table.cols.map(c=>c.label||c.id);
-        return (json.table.rows||[]).map(r=>{ const o={}; cols.forEach((lab,i)=>o[lab]=r.c[i]?r.c[i].v:''); return o; });
-      }
+    let ROWS = [];
+    let mapIdx = {}; // normalized header -> index
 
-      function render(rows){
-        grid.innerHTML = rows.map(r=>{
-          const name=r['Fighter']||'Unknown';
-          const style=r['Style']||'';
-          const country=r['Country']||'';
-          const weight=r['Weight']||'';
-          const gym=r['Gym']||'';
-          const bio=r['Bio']||'';
-          const img=r['Image']||'assets/img/favicon.png';
-          const chips=[style,country,weight,gym].filter(Boolean).map(v=>`<span class="chip">${v}</span>`).join('');
-          return `<article class="card fighter">
-            <img src="${img}" alt="${name}" />
-            <div>
-              <h3>${name}</h3>
-              <div class="meta">${chips}</div>
-              ${bio?`<p class="prose">${bio.replace(/\n/g,'<br>')}</p>`:''}
-            </div>
-          </article>`;
-        }).join('') || '<div class="card">No fighters match that filter.</div>';
-      }
+    const norm = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
+    const getVal = (row, idx) => {
+      const c = row.c[idx];
+      if (!c) return '';
+      // prefer formatted value for dates/currency; fallback to v
+      const v = (c.f != null ? c.f : c.v);
+      return (v == null) ? '' : String(v);
+    };
 
-      function applyFilters(){
-        const term=(q.value||'').toLowerCase();
-        const gSel=gymFilter.value;
-        const genSel=genderFilter.value;
-        const filtered = ROWS.filter(r=>{
-          if (gSel && (r['Gym']||'')!==gSel) return false;
-          if (genSel && (r['Gender']||'')!==genSel) return false;
-          if (term){
-            const hay=[r['Fighter'],r['Gym'],r['Style'],r['Country'],r['Weight'],r['Bio']].join(' ').toLowerCase();
-            if (!hay.includes(term)) return false;
+    function parseGViz(text){
+      const start=text.indexOf('{'), end=text.lastIndexOf('}');
+      const json=JSON.parse(text.slice(start,end+1));
+      const cols=json.table.cols.map(c=>c.label || c.id || '');
+      mapIdx = {};
+      cols.forEach((lab,i)=>{ mapIdx[norm(lab) || `col${i}`] = i; });
+
+      // helper: resolve a field by list of possible header names
+      const pick = (row, names, fallback='') => {
+        for (const n of names){
+          const idx = mapIdx[norm(n)];
+          if (idx != null) {
+            const val = getVal(row, idx);
+            if (val !== '') return val;
           }
-          return true;
-        });
-        render(filtered);
-      }
+        }
+        return fallback;
+      };
 
-      function populateFilters(){
-        const gyms=[...new Set(ROWS.map(r=>r['Gym']).filter(Boolean))].sort();
-        gymFilter.innerHTML = `<option value="">All gyms</option>` + gyms.map(g=>`<option>${g}</option>`).join('');
-      }
+      const rows = (json.table.rows||[]).map(r=>{
+        return {
+          fighter: pick(r, ['Fighter','Name','Fighter Name']),
+          style:   pick(r, ['Style']),
+          country: pick(r, ['Country','Region']),
+          weight:  pick(r, ['Weight','Division']),
+          gym:     pick(r, ['Gym','Camp']),
+          gender:  pick(r, ['Gender','Sex']),
+          bio:     pick(r, ['Bio','About','Notes']),
+          image:   pick(r, ['Image','ImageURL','Img','Photo']),
+          wins:    pick(r, ['Wins','W'], '0'),
+          losses:  pick(r, ['Losses','L'], '0'),
+          earnings: pick(r, ['Earnings','Payout','$','Total Earned','Money'], '0'),
+        };
+      });
+      return rows;
+    }
 
-      q.addEventListener('input', applyFilters);
-      gymFilter.addEventListener('change', applyFilters);
-      genderFilter.addEventListener('change', applyFilters);
-      clearBtn.addEventListener('click', ()=>{ q.value=''; gymFilter.value=''; genderFilter.value=''; applyFilters(); });
+    function render(rows){
+      grid.innerHTML = rows.map(r=>{
+        const name=r.fighter || 'Unknown';
+        const img=(r.image||'').trim() || 'assets/img/favicon.png';
+        const chips=[r.style,r.country,r.weight,r.gym].filter(Boolean).map(v=>`<span class="chip">${v}</span>`).join('');
+        const bio = r.bio ? `<p class="prose">${r.bio.replace(/\n/g,'<br>')}</p>` : '';
+        return `<article class="card fighter">
+          <img src="${img}" alt="${name}" />
+          <div>
+            <h3>${name}</h3>
+            <div class="meta">${chips}</div>
+            ${bio}
+          </div>
+        </article>`;
+      }).join('') || '<div class="card">No fighters match that filter.</div>';
+    }
 
-      async function boot(){
-        try{
-          const res=await fetch(url,{cache:'no-store'}); const text=await res.text(); ROWS=parseGViz(text);
-          populateFilters(); render(ROWS);
-        }catch(e){ grid.innerHTML='<div class="card">Failed to load fighters.</div>'; console.error(e); }
+    function applyFilters(){
+      const term=(q.value||'').toLowerCase();
+      const gSel=gymFilter.value;
+      const genSel=genderFilter.value;
+      const filtered = ROWS.filter(r=>{
+        if (gSel && (r.gym||'')!==gSel) return false;
+        if (genSel && (r.gender||'')!==genSel) return false;
+        if (term){
+          const hay=[r.fighter,r.gym,r.style,r.country,r.weight,r.bio].join(' ').toLowerCase();
+          if (!hay.includes(term)) return false;
+        }
+        return true;
+      });
+      render(filtered);
+    }
+
+    function populateFilters(){
+      const gyms=[...new Set(ROWS.map(r=>r.gym).filter(Boolean))].sort();
+      gymFilter.innerHTML = `<option value="">All gyms</option>` + gyms.map(g=>`<option>${g}</option>`).join('');
+    }
+
+    q.addEventListener('input', applyFilters);
+    gymFilter.addEventListener('change', applyFilters);
+    genderFilter.addEventListener('change', applyFilters);
+    clearBtn.addEventListener('click', ()=>{ q.value=''; gymFilter.value=''; genderFilter.value=''; applyFilters(); });
+
+    async function boot(){
+      try{
+        const res=await fetch(url,{cache:'no-store'}); 
+        const text=await res.text(); 
+        ROWS=parseGViz(text);
+        populateFilters(); 
+        render(ROWS);
+      }catch(e){ 
+        grid.innerHTML='<div class="card">Failed to load fighters.</div>'; 
+        console.error('fighters parse error', e); 
       }
-      boot();
-    })();
-  </script>
+    }
+    boot();
+  })();
+</script>
+
 </body>
 </html>
