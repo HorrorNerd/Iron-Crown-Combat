@@ -3,17 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Iron Crown Combat — Home</title>
-
-  <meta name="description" content="Official site for Iron Crown Combat — SWA’s shoot-style league: events, rankings, fighters, gyms, rules, and news." />
-  <meta property="og:title" content="Iron Crown Combat" />
-  <meta property="og:description" content="Events, rankings, fighters, gyms, rules, and news." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="assets/img/og-cover.png" />
-  <meta name="theme-color" content="#0f1115" />
-
-  <link rel="icon" href="assets/img/favicon.png" />
-  <link rel="preload" href="assets/css/main.css" as="style" />
+  <title>Iron Crown Combat — Fighters</title>
   <link rel="stylesheet" href="assets/css/main.css" />
 </head>
 <body>
@@ -26,7 +16,7 @@
       <nav class="menu" aria-label="Primary">
         <a href="events.html">Events</a>
         <a href="rankings.html">Rankings</a>
-        <a href="fighters.html">Fighters</a>
+        <a href="fighters.html" aria-current="page">Fighters</a>
         <a href="gyms.html">Gyms</a>
         <a href="news.html">News</a>
         <a href="rules.html">Rules</a>
@@ -35,39 +25,119 @@
       </nav>
       <div class="actions" style="display:flex;gap:.5rem;align-items:center">
         <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
-        <button class="btn burger" data-drawer aria-label="Open menu">☰</button>
-      </div>
-    </div>
-    <div id="drawer" class="drawer" hidden>
-      <div class="container">
-        <a href="events.html">Events</a>
-        <a href="rankings.html">Rankings</a>
-        <a href="fighters.html">Fighters</a>
-        <a href="gyms.html">Gyms</a>
-        <a href="news.html">News</a>
-        <a href="rules.html">Rules</a>
-        <a href="tournament.html">Tournaments</a>
-        <a href="about.html">About</a>
       </div>
     </div>
   </header>
-  <div class="grid grid-3" id="fighters-grid">
-  <div class="card">Loading fighters…</div>
-</div>
 
-  
-<footer class="footer">
+  <main class="container">
+    <div class="pagehead"><h1>Fighters</h1></div>
+
+    <!-- Search / filter (client-side) -->
+    <div class="card" style="margin-bottom:1rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
+      <input id="q" type="search" placeholder="Search fighters, gyms, styles…" style="flex:1;min-width:220px;padding:.6rem .8rem;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
+      <select id="gymFilter" style="padding:.55rem .7rem;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text)">
+        <option value="">All gyms</option>
+      </select>
+      <select id="genderFilter" style="padding:.55rem .7rem;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text)">
+        <option value="">All genders</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+      <button class="btn" id="clearFilters">Clear</button>
+    </div>
+
+    <section class="grid grid-3" id="fighters-grid">
+      <div class="card">Loading fighters…</div>
+    </section>
+  </main>
+
+  <footer class="footer">
     <div class="container cols">
       <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
-      <div style="display:flex;gap:.6rem">
-        <a class="chip" href="https://youtube.com/@SwtTNGaming" target="_blank" rel="noopener">YouTube</a>
-        <a class="chip" href="https://www.twitch.tv/" target="_blank" rel="noopener">Twitch</a>
-        <a class="chip" href="https://beacons.ai/tngamingyt" target="_blank" rel="noopener">Links</a>
-      </div>
     </div>
   </footer>
 
-  <script src="assets/js/main.js" defer></script>
-  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+  <script>
+    // year + theme toggle
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    (function(){ const root=document.documentElement; const saved=localStorage.getItem('icc:theme'); if(saved==='light') root.classList.add('light');
+      document.addEventListener('click',e=>{ const t=e.target.closest('[data-theme-toggle]'); if(!t) return;
+        root.classList.toggle('light'); localStorage.setItem('icc:theme', root.classList.contains('light')?'light':'dark'); }); })();
+
+    (function(){
+      const SHEET_ID='1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
+      const GID='1277877160';
+      const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+
+      const grid = document.getElementById('fighters-grid');
+      const q = document.getElementById('q');
+      const gymFilter = document.getElementById('gymFilter');
+      const genderFilter = document.getElementById('genderFilter');
+      const clearBtn = document.getElementById('clearFilters');
+
+      let ROWS = [];
+      function parseGViz(text){
+        const start=text.indexOf('{'), end=text.lastIndexOf('}'); const json=JSON.parse(text.slice(start,end+1));
+        const cols=json.table.cols.map(c=>c.label||c.id);
+        return (json.table.rows||[]).map(r=>{ const o={}; cols.forEach((lab,i)=>o[lab]=r.c[i]?r.c[i].v:''); return o; });
+      }
+
+      function render(rows){
+        grid.innerHTML = rows.map(r=>{
+          const name=r['Fighter']||'Unknown';
+          const style=r['Style']||'';
+          const country=r['Country']||'';
+          const weight=r['Weight']||'';
+          const gym=r['Gym']||'';
+          const bio=r['Bio']||'';
+          const img=r['Image']||'assets/img/favicon.png';
+          const chips=[style,country,weight,gym].filter(Boolean).map(v=>`<span class="chip">${v}</span>`).join('');
+          return `<article class="card fighter">
+            <img src="${img}" alt="${name}" />
+            <div>
+              <h3>${name}</h3>
+              <div class="meta">${chips}</div>
+              ${bio?`<p class="prose">${bio.replace(/\n/g,'<br>')}</p>`:''}
+            </div>
+          </article>`;
+        }).join('') || '<div class="card">No fighters match that filter.</div>';
+      }
+
+      function applyFilters(){
+        const term=(q.value||'').toLowerCase();
+        const gSel=gymFilter.value;
+        const genSel=genderFilter.value;
+        const filtered = ROWS.filter(r=>{
+          if (gSel && (r['Gym']||'')!==gSel) return false;
+          if (genSel && (r['Gender']||'')!==genSel) return false;
+          if (term){
+            const hay=[r['Fighter'],r['Gym'],r['Style'],r['Country'],r['Weight'],r['Bio']].join(' ').toLowerCase();
+            if (!hay.includes(term)) return false;
+          }
+          return true;
+        });
+        render(filtered);
+      }
+
+      function populateFilters(){
+        const gyms=[...new Set(ROWS.map(r=>r['Gym']).filter(Boolean))].sort();
+        gymFilter.innerHTML = `<option value="">All gyms</option>` + gyms.map(g=>`<option>${g}</option>`).join('');
+      }
+
+      q.addEventListener('input', applyFilters);
+      gymFilter.addEventListener('change', applyFilters);
+      genderFilter.addEventListener('change', applyFilters);
+      clearBtn.addEventListener('click', ()=>{ q.value=''; gymFilter.value=''; genderFilter.value=''; applyFilters(); });
+
+      async function boot(){
+        try{
+          const res=await fetch(url,{cache:'no-store'}); const text=await res.text(); ROWS=parseGViz(text);
+          populateFilters(); render(ROWS);
+        }catch(e){ grid.innerHTML='<div class="card">Failed to load fighters.</div>'; console.error(e); }
+      }
+      boot();
+    })();
+  </script>
 </body>
 </html>
