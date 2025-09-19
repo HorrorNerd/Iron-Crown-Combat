@@ -58,7 +58,7 @@
     </div>
   </footer>
 
-  <script>
+ <script>
   // year + theme toggle
   document.getElementById('yr').textContent = new Date().getFullYear();
   (function(){ const root=document.documentElement; const saved=localStorage.getItem('icc:theme'); if(saved==='light') root.classList.add('light');
@@ -77,59 +77,104 @@
     const clearBtn = document.getElementById('clearFilters');
 
     let ROWS = [];
-    let mapIdx = {}; // normalized header -> index
+    let COLS = []; // full cols metadata
 
     const norm = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
-    const getVal = (row, idx) => {
-      const c = row.c[idx];
-      if (!c) return '';
-      // prefer formatted value for dates/currency; fallback to v
-      const v = (c.f != null ? c.f : c.v);
-      return (v == null) ? '' : String(v);
+
+    // preferred label matches for each field
+    const WANT = {
+      fighter: ['fighter','name','fightername'],
+      wins: ['wins','w'],
+      losses: ['losses','l'],
+      draws: ['draws','d'],
+      total: ['totalfights','total'],
+      gender: ['gender','sex'],
+      earnings: ['earnings','payout','money','totalearned'],
+      bio: ['bio','about','notes'],
+      image: ['image','imageurl','img','photo','picture'],
+      gym: ['gym','camp','team'],
+      winpct: ['win','winpct','winpercent','winpercentage'] // will match 'Win %'
     };
+
+    function findColIndex(wantList){
+      // Try exact normalized label or substring
+      for (let i=0;i<COLS.length;i++){
+        const c = COLS[i];
+        const label = c.label || c.id || '';
+        const n = norm(label);
+        if (!n) continue;
+        if (c.type === 'boolean') continue; // skip checkbox/TRUE/FALSE columns
+        for (const w of wantList){
+          const wn = norm(w);
+          if (n === wn || n.includes(wn)) return i;
+        }
+      }
+      return -1;
+    }
 
     function parseGViz(text){
       const start=text.indexOf('{'), end=text.lastIndexOf('}');
       const json=JSON.parse(text.slice(start,end+1));
-      const cols=json.table.cols.map(c=>c.label || c.id || '');
-      mapIdx = {};
-      cols.forEach((lab,i)=>{ mapIdx[norm(lab) || `col${i}`] = i; });
+      COLS = json.table.cols;
 
-      // helper: resolve a field by list of possible header names
-      const pick = (row, names, fallback='') => {
-        for (const n of names){
-          const idx = mapIdx[norm(n)];
-          if (idx != null) {
-            const val = getVal(row, idx);
-            if (val !== '') return val;
-          }
-        }
-        return fallback;
+      // Resolve column indexes
+      let idx = {
+        fighter: findColIndex(WANT.fighter),
+        wins: findColIndex(WANT.wins),
+        losses: findColIndex(WANT.losses),
+        draws: findColIndex(WANT.draws),
+        total: findColIndex(WANT.total),
+        gender: findColIndex(WANT.gender),
+        earnings: findColIndex(WANT.earnings),
+        bio: findColIndex(WANT.bio),
+        image: findColIndex(WANT.image),
+        gym: findColIndex(WANT.gym),
+        winpct: findColIndex(WANT.winpct),
       };
 
-      const rows = (json.table.rows||[]).map(r=>{
-        return {
-          fighter: pick(r, ['Fighter','Name','Fighter Name']),
-          style:   pick(r, ['Style']),
-          country: pick(r, ['Country','Region']),
-          weight:  pick(r, ['Weight','Division']),
-          gym:     pick(r, ['Gym','Camp']),
-          gender:  pick(r, ['Gender','Sex']),
-          bio:     pick(r, ['Bio','About','Notes']),
-          image:   pick(r, ['Image','ImageURL','Img','Photo']),
-          wins:    pick(r, ['Wins','W'], '0'),
-          losses:  pick(r, ['Losses','L'], '0'),
-          earnings: pick(r, ['Earnings','Payout','$','Total Earned','Money'], '0'),
-        };
-      });
-      return rows;
+      // Failsafe defaults (common layout: col0=FALSE, col1=Fighter, col2=Wins,...)
+      if (idx.fighter < 0 && COLS.length >= 2) idx.fighter = 1;
+      if (idx.wins    < 0 && COLS.length >= 3) idx.wins    = 2;
+      if (idx.losses  < 0 && COLS.length >= 4) idx.losses  = 3;
+      if (idx.draws   < 0 && COLS.length >= 5) idx.draws   = 4;
+      if (idx.total   < 0 && COLS.length >= 6) idx.total   = 5;
+      if (idx.gender  < 0 && COLS.length >= 7) idx.gender  = 6;
+      if (idx.earnings< 0 && COLS.length >= 8) idx.earnings= 7;
+      if (idx.bio     < 0 && COLS.length >= 9) idx.bio     = 8;
+      if (idx.image   < 0 && COLS.length >=10) idx.image   = 9;
+      if (idx.gym     < 0 && COLS.length >=11) idx.gym     = 10;
+
+      const get = (row, i) => {
+        if (i < 0) return '';
+        const c = row.c[i];
+        if (!c) return '';
+        const v = (c.f != null ? c.f : c.v);
+        return (v == null) ? '' : String(v);
+      };
+
+      const rows = (json.table.rows||[]).map(r=>({
+        fighter: get(r, idx.fighter),
+        wins: get(r, idx.wins),
+        losses: get(r, idx.losses),
+        draws: get(r, idx.draws),
+        total: get(r, idx.total),
+        gender: get(r, idx.gender),
+        earnings: get(r, idx.earnings),
+        bio: get(r, idx.bio),
+        image: get(r, idx.image),
+        gym: get(r, idx.gym),
+        winpct: get(r, idx.winpct),
+      }));
+
+      // Filter out totally blank rows
+      return rows.filter(x => x.fighter || x.gym || x.bio || x.image);
     }
 
     function render(rows){
       grid.innerHTML = rows.map(r=>{
-        const name=r.fighter || 'Unknown';
+        const name=(r.fighter||'').trim() || 'Unknown';
         const img=(r.image||'').trim() || 'assets/img/favicon.png';
-        const chips=[r.style,r.country,r.weight,r.gym].filter(Boolean).map(v=>`<span class="chip">${v}</span>`).join('');
+        const chips=[r.gender, r.winpct, r.gym].filter(Boolean).map(v=>`<span class="chip">${v}</span>`).join('');
         const bio = r.bio ? `<p class="prose">${r.bio.replace(/\n/g,'<br>')}</p>` : '';
         return `<article class="card fighter">
           <img src="${img}" alt="${name}" />
@@ -150,7 +195,7 @@
         if (gSel && (r.gym||'')!==gSel) return false;
         if (genSel && (r.gender||'')!==genSel) return false;
         if (term){
-          const hay=[r.fighter,r.gym,r.style,r.country,r.weight,r.bio].join(' ').toLowerCase();
+          const hay=[r.fighter,r.gym,r.gender,r.bio].join(' ').toLowerCase();
           if (!hay.includes(term)) return false;
         }
         return true;
@@ -170,19 +215,20 @@
 
     async function boot(){
       try{
-        const res=await fetch(url,{cache:'no-store'}); 
-        const text=await res.text(); 
+        const res=await fetch(url,{cache:'no-store'});
+        const text=await res.text();
         ROWS=parseGViz(text);
-        populateFilters(); 
+        populateFilters();
         render(ROWS);
-      }catch(e){ 
-        grid.innerHTML='<div class="card">Failed to load fighters.</div>'; 
-        console.error('fighters parse error', e); 
+      }catch(e){
+        grid.innerHTML='<div class="card">Failed to load fighters.</div>';
+        console.error('fighters parse error', e);
       }
     }
     boot();
   })();
 </script>
+
 
 </body>
 </html>
