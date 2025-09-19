@@ -48,7 +48,7 @@
     </div>
   </footer>
 
-  <script>
+ <script>
   // year + theme toggle
   document.getElementById('yr').textContent = new Date().getFullYear();
   (function(){ const root=document.documentElement; const saved=localStorage.getItem('icc:theme'); if(saved==='light') root.classList.add('light');
@@ -61,48 +61,75 @@
     const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
     const grid = document.getElementById('gyms-grid');
+    let COLS=[];
 
     const norm = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
-    const getVal = (row, idx) => {
-      const c = row.c[idx];
-      if (!c) return '';
-      const v = (c.f != null ? c.f : c.v);
-      return (v == null) ? '' : String(v);
+    const WANT = {
+      fighter: ['fighter','name','fightername'],
+      gym: ['gym','camp','team'],
+      wins: ['wins','w'],
+      losses: ['losses','l'],
+      earnings: ['earnings','payout','money','totalearned'],
     };
+
+    function findColIndex(wantList){
+      for (let i=0;i<COLS.length;i++){
+        const c=COLS[i];
+        const n=norm(c.label||c.id||'');
+        if (!n || c.type==='boolean') continue;
+        for (const w of wantList){
+          const wn=norm(w);
+          if (n===wn || n.includes(wn)) return i;
+        }
+      }
+      return -1;
+    }
 
     function parseGViz(text){
       const start=text.indexOf('{'), end=text.lastIndexOf('}');
       const json=JSON.parse(text.slice(start,end+1));
-      const cols=json.table.cols.map(c=>c.label || c.id || '');
-      const mapIdx={}; cols.forEach((lab,i)=>{ mapIdx[norm(lab)||`col${i}`]=i; });
+      COLS=json.table.cols;
 
-      const pick = (row, names, fallback='')=>{
-        for (const n of names){
-          const idx = mapIdx[norm(n)];
-          if (idx != null){
-            const val = getVal(row, idx);
-            if (val !== '') return val;
-          }
-        }
-        return fallback;
+      let idx={
+        fighter: findColIndex(WANT.fighter),
+        gym:     findColIndex(WANT.gym),
+        wins:    findColIndex(WANT.wins),
+        losses:  findColIndex(WANT.losses),
+        earnings:findColIndex(WANT.earnings),
+      };
+
+      // Failsafe defaults (col0 FALSE, col1 Fighter, col10 Gym, etc.)
+      if (idx.fighter < 0 && COLS.length >= 2) idx.fighter = 1;
+      if (idx.gym     < 0 && COLS.length >=11) idx.gym     = 10;
+      if (idx.wins    < 0 && COLS.length >= 3) idx.wins    = 2;
+      if (idx.losses  < 0 && COLS.length >= 4) idx.losses  = 3;
+      if (idx.earnings< 0 && COLS.length >= 8) idx.earnings= 7;
+
+      const get = (row, i) => {
+        if (i < 0) return '';
+        const c = row.c[i];
+        if (!c) return '';
+        const v = (c.f != null ? c.f : c.v);
+        return (v == null) ? '' : String(v);
       };
 
       const rows=(json.table.rows||[]).map(r=>({
-        fighter: pick(r, ['Fighter','Name','Fighter Name']),
-        gym:     pick(r, ['Gym','Camp'], 'Independent'),
-        wins:    pick(r, ['Wins','W'], '0'),
-        losses:  pick(r, ['Losses','L'], '0'),
-        earnings: pick(r, ['Earnings','Payout','$','Total Earned','Money'], ''),
+        fighter: get(r, idx.fighter),
+        gym: (get(r, idx.gym) || 'Independent'),
+        wins: get(r, idx.wins) || '0',
+        losses: get(r, idx.losses) || '0',
+        earnings: get(r, idx.earnings) || '',
       }));
-      return rows;
+
+      return rows.filter(x => x.fighter || x.gym);
     }
 
     function render(groups){
       const gyms = Object.keys(groups).sort((a,b)=> groups[b].length - groups[a].length);
       grid.innerHTML = gyms.map(gym=>{
         const list = groups[gym].map(r=>{
-          const earnings = r.earnings ? ` · $${String(r.earnings).replace(/[^0-9.]/g,'')}` : '';
-          return `<li>${r.fighter} — ${r.wins}-${r.losses}${earnings ? `<span class="meta">${earnings}</span>` : ''}</li>`;
+          const clean$ = r.earnings ? ` · $${String(r.earnings).replace(/[^0-9.]/g,'')}` : '';
+          return `<li>${r.fighter} — ${r.wins}-${r.losses}${clean$ ? `<span class="meta">${clean$}</span>` : ''}</li>`;
         }).join('');
         return `<article class="card">
           <div class="gym-header" data-acc>
@@ -141,6 +168,7 @@
     boot();
   })();
 </script>
+
 
 </body>
 </html>
