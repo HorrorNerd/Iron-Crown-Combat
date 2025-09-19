@@ -34,10 +34,6 @@
         <a href="tournament.html">Tournaments</a>
         <a href="about.html">About</a>
       </nav>
-      <div class="actions" style="display:flex;gap:.5rem;align-items:center">
-        <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
-        <button class="btn burger" data-drawer aria-label="Open menu">☰</button>
-      </div>
     </div>
   </header>
 
@@ -67,74 +63,57 @@
   <footer class="footer">
     <div class="container cols">
       <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
-      <div style="display:flex;gap:.6rem">
-        <a class="chip" href="https://youtube.com/@SwtTNGaming" target="_blank" rel="noopener">YouTube</a>
-        <a class="chip" href="https://www.twitch.tv/" target="_blank" rel="noopener">Twitch</a>
-        <a class="chip" href="https://beacons.ai/tngamingyt" target="_blank" rel="noopener">Links</a>
-      </div>
     </div>
   </footer>
 
   <script>
-    // ---- minimal theme/nav helpers so the page is self-contained ----
-    (function(){
-      const root = document.documentElement;
-      const saved = localStorage.getItem('icc:theme');
-      if (saved === 'light') root.classList.add('light');
-      document.addEventListener('click', (e)=>{
-        const t = e.target.closest('[data-theme-toggle]');
-        if (!t) return;
-        root.classList.toggle('light');
-        localStorage.setItem('icc:theme', root.classList.contains('light') ? 'light' : 'dark');
-      });
-    })();
+    // --- year ---
     document.getElementById('yr').textContent = new Date().getFullYear();
 
-    // ---- NEWS loader (uses your sheet & gid) ----
+    // --- NEWS (GViz JSON) ---
     (function(){
       const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
       const GID_NEWS = '1273524900'; // News tab
-      const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID_NEWS}`;
 
-      async function fetchCSV(){ 
-        const res = await fetch(csvUrl(GID_NEWS), { cache:'no-store' }); 
-        const text = await res.text(); 
-        return parseCSV(text); 
-      }
-      function parseCSV(csv){
-        const lines = csv.replace(/\r/g,'').split('\n').filter(Boolean);
-        const rows = lines.map(line=>{
-          const out=[]; let cur='', q=false;
-          for (let i=0;i<line.length;i++){
-            const c=line[i], n=line[i+1];
-            if (c === '"' && n === '"'){ cur+='"'; i++; continue; }
-            if (c === '"'){ q = !q; continue; }
-            if (c === ',' && !q){ out.push(cur); cur=''; continue; }
-            cur += c;
-          }
-          out.push(cur); return out;
-        });
-        const headers = rows[0].map(h=>h.trim());
-        return rows.slice(1).map(r=>{ const o={}; headers.forEach((h,i)=>o[h]=(r[i]||'').trim()); return o; });
-      }
-
-      // Modal helpers
-      let NEWS_CACHE = [];
-      const modal = document.getElementById('news-modal');
+      const list   = document.getElementById('news-list');
+      const modal  = document.getElementById('news-modal');
       const mTitle = document.getElementById('news-modal-title');
       const mDate  = document.getElementById('news-modal-date');
       const mBody  = document.getElementById('news-modal-body');
 
-      function formatArticle(text){
-        if (!text) return '';
-        const parts = String(text).split(/\n\s*\n/);
-        return parts.map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+      let NEWS = [];
+
+      function parseGViz(text){
+        const start = text.indexOf('{');
+        const end   = text.lastIndexOf('}');
+        const json  = JSON.parse(text.slice(start, end + 1));
+        const cols  = json.table.cols.map(c => c.label || c.id);
+        return (json.table.rows || []).map(r => {
+          const obj = {};
+          cols.forEach((label, i) => {
+            const cell = r.c[i];
+            obj[label] = cell ? cell.v : '';
+          });
+          return obj;
+        });
       }
+
+      function pFormat(article){
+        if (!article) return '';
+        // blank lines -> paragraphs ; single newlines -> <br>
+        return String(article)
+          .split(/\n\s*\n/)
+          .map(p => `<p>${p.replace(/\n/g,'<br>')}</p>`)
+          .join('');
+      }
+
       function openModal(idx){
-        const row = NEWS_CACHE[idx]; if (!row) return;
+        const row = NEWS[idx];
+        if (!row) return;
         mTitle.textContent = row['Title'] || 'Update';
         mDate.textContent  = row['Date']  || '';
-        mBody.innerHTML    = formatArticle(row['Article'] || '');
+        mBody.innerHTML    = pFormat(row['Article'] || '');
         modal.classList.add('show');
         modal.setAttribute('aria-hidden','false');
         document.body.style.overflow = 'hidden';
@@ -144,38 +123,41 @@
         modal.setAttribute('aria-hidden','true');
         document.body.style.overflow = '';
       }
+
       document.addEventListener('click', (e)=>{
         if (e.target.closest('[data-modal-close]')) { closeModal(); }
         if (e.target === modal) { closeModal(); } // backdrop click
-        const btn = e.target.closest('[data-news-idx]');
-        if (btn) { openModal(Number(btn.getAttribute('data-news-idx'))); }
+        const open = e.target.closest('[data-news-open]');
+        if (open) openModal(+open.getAttribute('data-news-open'));
       });
       document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeModal(); });
 
-      async function boot(){
-        const list = document.getElementById('news-list');
-        try {
-          const rows = await fetchCSV();
-          NEWS_CACHE = rows;
-          list.innerHTML = rows.map((r,i)=>{
-            const date  = r['Date']  || '';
-            const title = r['Title'] || 'Update';
+      async function loadNews(){
+        try{
+          const res  = await fetch(url, {cache:'no-store'});
+          const text = await res.text();
+          NEWS = parseGViz(text);
+
+          // Build cards: Title, Date under it, Read more
+          list.innerHTML = NEWS.map((row, i) => {
+            const title = row['Title'] || 'Update';
+            const date  = row['Date']  || '';
             return `
               <article class="card">
-                <h3 style="margin-bottom:.2rem">
-                  <button class="btn" style="padding:.35rem .7rem;border-radius:10px" data-news-idx="${i}" aria-haspopup="dialog">
-                    ${title}
-                  </button>
-                </h3>
+                <h3 style="margin-bottom:.25rem">${title}</h3>
                 ${date ? `<div class="meta">${date}</div>` : ''}
+                <div style="margin-top:.5rem">
+                  <a class="btn" href="javascript:void(0)" data-news-open="${i}">Read more</a>
+                </div>
               </article>`;
           }).join('');
-        } catch (err) {
-          list.innerHTML = `<div class="card">Failed to load news.</div>`;
+        } catch (err){
           console.error(err);
+          list.innerHTML = `<div class="card">Failed to load news.</div>`;
         }
       }
-      boot();
+
+      loadNews();
     })();
   </script>
 </body>
