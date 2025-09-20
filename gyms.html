@@ -65,18 +65,19 @@
 
     const norm = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
     const WANT = {
-      fighter: ['fighter','name','fightername'],
-      gym: ['gym','camp','team'],
-      wins: ['wins','w'],
-      losses: ['losses','l'],
-      earnings: ['earnings','payout','money','totalearned'],
+      fighter:  ['fighter','name','fightername'],
+      gym:      ['gym','camp','team'],
+      wins:     ['wins','w'],
+      losses:   ['losses','l'],
+      draws:    ['draws','d'],
+      earnings: ['earnings','payout','money','totalearned','$']
     };
 
     function findColIndex(wantList){
       for (let i=0;i<COLS.length;i++){
         const c=COLS[i];
         const n=norm(c.label||c.id||'');
-        if (!n || c.type==='boolean') continue;
+        if (!n || c.type==='boolean') continue; // skip the leading TRUE/FALSE checkbox column
         for (const w of wantList){
           const wn=norm(w);
           if (n===wn || n.includes(wn)) return i;
@@ -85,40 +86,50 @@
       return -1;
     }
 
+    const getCell = (row, i) => {
+      if (i < 0) return '';
+      const c = row.c[i];
+      if (!c) return '';
+      const v = (c.f != null ? c.f : c.v);
+      return (v == null) ? '' : String(v);
+    };
+    const dollarsToNumber = (v) => {
+      if (!v) return 0;
+      const n = parseFloat(String(v).replace(/[^0-9.\-]/g,''));
+      return Number.isFinite(n) ? n : 0;
+    };
+    const fmtMoney = (n) => `$${Math.round(n).toLocaleString()}`;
+
     function parseGViz(text){
       const start=text.indexOf('{'), end=text.lastIndexOf('}');
       const json=JSON.parse(text.slice(start,end+1));
       COLS=json.table.cols;
 
       let idx={
-        fighter: findColIndex(WANT.fighter),
-        gym:     findColIndex(WANT.gym),
-        wins:    findColIndex(WANT.wins),
-        losses:  findColIndex(WANT.losses),
-        earnings:findColIndex(WANT.earnings),
+        fighter:  findColIndex(WANT.fighter),
+        gym:      findColIndex(WANT.gym),
+        wins:     findColIndex(WANT.wins),
+        losses:   findColIndex(WANT.losses),
+        draws:    findColIndex(WANT.draws),
+        earnings: findColIndex(WANT.earnings),
       };
 
-      // Failsafe defaults (col0 FALSE, col1 Fighter, col10 Gym, etc.)
-      if (idx.fighter < 0 && COLS.length >= 2) idx.fighter = 1;
-      if (idx.gym     < 0 && COLS.length >=11) idx.gym     = 10;
-      if (idx.wins    < 0 && COLS.length >= 3) idx.wins    = 2;
-      if (idx.losses  < 0 && COLS.length >= 4) idx.losses  = 3;
-      if (idx.earnings< 0 && COLS.length >= 8) idx.earnings= 7;
-
-      const get = (row, i) => {
-        if (i < 0) return '';
-        const c = row.c[i];
-        if (!c) return '';
-        const v = (c.f != null ? c.f : c.v);
-        return (v == null) ? '' : String(v);
-      };
+      // Failsafe defaults for your sheet structure:
+      // col0=FALSE, col1=Fighter, col2=Wins, col3=Losses, col4=Draws, col7=Earnings, col10=Gym
+      if (idx.fighter  < 0 && COLS.length >= 2) idx.fighter  = 1;
+      if (idx.wins     < 0 && COLS.length >= 3) idx.wins     = 2;
+      if (idx.losses   < 0 && COLS.length >= 4) idx.losses   = 3;
+      if (idx.draws    < 0 && COLS.length >= 5) idx.draws    = 4;
+      if (idx.earnings < 0 && COLS.length >= 8) idx.earnings = 7;
+      if (idx.gym      < 0 && COLS.length >=11) idx.gym      = 10;
 
       const rows=(json.table.rows||[]).map(r=>({
-        fighter: get(r, idx.fighter),
-        gym: (get(r, idx.gym) || 'Independent'),
-        wins: get(r, idx.wins) || '0',
-        losses: get(r, idx.losses) || '0',
-        earnings: get(r, idx.earnings) || '',
+        fighter:  getCell(r, idx.fighter),
+        gym:      getCell(r, idx.gym) || 'Independent',
+        wins:     getCell(r, idx.wins)   || '0',
+        losses:   getCell(r, idx.losses) || '0',
+        draws:    getCell(r, idx.draws)  || '0',
+        earnings: getCell(r, idx.earnings) || '0',
       }));
 
       return rows.filter(x => x.fighter || x.gym);
@@ -127,14 +138,21 @@
     function render(groups){
       const gyms = Object.keys(groups).sort((a,b)=> groups[b].length - groups[a].length);
       grid.innerHTML = gyms.map(gym=>{
-        const list = groups[gym].map(r=>{
-          const clean$ = r.earnings ? ` · $${String(r.earnings).replace(/[^0-9.]/g,'')}` : '';
-          return `<li>${r.fighter} — ${r.wins}-${r.losses}${clean$ ? `<span class="meta">${clean$}</span>` : ''}</li>`;
+        const fighters = groups[gym];
+        const totalMoney = fighters.reduce((sum, f)=> sum + dollarsToNumber(f.earnings), 0);
+
+        const list = fighters.map(r=>{
+          const money = dollarsToNumber(r.earnings);
+          return `<li>${r.fighter} — ${r.wins}-${r.losses}-${r.draws} · ${fmtMoney(money)}</li>`;
         }).join('');
+
         return `<article class="card">
           <div class="gym-header" data-acc>
-            <h3>${gym}</h3>
-            <span class="chip">${groups[gym].length} fighter${groups[gym].length===1?'':'s'}</span>
+            <div>
+              <h3 style="margin:0">${gym}</h3>
+              <div class="meta" style="margin-top:.25rem">${fmtMoney(totalMoney)} total</div>
+            </div>
+            <span class="chip">${fighters.length} fighter${fighters.length===1?'':'s'}</span>
           </div>
           <div class="roster prose" hidden>
             <ul style="margin-left:1rem">${list}</ul>
@@ -143,6 +161,7 @@
       }).join('') || '<div class="card">No gyms found.</div>';
     }
 
+    // accordion
     document.addEventListener('click', (e)=>{
       const acc = e.target.closest('[data-acc]');
       if (!acc) return;
@@ -168,6 +187,7 @@
     boot();
   })();
 </script>
+
 
 
 </body>
