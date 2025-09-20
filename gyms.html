@@ -180,26 +180,30 @@
     });
 
     async function boot(){
-      try{
-        const res=await fetch(url,{cache:'no-store'});
-        const text=await res.text();
-        const rows=parseGViz(text);
+    try{
+      const res = await fetch(url, {cache:'no-store'});
+      const text = await res.text();
+      const rows = parseGViz(text);
 
-        // Group by normalized gym key, keep first display name
-        const groups = {};
-        for (const r of rows){
-          const key = normKey(r.gym || 'Independent');
-          if (!groups[key]) groups[key] = { displayName: r.gym || 'Independent', fighters: [] };
-          groups[key].fighters.push(r);
-        }
+      // Group by normalized gym key, SKIP Independent/blank gyms
+      const groups = {};
+      for (const r of rows){
+        const display = (r.gym || '').trim();
+        const key = display.replace(/\s+/g,' ').toLowerCase();
+        if (!display) continue;                              // skip empty
+        if (key === 'independent') continue;                 // skip Independent
 
-        render(groups);
-      }catch(e){
-        grid.innerHTML = '<div class="card">Failed to load gyms.</div>';
-        console.error('gyms parse error', e);
+        if (!groups[key]) groups[key] = { displayName: display, fighters: [] };
+        groups[key].fighters.push(r);
       }
+
+      render(groups);
+    } catch(e){
+      grid.innerHTML = '<div class="card">Failed to load gyms.</div>';
+      console.error('gyms parse error', e);
     }
-    boot();
+  }
+  boot();
   })();
 </script>
 
