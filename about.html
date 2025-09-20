@@ -6,11 +6,9 @@
   <title>Iron Crown Combat — About</title>
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
-    /* Page-specific light touches */
+    /* Page sprinkles to complement your global theme */
     .about-hero {
-      position: relative;
-      border-radius: 20px;
-      overflow: hidden;
+      position: relative; border-radius: 20px; overflow: hidden;
       border: 1px solid var(--border);
       background:
         linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.65)),
@@ -18,25 +16,37 @@
     }
     .about-hero .inner {
       padding: clamp(1rem, 3vw, 2rem);
-      display: grid;
-      gap: .8rem;
-      align-items: center;
-      grid-template-columns: auto 1fr;
+      display: grid; gap: .8rem; align-items: center; grid-template-columns: auto 1fr;
     }
-    .about-hero .icon {
-      font-size: clamp(2.2rem, 4vw, 3rem);
-      line-height: 1;
-      filter: drop-shadow(0 6px 24px rgba(0,0,0,.45));
-    }
+    .about-hero .icon { font-size: clamp(2.2rem, 4vw, 3rem); line-height: 1; filter: drop-shadow(0 6px 24px rgba(0,0,0,.45)); }
     .about-hero h1 { margin: 0; letter-spacing: .02em; }
     .about-hero p { margin: 0; color: var(--muted); }
 
     .about-section h2 { margin-top: .2rem; }
     .about-bullets li { margin-bottom: .5rem; }
-    .accent-crown { color: var(--icc-gold, #c8a64d); font-weight: 700; }
+
+    .founders { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; }
+    .founder { display:grid; grid-template-columns: 72px 1fr; gap:.8rem; align-items:center; }
+    .founder .ph {
+      width:72px;height:72px;border-radius:12px;border:1px solid var(--border); background:var(--bg-2) center/cover no-repeat;
+    }
+    .founder h3 { margin:0 0 .15rem 0; }
+    .founder .meta { color: var(--muted); font-size:.9rem; }
+
+    .champion-tile { display:grid; grid-template-columns: 80px 1fr; gap:.9rem; align-items:center; }
+    .champion-tile .img {
+      width:80px;height:80px;border-radius:14px;border:1px solid var(--border); background:var(--bg-2) center/cover no-repeat;
+    }
+    .badge-crown {
+      display:inline-flex; align-items:center; gap:.35rem;
+      border:1px solid var(--icc-gold, #c8a64d); color: var(--icc-gold, #c8a64d);
+      padding:.25rem .5rem; border-radius: 999px; font-size: .8em; font-weight: 700;
+      background: color-mix(in oklab, var(--icc-gold, #c8a64d) 12%, transparent);
+    }
 
     .cta-row { display:flex; flex-wrap:wrap; gap:.6rem; justify-content:center; }
     .cta-row .btn { font-weight: 700; }
+    @media (max-width: 780px) { .founders { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -84,8 +94,8 @@
       </p>
     </section>
 
-    <!-- Crucible -->
     <section class="cols">
+      <!-- The Crucible -->
       <div class="card">
         <h2>🔥 The Crucible: Where Legacies Are Forged</h2>
         <p>
@@ -137,25 +147,59 @@
       </p>
     </section>
 
-    <!-- Fighters -->
+    <!-- Founders -->
     <section class="card">
-      <h2>🩸 A Different Breed of Fighter</h2>
-      <ul class="about-bullets">
-        <li><strong>Shiv</strong> — an unhinged brawler who declared war on an entire gym.</li>
-        <li><strong>Abigail Jones</strong> — “The Headhuntress,” a perfect record and merciless precision.</li>
-        <li><strong>The Kumari Twins</strong> — two bodies sharing one destiny, feared and hated in equal measure.</li>
-        <li><strong>Cole Maddox</strong> — the King of the Crown, etched into ICC’s brutal history.</li>
-      </ul>
-      <blockquote class="prose" style="margin:.6rem 0 0 0;">
-        <p><strong>Honor the Crown. Endure the Crucible. Leave nothing behind.</strong></p>
-      </blockquote>
+      <h2>🏛️ Founders</h2>
+      <div class="founders">
+        <div class="founder">
+          <div class="ph" style="background-image:url('assets/images/founders/cota-kinzo.jpg')" aria-hidden="true"></div>
+          <div>
+            <h3>Cota Kinzo</h3>
+            <div class="meta">Co-Founder • Matchmaker • Traditionalist</div>
+            <p class="prose" style="margin:.4rem 0 0 0;">
+              A purist who believes the fight should speak for itself. Kinzo pushed ICC toward realism: clean rules, real consequences,
+              and absolute respect for the craft.
+            </p>
+          </div>
+        </div>
+        <div class="founder">
+          <div class="ph" style="background-image:url('assets/images/founders/alex-the-wall-thompson.jpg')" aria-hidden="true"></div>
+          <div>
+            <h3>Alex “The Wall” Thompson</h3>
+            <div class="meta">Co-Founder • Promoter • Architect of the Crucible</div>
+            <p class="prose" style="margin:.4rem 0 0 0;">
+              The heartbeat of ICC’s presentation. The Wall built the Crucible into appointment viewing—fewer lights and scripts, more grit and stakes.
+            </p>
+          </div>
+        </div>
+      </div>
+      <p class="meta" style="margin-top:.6rem">
+        Tip: drop founder portraits in <code>assets/images/founders/</code> as
+        <code>cota-kinzo.jpg</code> and <code>alex-the-wall-thompson.jpg</code> (any of .png/.jpg/.jpeg/.webp will work).
+      </p>
+    </section>
+
+    <!-- Hall of Champions (dynamic) -->
+    <section class="card" id="champ-card">
+      <h2>🏆 Hall of Champions</h2>
+      <div id="champ-content" class="champion-tile">
+        <div class="img" id="champ-img" aria-hidden="true"></div>
+        <div>
+          <div class="badge-crown">👑 Current Champion</div>
+          <h3 id="champ-name" style="margin:.3rem 0 0 0;">Loading…</h3>
+          <div id="champ-meta" class="meta">Determining the latest champion…</div>
+        </div>
+      </div>
+      <div class="meta" style="margin-top:.5rem">
+        This tile updates automatically when your tournament JSON’s final winner changes (or if a fighter in <code>assets/fighters.json</code> has <code>"isChampion": true</code>).
+      </div>
     </section>
 
     <!-- CTA -->
     <section class="card">
       <h2>Where to Watch</h2>
       <p>ICC is <strong>raw</strong>, <strong>unpredictable</strong>, and <strong>violently real</strong>. No gimmicks—just fighters who leave it all in the ring.</p>
-      <p class="accent-crown">Real stakes. Real violence. Real legacy.</p>
+      <p style="font-weight:700;">Real stakes. Real violence. Real legacy.</p>
       <div class="cta-row" style="margin-top:.6rem">
         <a class="btn" href="https://www.twitch.tv/swttngaming?sr=a" target="_blank" rel="noopener">Watch Us Live on Twitch</a>
         <a class="btn" href="https://www.youtube.com/@swttngaming" target="_blank" rel="noopener">Recap Show on YouTube</a>
@@ -171,6 +215,101 @@
 
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
+
+    // --- Champion auto-detect logic ---
+    const FIGHTERS_URL = 'assets/fighters.json';
+    const TOURN_LIST_URL = 'assets/data/tournaments.json';
+    const TOURN_DATA_URL = slug => `assets/data/tournaments/${slug}.json`;
+    const DEFAULT_CHAMPION = 'Cole Maddox'; // Fallback if none detected
+
+    const slugify = s => String(s||'')
+      .toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+
+    async function fetchJSON(url){
+      const r = await fetch(url, { cache:'no-store' });
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }
+
+    async function pickImage(pathBase){
+      const tryExt = async ext => {
+        try { const r = await fetch(`${pathBase}.${ext}`, {method:'HEAD'}); return r.ok ? `${pathBase}.${ext}` : null; }
+        catch { return null; }
+      };
+      return (await tryExt('png')) || (await tryExt('jpg')) || (await tryExt('jpeg')) || (await tryExt('webp'));
+    }
+
+    async function resolveFighterImg(name, fightersMap){
+      if (!name) return null;
+      const raw = String(name).trim();
+      const noThe = raw.replace(/^the\s+/i, '');
+      for (const key of [raw, noThe]){
+        const entry = fightersMap && fightersMap[key];
+        if (entry && entry.img) return entry.img;
+      }
+      const base = `assets/images/fighters/${slugify(raw)}`;
+      return await pickImage(base);
+    }
+
+    function lastRoundWinner(tourney){
+      const last = tourney && tourney.rounds && tourney.rounds[tourney.rounds.length-1];
+      const fm = last && last.matches && last.matches[0];
+      if (!fm) return null;
+      if (fm.winner === 'a') return fm.a;
+      if (fm.winner === 'b') return fm.b;
+      return null;
+    }
+
+    async function findCurrentChampion(){
+      let fighters = {};
+      try { fighters = await fetchJSON(FIGHTERS_URL); } catch {}
+      if (fighters.fighters) fighters = fighters.fighters; // unwrap if nested
+
+      // 1) Try latest finished tournament in tournaments.json
+      try {
+        const list = await fetchJSON(TOURN_LIST_URL);
+        // Assume latest is last; if list has years, sort desc by year
+        const sorted = Array.isArray(list)
+          ? [...list].sort((a,b) => (b.year||0) - (a.year||0))
+          : [];
+        for (const t of sorted){
+          try {
+            const tj = await fetchJSON(TOURN_DATA_URL(t.slug));
+            const w = lastRoundWinner(tj);
+            if (w) return { name:w, source:`${t.name}`, img: await resolveFighterImg(w, fighters) };
+          } catch {}
+        }
+      } catch {}
+
+      // 2) Try fighters.json flag
+      for (const [name, data] of Object.entries(fighters)){
+        if (data && (data.isChampion === true || data.is_champion === true)) {
+          return { name, source:'fighters.json', img: data.img || await resolveFighterImg(name, fighters) };
+        }
+      }
+
+      // 3) Fallback
+      return { name: DEFAULT_CHAMPION, source:'fallback', img: await resolveFighterImg(DEFAULT_CHAMPION, fighters) };
+    }
+
+    (async function bootChampion(){
+      const nameEl = document.getElementById('champ-name');
+      const metaEl = document.getElementById('champ-meta');
+      const imgEl  = document.getElementById('champ-img');
+
+      try {
+        const champ = await findCurrentChampion();
+        nameEl.textContent = champ.name || 'Champion';
+        metaEl.textContent = champ.source === 'fallback'
+          ? 'Set a champion by finishing a tournament or toggling "isChampion" in fighters.json.'
+          : `Source: ${champ.source}`;
+        if (champ.img) imgEl.style.backgroundImage = `url('${champ.img}')`;
+        else imgEl.style.background = 'var(--bg-2)';
+      } catch (e){
+        nameEl.textContent = 'Champion';
+        metaEl.textContent = 'Unable to determine champion.';
+      }
+    })();
   </script>
 </body>
 </html>
