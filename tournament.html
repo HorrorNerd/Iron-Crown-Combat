@@ -6,23 +6,53 @@
   <title>Iron Crown Combat — Tournament</title>
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
+    /* Toolbar & basic layout */
     .toolbar { display:flex; gap:.6rem; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:1rem; }
     .toolbar .select { padding:.5rem .7rem; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); }
 
+    /* Bracket layout */
     .bracket-container { overflow-x: auto; padding-bottom: .5rem; }
     .bracket {
-      --gap: 2.0rem; --v-gap: 1.2rem; --line: var(--border);
+      /* sizing tokens */
+      --gap: 2rem;
+      --v-gap: 14px;
+      --match-h: 56px;
+      --line: var(--border);
       --winner: var(--icc-gold, #c8a64d);
-      display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
-      gap: var(--gap); min-width: 880px;
+
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: var(--gap);
+      min-width: 880px;
+
+      /* computed from JS: --qf-rows -> --qf-height */
+      --qf-rows: 8; /* default; will be overwritten by JS */
+      --qf-height: calc(var(--qf-rows) * var(--match-h) + (var(--qf-rows) - 1) * var(--v-gap));
     }
-    .round { display: grid; align-content: start; gap: var(--v-gap); }
+
+    .round-col {
+      /* This centers later rounds vertically to match QF column height */
+      min-height: var(--qf-height);
+      display: flex;
+      align-items: center; /* vertical centering */
+    }
+
+    .round { display: grid; align-content: start; gap: var(--v-gap); width: 100%; }
     .round h3 { margin: 0 0 .6rem 0; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); font-size: .95rem; }
 
+    /* Match card */
     .match {
-      position: relative; background: var(--bg); border: 1px solid var(--border);
-      border-radius: 10px; padding: .5rem .6rem; min-height: 52px;
-      display: grid; grid-template-columns: 40px 1fr auto; gap: .55rem; align-items: center;
+      position: relative;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .5rem .6rem;
+      min-height: var(--match-h);
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      gap: .55rem;
+      align-items: center;
     }
     .match img.thumb {
       width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
@@ -39,6 +69,7 @@
       background: color-mix(in oklab, var(--winner) 8%, transparent);
     }
 
+    /* Connectors (desktop) */
     .match::after {
       content: "";
       position: absolute;
@@ -53,8 +84,6 @@
     .connector::before { content: ""; position: absolute; left: -1rem; top: 25%; bottom: 25%; width: 1px; background: var(--line); }
     .receives::before { content: ""; position: absolute; left: -1rem; top: 50%; width: 1rem; height: 1px; background: var(--line); }
 
-    .round-col { min-width: 280px; }
-
     .badge-crown {
       display:inline-flex; align-items:center; gap:.35rem;
       border:1px solid var(--winner); color: var(--winner);
@@ -62,9 +91,10 @@
       background: color-mix(in oklab, var(--winner) 12%, transparent);
     }
 
+    /* Responsive: simplify connections, stack columns */
     @media (max-width: 900px){
       .bracket { display: block; min-width: 0; }
-      .round-col { margin-bottom: 1.25rem; }
+      .round-col { min-height: 0; margin-bottom: 1.25rem; }
       .match::after, .connector::before, .receives::before { display: none; }
     }
   </style>
@@ -118,13 +148,11 @@
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
 
-    const $ = s => document.querySelector(s);
     const LIST_URL = 'assets/data/tournaments.json';
     const DATA_URL = slug => `assets/data/tournaments/${slug}.json`;
-    const FIGHTERS_URL = 'assets/fighters.json'; // <-- shared fighters map (you just made this)
+    const FIGHTERS_URL = 'assets/fighters.json';
     const STORAGE_KEY = 'icc:lastTournament';
 
-    // Fallback data if tournament JSON fails
     const FALLBACK = {
       name: "The Iron Trial",
       rounds: [
@@ -144,6 +172,7 @@
       ]
     };
 
+    const $ = s => document.querySelector(s);
     const slugify = s => String(s||'')
       .toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 
@@ -154,7 +183,6 @@
     }
 
     async function pickImage(pathBase){
-      // Try png, jpg, jpeg, webp in that order
       const tryExt = async ext => {
         try { const r = await fetch(`${pathBase}.${ext}`, {method:'HEAD'}); return r.ok ? `${pathBase}.${ext}` : null; }
         catch { return null; }
@@ -164,11 +192,17 @@
 
     async function resolveImg(name, fightersMap){
       if (!name || /winner of/i.test(name)) return null;
-      // Prefer shared fighters.json mapping
-      const entry = fightersMap && fightersMap[name];
-      if (entry && entry.img) return entry.img;
-      // Fallback to slug under assets/images/fighters/
-      const base = `assets/images/fighters/${slugify(name)}`;
+
+      // small normalization to handle "The <name>"
+      const raw = String(name).trim();
+      const noThe = raw.replace(/^the\s+/i, '');
+      for (const key of [raw, noThe]){
+        const entry = fightersMap && fightersMap[key];
+        if (entry && entry.img) return entry.img;
+      }
+
+      // Fallback to slug in assets/images/fighters/
+      const base = `assets/images/fighters/${slugify(raw)}`;
       return await pickImage(base);
     }
 
@@ -216,7 +250,12 @@
       const host = document.getElementById('bracket');
       host.innerHTML = 'Loading…';
 
-      // Pre-resolve images
+      /* Compute QF rows for vertical centering = number of fighter slots in round 1 */
+      const r1 = tourney.rounds[0];
+      const qfRows = r1 && r1.matches ? r1.matches.length * 2 : 8;
+      host.style.setProperty('--qf-rows', qfRows);
+
+      /* Pre-resolve images */
       const names = new Set();
       tourney.rounds.forEach(r => r.matches.forEach(m => { names.add(m.a); names.add(m.b); }));
 
@@ -238,7 +277,7 @@
     async function loadTournament(slug, fightersMap){
       localStorage.setItem(STORAGE_KEY, slug);
       try {
-        const tourney = await fetchJSON(`assets/data/tournaments/${slug}.json`);
+        const tourney = await fetchJSON(DATA_URL(slug));
         await renderBracket(tourney, fightersMap);
       } catch {
         await renderBracket(FALLBACK, fightersMap);
@@ -246,13 +285,10 @@
     }
 
     async function boot(){
-      // Load shared fighters map first
+      // Load shared fighters map
       let fightersMap = {};
       try { fightersMap = await fetchJSON(FIGHTERS_URL); } catch { fightersMap = {}; }
-
-      // If your fighters.json is { "Reiko": {...}, ... } without a wrapper, keep as-is.
-      // If you used the "fighters": { ... } wrapper, unwrap it here:
-      if (fightersMap.fighters) fightersMap = fightersMap.fighters;
+      if (fightersMap.fighters) fightersMap = fightersMap.fighters; // unwrap if nested
 
       // Load tournament list
       let list;
