@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Iron Crown Combat — Tournament</title>
+  <title>Iron Crown Combat — The Iron Trial</title>
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
     /* ===== Bracket Layout ===== */
-    .bracket-container {
-      overflow-x: auto;
-      padding-bottom: .5rem;
-    }
+    .toolbar { display:flex; gap:.6rem; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:1rem; }
+    .toolbar .select { padding:.5rem .7rem; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); }
+
+    .bracket-container { overflow-x: auto; padding-bottom: .5rem; }
     .bracket {
       --gap: 2.0rem;                /* horizontal gap between rounds */
       --v-gap: 1.2rem;              /* vertical gap between matches */
@@ -20,22 +20,11 @@
       grid-auto-flow: column;
       grid-auto-columns: 1fr;
       gap: var(--gap);
-      min-width: 880px;             /* enables horizontal scroll when needed */
+      min-width: 880px;
     }
-    .round {
-      display: grid;
-      align-content: start;
-      gap: var(--v-gap);
-    }
-    .round h3 {
-      margin: 0 0 .6rem 0;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      color: var(--accent);
-      font-size: .95rem;
-    }
+    .round { display: grid; align-content: start; gap: var(--v-gap); }
+    .round h3 { margin: 0 0 .6rem 0; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); font-size: .95rem; }
 
-    /* Match card with connectors */
     .match {
       position: relative;
       background: var(--bg);
@@ -49,67 +38,46 @@
       gap: .5rem;
     }
     .match .name { font-weight: 600; }
-    .match .meta { color: var(--muted); font-size: .9em; white-space: nowrap; }
+    .match .sub { color: var(--muted); font-size: .9em; white-space: nowrap; }
     .match.winner {
       border-color: var(--winner);
       box-shadow: inset 3px 0 0 var(--winner);
       background: color-mix(in oklab, var(--winner) 8%, transparent);
     }
 
-    /* Horizontal connector to the next round */
-    .match::after {
+    .match::after { /* horizontal connector to the next round */
       content: "";
       position: absolute;
-      right: -1rem;
-      top: 50%;
-      width: 1rem;
-      height: 1px;
+      right: -1rem; top: 50%;
+      width: 1rem; height: 1px;
       background: var(--line);
     }
-
-    /* Vertical connector container for SF/QF merges (drawn on the receiving round) */
     .connector {
       position: relative;
       height: calc(100% + var(--v-gap));
       margin-top: calc(var(--v-gap) * -0.5);
       margin-bottom: calc(var(--v-gap) * -0.5);
     }
-    .connector::before {
-      /* vertical line */
+    .connector::before { /* vertical merge line */
       content: "";
       position: absolute;
-      left: -1rem;
-      top: 25%;
-      bottom: 25%;
-      width: 1px;
+      left: -1rem; top: 25%; bottom: 25%;
+      width: 1px; background: var(--line);
+    }
+    .receives::before { /* incoming stub from left */
+      content: "";
+      position: absolute;
+      left: -1rem; top: 50%;
+      width: 1rem; height: 1px;
       background: var(--line);
     }
 
-    /* In the receiving round, add the incoming stub from the left */
-    .receives::before {
-      content: "";
-      position: absolute;
-      left: -1rem;
-      top: 50%;
-      width: 1rem;
-      height: 1px;
-      background: var(--line);
-    }
-
-    /* Utilities */
-    .badge { margin-left: .5rem; }
     .round-col { min-width: 260px; }
 
-    /* Mobile stacking fallback */
     @media (max-width: 900px){
-      .bracket {
-        display: block;
-        min-width: 0;
-      }
+      .bracket { display: block; min-width: 0; }
       .round-col { margin-bottom: 1.25rem; }
-      .match::after,
-      .connector::before,
-      .receives::before { display: none; } /* hide lines on stacked view */
+      .match::after, .connector::before, .receives::before { display: none; } /* hide lines on stacked view */
     }
   </style>
 </head>
@@ -135,100 +103,21 @@
 
   <main class="container">
     <div class="pagehead">
-      <h1>Live Crucible Tournament Bracket</h1>
-      <p class="meta">Updated as results come in.</p>
+      <h1>The Iron Trial</h1>
+      <p class="meta">Switch tournaments to view past brackets.</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="card" style="padding:.6rem .75rem">Tournament:
+        <select id="t-select" class="select" aria-label="Choose tournament"></select>
+      </div>
+      <div class="meta">Tip: You can link directly, e.g. <code>?t=iron-trial</code></div>
     </div>
 
     <section class="card">
-      <div class="bracket-container">
-        <!-- 
-          Bracket columns:
-          Col 1 = Quarterfinals (4 matches)
-          Col 2 = Semifinals (2 matches; first is completed)
-          Col 3 = Final (awaiting second semi)
-        -->
-        <div class="bracket">
-          <!-- ===== Quarterfinals ===== -->
-          <div class="round-col">
-            <div class="round">
-              <h3>Quarterfinals</h3>
-
-              <div class="match winner">
-                <span class="name">Abigail Jones</span>
-                <span class="meta chip">Winner</span>
-              </div>
-              <div class="match">
-                <span class="name">Hotarubi Kendo</span>
-              </div>
-
-              <div class="match winner">
-                <span class="name">Rich Action</span>
-                <span class="meta chip">Winner</span>
-              </div>
-              <div class="match">
-                <span class="name">Dante Marcheli</span>
-              </div>
-
-              <div class="match winner">
-                <span class="name">Sophia Rodriques</span>
-                <span class="meta chip">Winner</span>
-              </div>
-              <div class="match">
-                <span class="name">Fernando Riveiro</span>
-              </div>
-
-              <div class="match">
-                <span class="name">Kumari Twins</span>
-              </div>
-              <div class="match winner">
-                <span class="name">Augg Action</span>
-                <span class="meta chip">Winner</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- ===== Semifinals ===== -->
-          <div class="round-col">
-            <div class="round">
-              <h3>Semifinals</h3>
-
-              <!-- SF #1 (Completed: Abigail beat Rich) -->
-              <div class="match winner receives">
-                <span class="name">Abigail Jones</span>
-                <span class="meta chip">Advanced to Final</span>
-              </div>
-              <div class="connector"></div>
-              <div class="match">
-                <span class="name">Rich Action</span>
-              </div>
-
-              <!-- SF #2 (Pending: Sophia vs Augg) -->
-              <div class="match receives" style="margin-top: var(--v-gap);">
-                <span class="name">Sophia Rodriques</span>
-              </div>
-              <div class="connector"></div>
-              <div class="match">
-                <span class="name">Augg Action</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- ===== Final ===== -->
-          <div class="round-col">
-            <div class="round">
-              <h3>Final</h3>
-              <div class="match receives winner">
-                <span class="name">Abigail Jones</span>
-                <span class="meta chip">Finalist</span>
-              </div>
-              <div class="connector"></div>
-              <div class="match">
-                <span class="name">Winner of Sophia Rodriques / Augg Action</span>
-              </div>
-            </div>
-          </div>
-        </div><!-- /.bracket -->
-      </div><!-- /.bracket-container -->
+      <div id="bracketHost">
+        <div class="bracket-container"><div class="bracket">Loading…</div></div>
+      </div>
     </section>
   </main>
 
@@ -240,6 +129,131 @@
 
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
+
+    // --------- Simple tournament loader (JSON) ----------
+    // Files:
+    //  - assets/data/tournaments.json                -> [{slug, name, year}]
+    //  - assets/data/tournaments/<slug>.json         -> { name, rounds: [ {name, matches:[{a,b,winner}]} ] }
+    //
+    // Example file contents provided below this page code.
+
+    const $ = s => document.querySelector(s);
+    const params = new URLSearchParams(location.search);
+    const STORAGE_KEY = 'icc:lastTournament';
+
+    const FALLBACK = {
+      name: "The Iron Trial",
+      rounds: [
+        { name: "Quarterfinals", matches: [
+          { a:"Abigail Jones", b:"Hotarubi Kendo", winner:"a" },
+          { a:"Rich Action", b:"Dante Marcheli", winner:"a" },
+          { a:"Sophia Rodriques", b:"Fernando Riveiro", winner:"a" },
+          { a:"Kumari Twins", b:"Augg Action", winner:"b" },
+        ]},
+        { name: "Semifinals", matches: [
+          { a:"Abigail Jones", b:"Rich Action", winner:"a" },
+          { a:"Sophia Rodriques", b:"Augg Action", winner:null }, // pending
+        ]},
+        { name: "Final", matches: [
+          { a:"Abigail Jones", b:"Winner of Sophia Rodriques / Augg Action", winner:null }
+        ]}
+      ]
+    };
+
+    async function fetchJson(url){
+      const res = await fetch(url, { cache:'no-store' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      return await res.json();
+    }
+
+    function matchEl({a,b,winner}) {
+      const aWin = winner === 'a';
+      const bWin = winner === 'b';
+      return `
+        <div class="match ${aWin ? 'winner':''}">
+          <span class="name">${a}</span>
+        </div>
+        <div class="match ${bWin ? 'winner':''}">
+          <span class="name">${b}</span>
+        </div>
+      `;
+    }
+
+    function roundEl({name, matches}, idx, total) {
+      // add connector blocks between paired matches to draw vertical merge lines
+      let html = `<div class="round-col"><div class="round"><h3>${name}</h3>`;
+      for (let i=0;i<matches.length;i++){
+        const m = matches[i];
+        const isOdd = i % 2 === 1;
+        // Receiver markers (for rounds after the first) so lines look right
+        const receivesAttr = idx>0 ? 'receives' : '';
+        html += `
+          <div class="match ${m.winner==='a'?'winner':''} ${receivesAttr ? 'receives':''}">
+            <span class="name">${m.a}</span>
+          </div>
+          <div class="connector"></div>
+          <div class="match ${m.winner==='b'?'winner':''}">
+            <span class="name">${m.b}</span>
+          </div>
+        `;
+        // Add extra spacing between pairs so connectors line up nicely
+        if (isOdd && i < matches.length-1) html += `<div style="height: var(--v-gap);"></div>`;
+      }
+      html += `</div></div>`;
+      return html;
+    }
+
+    function renderBracket(tournament){
+      const host = document.querySelector('#bracketHost .bracket');
+      if (!host) return;
+      host.innerHTML = tournament.rounds.map((r, i) => roundEl(r, i, tournament.rounds.length)).join('');
+      document.title = `Iron Crown Combat — ${tournament.name}`;
+      document.querySelector('.pagehead h1').textContent = tournament.name;
+    }
+
+    async function loadTournament(slug){
+      // remember last
+      localStorage.setItem(STORAGE_KEY, slug);
+      const url = `assets/data/tournaments/${slug}.json`;
+      try {
+        const data = await fetchJson(url);
+        renderBracket(data);
+      } catch (e) {
+        console.warn('Falling back to embedded data:', e);
+        renderBracket(FALLBACK);
+      }
+    }
+
+    async function boot(){
+      // load tournament list
+      let list = [];
+      try {
+        list = await fetchJson('assets/data/tournaments.json');
+      } catch(e) {
+        // If list fails, synthesize a one-item list for Iron Trial
+        list = [{ slug:'iron-trial', name:'The Iron Trial', year:new Date().getFullYear() }];
+      }
+
+      const select = document.getElementById('t-select');
+      select.innerHTML = list.map(t => `<option value="${t.slug}">${t.name}${t.year ? ' ('+t.year+')':''}</option>`).join('');
+
+      const urlSlug = (new URLSearchParams(location.search)).get('t');
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const slug = urlSlug || saved || (list[0] && list[0].slug) || 'iron-trial';
+
+      select.value = slug;
+      await loadTournament(slug);
+
+      select.addEventListener('change', () => {
+        const s = select.value;
+        const p = new URLSearchParams(location.search);
+        p.set('t', s);
+        history.replaceState(null, '', location.pathname + '?' + p.toString());
+        loadTournament(s);
+      });
+    }
+
+    boot();
   </script>
 </body>
 </html>
