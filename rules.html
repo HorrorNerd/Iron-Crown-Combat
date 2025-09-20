@@ -1,173 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat - Test Your Metal</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iron Crown Combat — Rules</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
   <style>
-    body {
-      background: url('image.png') no-repeat center/cover fixed;
-      color: #f1f1f1;
-      margin: 0;
-      min-height: 100vh;
-      font-family: 'Oswald','Impact',Arial,sans-serif;
-    }
-    header {
-      text-align: center;
-      background: rgba(35,39,42, 0.97);
-      border-bottom: 3px solid #ffd700;
-      padding: 2em 0 1em 0;
-      box-shadow: 0 2px 16px #181a1b88;
-    }
-    .logo {
-      font-size: 2.2rem;
-      color: #ffd700;
-      text-shadow: 0 2px 10px #23272a;
-      margin-bottom: 1em;
-      font-family: 'Oswald','Impact','Arial Narrow',Arial,sans-serif;
-    }
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.7em;
-      margin-bottom: 1.5em;
-    }
-    nav a {
-      text-decoration: none;
-      font-weight: bold;
-      background: #181a1b;
-      color: #ffd700;
-      border: 1.5px solid #e56915;
-      border-radius: 8px;
-      padding: 0.7em 1.3em;
-      transition: background 0.18s, color 0.12s;
-      letter-spacing: 2px;
-    }
-    nav a.active, nav a:hover {
-      background: #ffd700;
-      color: #23272a;
-    }
-    main {
-      max-width: 820px;
-      margin: 3em auto 4em auto;
-      background: rgba(30,32,33,0.96);
-      border-radius: 24px;
-      box-shadow: 0 8px 32px #181a1b97, 0 0 18px #ffd70022 inset;
-      padding: 2.3em 1.7em 2em 1.7em;
-      font-size: 1.07em;
-    }
-    h2, h3 {
-      color: #ffd700;
-      text-shadow: 0 2px 8px #23272a66, 0 1px 30px #e5691515;
-      font-family: 'Oswald','Impact',Arial,sans-serif;
-      margin-bottom: 0.45em;
-      letter-spacing: 2px;
-      text-align: center;
-    }
-    h2 { font-size: 1.7em; }
-    h3 { font-size: 1.18em; text-align: left;}
-    ul {
-      padding-left: 1.4em;
-      margin-bottom: 1.2em;
-      list-style: disc;
-    }
-    li {
-      margin-bottom: 0.5em;
-      color: #ffd700;
-    }
-    strong { color: #e56915; }
-    em { color: #ffd700; font-style: italic;}
-    a { color: #ffd700; text-decoration: underline; transition: color 0.15s;}
-    a:hover { color: #e56915;}
-    .discord-link {
-      font-size: 1.08em;
-      text-align: left;
-      margin: 1em 0;
-      display: block;
-    }
-    .discord-link a {
-      display: inline-block;
-      background: linear-gradient(90deg,#e56915 5%,#ffd700 80%);
-      color: #23272a !important;
-      font-weight: bold;
-      font-size: 1.1em;
-      padding: 0.36em 1.1em;
+    /* Page-specific helpers (light touch to keep style consistent) */
+    .callout {
+      border: 1px solid var(--border);
+      background: var(--bg-2);
       border-radius: 14px;
-      text-decoration: none;
-      margin-left: 0.4em;
-      transition: background 0.18s, color 0.18s;
-      letter-spacing: 1px;
+      padding: 1rem;
+      display: flex; gap: .75rem; align-items: flex-start;
     }
-    .discord-link a:hover {
-      background: linear-gradient(90deg,#ffd700 65%,#e56915 120%);
-      color: #23272a !important;
+    .callout .icon { font-size: 1.35rem; line-height: 1; }
+    .discord-cta {
+      display:flex; align-items:center; justify-content:space-between;
+      gap: .8rem; flex-wrap: wrap;
+      border: 1px dashed var(--border);
+      background: var(--bg);
+      border-radius: 14px;
+      padding: .9rem 1rem;
+      margin-top: .75rem;
     }
-    @media (max-width:700px) {
-      main { padding: 1em 0.5em; }
-      h2 { font-size: 1.13em; }
-      .logo { font-size: 1.17em; }
-      .discord-link a { font-size: 1em; padding: 0.29em 0.7em;}
-    }
+    .discord-cta a.btn { text-decoration: none; }
+    .rules-list { margin-left: 1.2rem; }
+    .rules-list li { margin: .25rem 0; }
   </style>
 </head>
 <body>
-  <header>
-    <h1 class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="fighters.html">Fighters</a>
-      <a href="events.html">Events</a>
-      <a href="rankings.html">Rankings</a>
-      <a href="news.html">News</a>
-      <a href="about.html">About</a>
-      <a href="rules.html" class="active">Test Your Metal</a>
-    </nav>
+  <header class="header">
+    <div class="container nav" data-nav>
+      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
+        <span>Iron Crown Combat</span>
+      </a>
+      <nav class="menu" aria-label="Primary">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html" aria-current="page">Rules</a>
+        <a href="tournament.html">Tournaments</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="actions" style="display:flex;gap:.5rem;align-items:center">
+        <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
+      </div>
+    </div>
   </header>
-  <main>
-    <h2>🔻 Submit Your Fighter to Iron Crown Combat 🔻</h2>
-    <p><strong>Think you have what it takes to survive the Crucible?</strong><br>
-      You may submit <strong>1 male and 1 female fighter</strong> to compete in Iron Crown Combat. All styles are welcome — as long as they stay grounded in semi-realism. That means <em>no superpowers, no werewolves—just gritty, bone-cracking combat.</em>
-    </p>
 
-    <h3>✅ Submission Rules</h3>
-    <ul>
-      <li><strong>Platform:</strong> Fire Pro Wrestling World (PS4)</li>
-      <li><strong>Match Format:</strong> 3 rounds, 5 minutes each</li>
-      <li><strong>Win Conditions:</strong> KO, Submission, Ref Stoppage, or Time-limit Draw (No judges)</li>
-      <li><strong>Environment:</strong> Ring only – no cage</li>
-      <li><strong>Custom Moves:</strong> Minimal use, must be clearly labeled</li>
-      <li><strong>Ukemi:</strong> Set to 0-0-0</li>
-      <li><strong>Logic Settings:</strong> Only 1 offensive and 1 defensive parameter can be set to 10. All others must be 8 or lower.</li>
-      <li><strong>No Tag Matches</strong></li>
-      <li><strong>No Gym Mate Battles</strong> (fighters from the same camp can’t face each other – e.g., Shiv vs. Executioner)</li>
-    </ul>
-
-    <h3>🧾 How to Submit</h3>
-    <p>Upload your fighter to the PS4 workshop and include:</p>
-    <ul>
-      <li>Fighter’s full name</li>
-      <li>Nickname (if applicable)</li>
-      <li>Age, Height, Weight, Country of origin</li>
-      <li>Fighting style & description</li>
-      <li>Signature move(s) and personality traits</li>
-      <li>Backstory</li>
-    </ul>
-
-    <div class="discord-link">
-      Send your fighter's link as a message on our 
-      <a href="https://discord.gg/ATZZFNEpa5" target="_blank">Discord</a>
+  <main class="container">
+    <div class="pagehead">
+      <h1>Competition Rules</h1>
+      <p class="meta">Read carefully before submitting a fighter to the Crucible.</p>
     </div>
 
-    <h3>💰 Purse & Prestige</h3>
-    <p>
-      Fighters earn money based on match rating and performance bonuses (KO of the Night, Submission of the Night, Fight of the Night).
-      <br><strong>Top earners gain power</strong> — the right to challenge anyone, regardless of division or gender, and eventually compete for the <strong>Iron Crown Championship.</strong>
-    </p>
+    <section class="grid grid-2">
+      <article class="card prose" style="grid-column: 1 / -1">
+        <h2>🔻 Submit Your Fighter to Iron Crown Combat 🔻</h2>
+        <p><strong>Think you have what it takes to survive the Crucible?</strong><br>
+          You may submit <strong>1 male and 1 female fighter</strong> to compete in Iron Crown Combat. All styles are welcome — as long as they stay grounded in semi-realism.
+          That means <em>no superpowers, no werewolves</em> — just gritty, bone-cracking combat.
+        </p>
+
+        <div class="callout" role="note" aria-label="No game? No problem">
+          <div class="icon">🎮</div>
+          <div>
+            <strong>No game? No problem.</strong><br>
+            You can still enter! If you don’t own Fire Pro Wrestling World, we can create your fighter with you. Join the Discord and we’ll help build your CAW together.
+            <div class="discord-cta">
+              <span>Submit questions or your fighter link on our Discord.</span>
+              <a class="btn" href="https://discord.gg/ATZZFNEpa5" target="_blank" rel="noopener">Join the Discord</a>
+            </div>
+          </div>
+        </div>
+
+        <h3>✅ Submission Rules</h3>
+        <ul class="rules-list">
+          <li><strong>Platform:</strong> Fire Pro Wrestling World (PS4)</li>
+          <li><strong>Match Format:</strong> 3 rounds, 5 minutes each</li>
+          <li><strong>Win Conditions:</strong> KO, Submission, Ref Stoppage, or Time-limit Draw (No judges)</li>
+          <li><strong>Environment:</strong> Ring only — no cage</li>
+          <li><strong>Custom Moves:</strong> Minimal use, must be clearly labeled</li>
+          <li><strong>Ukemi:</strong> Set to 0-0-0</li>
+          <li><strong>Logic Settings:</strong> Only 1 offensive and 1 defensive parameter can be set to 10. All others must be 8 or lower.</li>
+          <li><strong>No Tag Matches</strong></li>
+          <li><strong>No Gym Mate Battles</strong> (fighters from the same camp can’t face each other — e.g., Shiv vs. Executioner)</li>
+        </ul>
+
+        <h3>🧾 How to Submit</h3>
+        <p>Upload your fighter to the PS4 workshop and include:</p>
+        <ul class="rules-list">
+          <li>Fighter’s full name</li>
+          <li>Nickname (if applicable)</li>
+          <li>Age, Height, Weight, Country of origin</li>
+          <li>Fighting style & description</li>
+          <li>Signature move(s) and personality traits</li>
+          <li>Backstory</li>
+        </ul>
+
+        <div class="discord-cta">
+          <span>Ready to submit? Drop your workshop link in our Discord and we’ll confirm entry.</span>
+          <a class="btn" href="https://discord.gg/ATZZFNEpa5" target="_blank" rel="noopener">Send it on Discord</a>
+        </div>
+
+        <h3>💰 Purse & Prestige</h3>
+        <p>
+          Fighters earn money based on match rating and performance bonuses (KO of the Night, Submission of the Night, Fight of the Night).
+          <br><strong>Top earners gain power</strong> — the right to challenge anyone, regardless of division or gender, and eventually compete for the <strong>Iron Crown Championship.</strong>
+        </p>
+      </article>
+    </section>
   </main>
+
   <footer class="footer">
-    &copy; 2025 Iron Crown Combat. All rights reserved.
+    <div class="container cols">
+      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
+      <div style="display:flex;gap:.6rem">
+        <a class="chip" href="https://youtube.com/@SwtTNGaming" target="_blank" rel="noopener">YouTube</a>
+        <a class="chip" href="https://www.twitch.tv/" target="_blank" rel="noopener">Twitch</a>
+        <a class="chip" href="https://beacons.ai/tngamingyt" target="_blank" rel="noopener">Links</a>
+      </div>
+    </div>
   </footer>
+
+  <script>
+    // Year + theme toggle (same pattern as other pages)
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    (function(){
+      const root = document.documentElement;
+      const saved = localStorage.getItem('icc:theme');
+      if (saved === 'light') root.classList.add('light');
+      document.addEventListener('click', (e)=>{
+        const t = e.target.closest('[data-theme-toggle]');
+        if (!t) return;
+        root.classList.toggle('light');
+        localStorage.setItem('icc:theme', root.classList.contains('light') ? 'light' : 'dark');
+      });
+    })();
+  </script>
 </body>
 </html>
