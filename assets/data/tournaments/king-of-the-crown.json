@@ -7,20 +7,20 @@
         { "a": "Shiv",              "b": "Cole Maddox",      "winner": "b" },
         { "a": "Abigail Jones",     "b": "Sophia Rodriques", "winner": "b" },
         { "a": "Dante Marcheli",    "b": "Veronica Kane",    "winner": "a" },
-        { "a": "The Kumari Twins",  "b": "Kai Lawson",       "winner": "a" }
+        { "a": "Kumari Twins",  "b": "Kai Lawson",       "winner": "a" }
       ]
     },
     {
       "name": "Semi-Finals",
       "matches": [
         { "a": "Cole Maddox",       "b": "Sophia Rodriques", "winner": "a" },
-        { "a": "Dante Marcheli",    "b": "The Kumari Twins", "winner": "b" }
+        { "a": "Dante Marcheli",    "b": "Kumari Twins", "winner": "b" }
       ]
     },
     {
       "name": "Finals",
       "matches": [
-        { "a": "Cole Maddox",       "b": "The Kumari Twins", "winner": "a" }
+        { "a": "Cole Maddox",       "b": "Kumari Twins", "winner": "a" }
       ]
     }
   ]
