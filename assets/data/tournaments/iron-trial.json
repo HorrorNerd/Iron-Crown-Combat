@@ -1,0 +1,27 @@
+{
+  "name": "The Iron Trial",
+  "rounds": [
+    {
+      "name": "Quarterfinals",
+      "matches": [
+        { "a": "Abigail Jones", "b": "Hotarubi Kendo", "winner": "a" },
+        { "a": "Rich Action",   "b": "Dante Marcheli", "winner": "a" },
+        { "a": "Sophia Rodriques", "b": "Fernando Riveiro", "winner": "a" },
+        { "a": "Kumari Twins",  "b": "Augg Action",    "winner": "b" }
+      ]
+    },
+    {
+      "name": "Semifinals",
+      "matches": [
+        { "a": "Abigail Jones", "b": "Rich Action", "winner": "a" },
+        { "a": "Sophia Rodriques", "b": "Augg Action", "winner": null }
+      ]
+    },
+    {
+      "name": "Final",
+      "matches": [
+        { "a": "Abigail Jones", "b": "Winner of Sophia Rodriques / Augg Action", "winner": null }
+      ]
+    }
+  ]
+}
