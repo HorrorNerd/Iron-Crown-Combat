@@ -5,6 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Iron Crown Combat — Fighters</title>
   <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    /* Page sprinkles */
+    .fighters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .fighter-card {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg);
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .fighter-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+    }
+    .fighter-card img {
+      width: 100%;
+      height: 230px;
+      object-fit: cover;
+      display: block;
+      background: var(--bg-2);
+    }
+    .fighter-name-overlay {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: .45rem .6rem;
+      background: linear-gradient(0deg, rgba(0,0,0,.7), rgba(0,0,0,0));
+      color: #fff; font-weight: 700; letter-spacing: .02em;
+      text-shadow: 0 2px 6px rgba(0,0,0,.5);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.6);
+      display: none; align-items: center; justify-content: center; z-index: 50;
+      padding: 1rem;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: 16px; width: min(980px, 100%); max-height: 90vh; overflow: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .modal header {
+      display:flex; justify-content:space-between; align-items:center;
+      padding: .8rem 1rem; border-bottom:1px solid var(--border);
+    }
+    .modal .content {
+      display: grid; grid-template-columns: 320px 1fr; gap: 1rem;
+      padding: 1rem;
+    }
+    .modal .left-col .thumb {
+      width: 100%; height: 260px; object-fit: cover; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg);
+      display: block; margin-bottom: .75rem;
+    }
+    .stat {
+      display:flex; justify-content: space-between; align-items:center;
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: .5rem .7rem; margin-bottom: .5rem; background: var(--bg);
+      font-weight: 600;
+    }
+    .awards { margin-top: .6rem; }
+    .awards h4 { margin: 0 0 .4rem 0; }
+    .badge {
+      display:inline-flex; align-items:center; gap:.35rem;
+      border:1px solid var(--border); padding:.2rem .5rem; border-radius: 999px;
+      font-size: .85em; margin: 0 .3rem .3rem 0; background: var(--bg);
+    }
+    .right-col h3 { margin: .1rem 0 .4rem 0; font-size: 1.35rem; }
+    .right-col .prose { white-space: pre-wrap; }
+
+    @media (max-width: 860px){
+      .modal .content { grid-template-columns: 1fr; }
+      .modal .left-col .thumb { height: 220px; }
+    }
+  </style>
 </head>
 <body>
   <header class="header">
@@ -23,33 +105,40 @@
         <a href="tournament.html">Tournaments</a>
         <a href="about.html">About</a>
       </nav>
-      <div class="actions" style="display:flex;gap:.5rem;align-items:center">
-        <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
-      </div>
     </div>
   </header>
 
   <main class="container">
     <div class="pagehead"><h1>Fighters</h1></div>
 
-    <!-- Search / filter (client-side) -->
-    <div class="card" style="margin-bottom:1rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
-      <input id="q" type="search" placeholder="Search fighters, gyms, styles…" style="flex:1;min-width:220px;padding:.6rem .8rem;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
-      <select id="gymFilter" style="padding:.55rem .7rem;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text)">
-        <option value="">All gyms</option>
-      </select>
-      <select id="genderFilter" style="padding:.55rem .7rem;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text)">
-        <option value="">All genders</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-      </select>
-      <button class="btn" id="clearFilters">Clear</button>
-    </div>
-
-    <section class="grid grid-3" id="fighters-grid">
+    <section class="fighters-grid" id="fightersGrid">
       <div class="card">Loading fighters…</div>
     </section>
+
+    <!-- Modal -->
+    <div class="modal-backdrop" id="fighterModal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fighterModalTitle">
+        <header>
+          <h3 id="fighterModalTitle">Fighter</h3>
+          <button class="btn" data-close aria-label="Close">✕</button>
+        </header>
+        <div class="content">
+          <div class="left-col">
+            <img id="modalImg" class="thumb" src="" alt="" />
+            <div class="stat"><span>Record</span><span id="modalRecord">0-0-0</span></div>
+            <div class="stat"><span>Total Earnings</span><span id="modalMoney">$0</span></div>
+            <div class="awards">
+              <h4>Awards</h4>
+              <div id="modalAwards"></div>
+            </div>
+          </div>
+          <div class="right-col">
+            <h3 id="modalName">Fighter Name</h3>
+            <div class="prose" id="modalBio">Bio</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer class="footer">
@@ -58,177 +147,154 @@
     </div>
   </footer>
 
- <script>
-  // year + theme toggle
-  document.getElementById('yr').textContent = new Date().getFullYear();
-  (function(){ const root=document.documentElement; const saved=localStorage.getItem('icc:theme'); if(saved==='light') root.classList.add('light');
-    document.addEventListener('click',e=>{ const t=e.target.closest('[data-theme-toggle]'); if(!t) return;
-      root.classList.toggle('light'); localStorage.setItem('icc:theme', root.classList.contains('light')?'light':'dark'); }); })();
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
 
-  (function(){
-    const SHEET_ID='1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
-    const GID='1277877160'; // Fighter Tracker
-    const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+    const FIGHTERS_URL = 'assets/fighters.json';
 
-    const grid = document.getElementById('fighters-grid');
-    const q = document.getElementById('q');
-    const gymFilter = document.getElementById('gymFilter');
-    const genderFilter = document.getElementById('genderFilter');
-    const clearBtn = document.getElementById('clearFilters');
+    const $ = s => document.querySelector(s);
+    const grid = $('#fightersGrid');
+    const modal = $('#fighterModal');
+    const mTitle = $('#fighterModalTitle');
+    const mName  = $('#modalName');
+    const mImg   = $('#modalImg');
+    const mRecord = $('#modalRecord');
+    const mMoney = $('#modalMoney');
+    const mAwards = $('#modalAwards');
+    const mBio   = $('#modalBio');
 
-    let ROWS = [];
-    let COLS = []; // full cols metadata
+    function formatMoney(n){
+      const num = (typeof n === 'string') ? Number(n.replace(/[^0-9.-]/g,'')) : Number(n||0);
+      return num.toLocaleString(undefined, { style:'currency', currency:'USD', maximumFractionDigits:0 });
+    }
+    function recordStr(w=0,l=0,d=0){
+      const wi = parseInt(w||0,10), lo=parseInt(l||0,10), dr=parseInt(d||0,10);
+      return `${wi}-${lo}-${dr}`;
+    }
+    function safe(val, fallback=''){
+      return (val === null || val === undefined) ? fallback : String(val);
+    }
 
-    const norm = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
+    // Normalize fighters.json => array of objects { name, img, wins, losses, draws, earnings, bio, awards[] }
+    function normalize(data){
+      // supports either { fighters: {...} } or flat { ... }
+      const raw = data && data.fighters ? data.fighters : data;
+      const out = [];
 
-    // preferred label matches for each field
-    const WANT = {
-      fighter: ['fighter','name','fightername'],
-      wins: ['wins','w'],
-      losses: ['losses','l'],
-      draws: ['draws','d'],
-      total: ['totalfights','total'],
-      gender: ['gender','sex'],
-      earnings: ['earnings','payout','money','totalearned'],
-      bio: ['bio','about','notes'],
-      image: ['image','imageurl','img','photo','picture'],
-      gym: ['gym','camp','team'],
-      winpct: ['win','winpct','winpercent','winpercentage'] // will match 'Win %'
-    };
+      if (Array.isArray(raw)) {
+        raw.forEach(f => {
+          if (!f) return;
+          const name = f.name || f.Fighter || f.id || 'Unknown';
+          out.push({
+            name,
+            img: f.img || f.Image || '',
+            wins: f.wins ?? f.Wins ?? 0,
+            losses: f.losses ?? f.Losses ?? 0,
+            draws: f.draws ?? f.Draws ?? 0,
+            earnings: f.earnings ?? f.Earnings ?? 0,
+            bio: f.bio ?? f.Bio ?? '',
+            awards: f.awards || f.Awards || []
+          });
+        });
+      } else if (raw && typeof raw === 'object') {
+        Object.entries(raw).forEach(([key, f])=>{
+          if (!f || typeof f !== 'object') return;
+          const name = f.name || f.Fighter || key;
+          out.push({
+            name,
+            img: f.img || f.Image || '',
+            wins: f.wins ?? f.Wins ?? 0,
+            losses: f.losses ?? f.Losses ?? 0,
+            draws: f.draws ?? f.Draws ?? 0,
+            earnings: f.earnings ?? f.Earnings ?? 0,
+            bio: f.bio ?? f.Bio ?? '',
+            awards: f.awards || f.Awards || []
+          });
+        });
+      }
 
-    function findColIndex(wantList){
-      // Try exact normalized label or substring
-      for (let i=0;i<COLS.length;i++){
-        const c = COLS[i];
-        const label = c.label || c.id || '';
-        const n = norm(label);
-        if (!n) continue;
-        if (c.type === 'boolean') continue; // skip checkbox/TRUE/FALSE columns
-        for (const w of wantList){
-          const wn = norm(w);
-          if (n === wn || n.includes(wn)) return i;
+      // Sort A→Z by name
+      out.sort((a,b)=> String(a.name).localeCompare(String(b.name)));
+      return out;
+    }
+
+    function cardHTML(f, idx){
+      // If missing image, still render card (with neutral bg)
+      const imgAttr = f.img ? `src="${f.img}"` : '';
+      return `
+        <article class="fighter-card" data-idx="${idx}" title="View ${safe(f.name)}">
+          <img ${imgAttr} alt="${safe(f.name)}" onerror="this.removeAttribute('src')" />
+          <div class="fighter-name-overlay">${safe(f.name)}</div>
+        </article>
+      `;
+    }
+
+    function awardsHTML(awards){
+      const list = Array.isArray(awards) ? awards : [];
+      if (!list.length) return '<span class="meta">No awards yet.</span>';
+      return list.map(a => `<span class="badge">🏅 ${safe(a)}</span>`).join('');
+    }
+
+    function openModal(f){
+      mTitle.textContent = safe(f.name);
+      mName.textContent  = safe(f.name);
+      mImg.src = f.img || '';
+      mImg.alt = f.name || 'Fighter';
+      mRecord.textContent = recordStr(f.wins, f.losses, f.draws);
+      mMoney.textContent = formatMoney(f.earnings);
+      mAwards.innerHTML = awardsHTML(f.awards);
+      mBio.textContent = safe(f.bio) || '—';
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(){
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    // Close handlers
+    document.addEventListener('click', (e)=>{
+      if (e.target.matches('[data-close]')) closeModal();
+      if (e.target === modal) closeModal();
+      const card = e.target.closest('.fighter-card');
+      if (card) {
+        const i = Number(card.getAttribute('data-idx'));
+        if (!isNaN(i) && window.__Fighters && window.__Fighters[i]) {
+          openModal(window.__Fighters[i]);
         }
       }
-      return -1;
+    });
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+    });
+
+    async function fetchJSON(url){
+      const r = await fetch(url, { cache:'no-store' });
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
     }
-
-    function parseGViz(text){
-      const start=text.indexOf('{'), end=text.lastIndexOf('}');
-      const json=JSON.parse(text.slice(start,end+1));
-      COLS = json.table.cols;
-
-      // Resolve column indexes
-      let idx = {
-        fighter: findColIndex(WANT.fighter),
-        wins: findColIndex(WANT.wins),
-        losses: findColIndex(WANT.losses),
-        draws: findColIndex(WANT.draws),
-        total: findColIndex(WANT.total),
-        gender: findColIndex(WANT.gender),
-        earnings: findColIndex(WANT.earnings),
-        bio: findColIndex(WANT.bio),
-        image: findColIndex(WANT.image),
-        gym: findColIndex(WANT.gym),
-        winpct: findColIndex(WANT.winpct),
-      };
-
-      // Failsafe defaults (common layout: col0=FALSE, col1=Fighter, col2=Wins,...)
-      if (idx.fighter < 0 && COLS.length >= 2) idx.fighter = 1;
-      if (idx.wins    < 0 && COLS.length >= 3) idx.wins    = 2;
-      if (idx.losses  < 0 && COLS.length >= 4) idx.losses  = 3;
-      if (idx.draws   < 0 && COLS.length >= 5) idx.draws   = 4;
-      if (idx.total   < 0 && COLS.length >= 6) idx.total   = 5;
-      if (idx.gender  < 0 && COLS.length >= 7) idx.gender  = 6;
-      if (idx.earnings< 0 && COLS.length >= 8) idx.earnings= 7;
-      if (idx.bio     < 0 && COLS.length >= 9) idx.bio     = 8;
-      if (idx.image   < 0 && COLS.length >=10) idx.image   = 9;
-      if (idx.gym     < 0 && COLS.length >=11) idx.gym     = 10;
-
-      const get = (row, i) => {
-        if (i < 0) return '';
-        const c = row.c[i];
-        if (!c) return '';
-        const v = (c.f != null ? c.f : c.v);
-        return (v == null) ? '' : String(v);
-      };
-
-      const rows = (json.table.rows||[]).map(r=>({
-        fighter: get(r, idx.fighter),
-        wins: get(r, idx.wins),
-        losses: get(r, idx.losses),
-        draws: get(r, idx.draws),
-        total: get(r, idx.total),
-        gender: get(r, idx.gender),
-        earnings: get(r, idx.earnings),
-        bio: get(r, idx.bio),
-        image: get(r, idx.image),
-        gym: get(r, idx.gym),
-        winpct: get(r, idx.winpct),
-      }));
-
-      // Filter out totally blank rows
-      return rows.filter(x => x.fighter || x.gym || x.bio || x.image);
-    }
-
-    function render(rows){
-      grid.innerHTML = rows.map(r=>{
-        const name=(r.fighter||'').trim() || 'Unknown';
-        const img=(r.image||'').trim() || 'assets/img/favicon.png';
-        const chips=[r.gender, r.winpct, r.gym].filter(Boolean).map(v=>`<span class="chip">${v}</span>`).join('');
-        const bio = r.bio ? `<p class="prose">${r.bio.replace(/\n/g,'<br>')}</p>` : '';
-        return `<article class="card fighter">
-          <img src="${img}" alt="${name}" />
-          <div>
-            <h3>${name}</h3>
-            <div class="meta">${chips}</div>
-            ${bio}
-          </div>
-        </article>`;
-      }).join('') || '<div class="card">No fighters match that filter.</div>';
-    }
-
-    function applyFilters(){
-      const term=(q.value||'').toLowerCase();
-      const gSel=gymFilter.value;
-      const genSel=genderFilter.value;
-      const filtered = ROWS.filter(r=>{
-        if (gSel && (r.gym||'')!==gSel) return false;
-        if (genSel && (r.gender||'')!==genSel) return false;
-        if (term){
-          const hay=[r.fighter,r.gym,r.gender,r.bio].join(' ').toLowerCase();
-          if (!hay.includes(term)) return false;
-        }
-        return true;
-      });
-      render(filtered);
-    }
-
-    function populateFilters(){
-      const gyms=[...new Set(ROWS.map(r=>r.gym).filter(Boolean))].sort();
-      gymFilter.innerHTML = `<option value="">All gyms</option>` + gyms.map(g=>`<option>${g}</option>`).join('');
-    }
-
-    q.addEventListener('input', applyFilters);
-    gymFilter.addEventListener('change', applyFilters);
-    genderFilter.addEventListener('change', applyFilters);
-    clearBtn.addEventListener('click', ()=>{ q.value=''; gymFilter.value=''; genderFilter.value=''; applyFilters(); });
 
     async function boot(){
-      try{
-        const res=await fetch(url,{cache:'no-store'});
-        const text=await res.text();
-        ROWS=parseGViz(text);
-        populateFilters();
-        render(ROWS);
-      }catch(e){
-        grid.innerHTML='<div class="card">Failed to load fighters.</div>';
-        console.error('fighters parse error', e);
+      try {
+        const data = await fetchJSON(FIGHTERS_URL);
+        const fighters = normalize(data);
+        window.__Fighters = fighters;
+
+        if (!fighters.length) {
+          grid.innerHTML = '<div class="card">No fighters found in assets/fighters.json.</div>';
+          return;
+        }
+
+        grid.innerHTML = fighters.map((f, i)=>cardHTML(f, i)).join('');
+      } catch (e){
+        console.error(e);
+        grid.innerHTML = '<div class="card">Failed to load fighters.</div>';
       }
     }
+
     boot();
-  })();
-</script>
-
-
+  </script>
 </body>
 </html>
