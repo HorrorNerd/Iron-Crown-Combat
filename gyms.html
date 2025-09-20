@@ -48,7 +48,7 @@
     </div>
   </footer>
 
- <script>
+<script>
   // year + theme toggle
   document.getElementById('yr').textContent = new Date().getFullYear();
   (function(){ const root=document.documentElement; const saved=localStorage.getItem('icc:theme'); if(saved==='light') root.classList.add('light');
@@ -61,98 +61,108 @@
     const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
     const grid = document.getElementById('gyms-grid');
-    let COLS=[];
 
-    const norm = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
-    const WANT = {
-      fighter:  ['fighter','name','fightername'],
-      gym:      ['gym','camp','team'],
-      wins:     ['wins','w'],
-      losses:   ['losses','l'],
-      draws:    ['draws','d'],
-      earnings: ['earnings','payout','money','totalearned','$']
+    // Helpers
+    const normKey = s => String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
+    const cleanGym = s => String(s||'').trim().replace(/\s+/g,' ');
+    const isHeaderish = v => {
+      const x = String(v||'').trim().toLowerCase();
+      return x === 'fighter' || x === 'wins' || x === 'losses' || x === 'draws' || x === 'earnings' || x === 'gym' || x === 'win %' || x === 'win%';
     };
-
-    function findColIndex(wantList){
-      for (let i=0;i<COLS.length;i++){
-        const c=COLS[i];
-        const n=norm(c.label||c.id||'');
-        if (!n || c.type==='boolean') continue; // skip the leading TRUE/FALSE checkbox column
-        for (const w of wantList){
-          const wn=norm(w);
-          if (n===wn || n.includes(wn)) return i;
-        }
-      }
-      return -1;
-    }
-
-    const getCell = (row, i) => {
-      if (i < 0) return '';
-      const c = row.c[i];
-      if (!c) return '';
-      const v = (c.f != null ? c.f : c.v);
-      return (v == null) ? '' : String(v);
+    const num$ = v => {
+      if (v == null || v === '') return 0;
+      // Prefer numeric if GViz gave it (e.g., 66900), else strip currency
+      const n = Number(v);
+      if (Number.isFinite(n)) return n;
+      const m = parseFloat(String(v).replace(/[^0-9.\-]/g,''));
+      return Number.isFinite(m) ? m : 0;
     };
-    const dollarsToNumber = (v) => {
-      if (!v) return 0;
-      const n = parseFloat(String(v).replace(/[^0-9.\-]/g,''));
-      return Number.isFinite(n) ? n : 0;
-    };
-    const fmtMoney = (n) => `$${Math.round(n).toLocaleString()}`;
+    const fmt$ = n => `$${Math.round(n).toLocaleString()}`;
 
     function parseGViz(text){
       const start=text.indexOf('{'), end=text.lastIndexOf('}');
       const json=JSON.parse(text.slice(start,end+1));
-      COLS=json.table.cols;
+      const cols=json.table.cols;
 
-      let idx={
-        fighter:  findColIndex(WANT.fighter),
-        gym:      findColIndex(WANT.gym),
-        wins:     findColIndex(WANT.wins),
-        losses:   findColIndex(WANT.losses),
-        draws:    findColIndex(WANT.draws),
-        earnings: findColIndex(WANT.earnings),
+      // Build label->index map (skip boolean/checkbox column "FALSE")
+      const map = {};
+      cols.forEach((c,i)=>{
+        const label = (c && (c.label || c.id) || '').trim();
+        if (!label) return;
+        if (c && c.type === 'boolean') return; // skip TRUE/FALSE col 0
+        map[label.toLowerCase()] = i;
+      });
+
+      // Hard-map by your exact headers
+      const idx = {
+        fighter: map['fighter'],
+        wins:    map['wins'],
+        losses:  map['losses'],
+        draws:   map['draws'],
+        earn:    map['earnings'],
+        gym:     map['gym'],
       };
 
-      // Failsafe defaults for your sheet structure:
-      // col0=FALSE, col1=Fighter, col2=Wins, col3=Losses, col4=Draws, col7=Earnings, col10=Gym
-      if (idx.fighter  < 0 && COLS.length >= 2) idx.fighter  = 1;
-      if (idx.wins     < 0 && COLS.length >= 3) idx.wins     = 2;
-      if (idx.losses   < 0 && COLS.length >= 4) idx.losses   = 3;
-      if (idx.draws    < 0 && COLS.length >= 5) idx.draws    = 4;
-      if (idx.earnings < 0 && COLS.length >= 8) idx.earnings = 7;
-      if (idx.gym      < 0 && COLS.length >=11) idx.gym      = 10;
+      // Fallbacks based on your known order if any are missing
+      if (idx.fighter == null) idx.fighter = 1;
+      if (idx.wins    == null) idx.wins    = 2;
+      if (idx.losses  == null) idx.losses  = 3;
+      if (idx.draws   == null) idx.draws   = 4;
+      if (idx.earn    == null) idx.earn    = 7;
+      if (idx.gym     == null) idx.gym     = 10;
 
-      const rows=(json.table.rows||[]).map(r=>({
-        fighter:  getCell(r, idx.fighter),
-        gym:      getCell(r, idx.gym) || 'Independent',
-        wins:     getCell(r, idx.wins)   || '0',
-        losses:   getCell(r, idx.losses) || '0',
-        draws:    getCell(r, idx.draws)  || '0',
-        earnings: getCell(r, idx.earnings) || '0',
-      }));
+      const get = (row, i) => {
+        if (i == null || i < 0) return '';
+        const c = row.c[i];
+        if (!c) return '';
+        // Use formatted if present, else raw
+        return (c.f != null ? c.f : c.v) ?? '';
+      };
 
-      return rows.filter(x => x.fighter || x.gym);
+      const out = [];
+      for (const r of (json.table.rows || [])){
+        const fighter = get(r, idx.fighter);
+        const gymRaw  = get(r, idx.gym);
+        const wins    = get(r, idx.wins);
+        const losses  = get(r, idx.losses);
+        const draws   = get(r, idx.draws);
+        const earn    = get(r, idx.earn);
+
+        // Drop obvious header/blank rows
+        if (!fighter && !gymRaw) continue;
+        if (isHeaderish(fighter) || isHeaderish(gymRaw)) continue;
+
+        out.push({
+          fighter: String(fighter).trim(),
+          gym: cleanGym(gymRaw || 'Independent'),
+          wins: String(wins || '0').trim(),
+          losses: String(losses || '0').trim(),
+          draws: String(draws || '0').trim(),
+          earnings: earn
+        });
+      }
+      return out;
     }
 
     function render(groups){
-      const gyms = Object.keys(groups).sort((a,b)=> groups[b].length - groups[a].length);
-      grid.innerHTML = gyms.map(gym=>{
-        const fighters = groups[gym];
-        const totalMoney = fighters.reduce((sum, f)=> sum + dollarsToNumber(f.earnings), 0);
+      const gyms = Object.keys(groups)
+        .sort((a,b)=> groups[b].fighters.length - groups[a].fighters.length || a.localeCompare(b));
 
-        const list = fighters.map(r=>{
-          const money = dollarsToNumber(r.earnings);
-          return `<li>${r.fighter} — ${r.wins}-${r.losses}-${r.draws} · ${fmtMoney(money)}</li>`;
+      grid.innerHTML = gyms.map(key=>{
+        const g = groups[key];
+        const total = g.fighters.reduce((s,f)=> s + num$(f.earnings), 0);
+
+        const list = g.fighters.map(f=>{
+          return `<li>${f.fighter} — ${f.wins}-${f.losses}-${f.draws} · ${fmt$(num$(f.earnings))}</li>`;
         }).join('');
 
         return `<article class="card">
           <div class="gym-header" data-acc>
             <div>
-              <h3 style="margin:0">${gym}</h3>
-              <div class="meta" style="margin-top:.25rem">${fmtMoney(totalMoney)} total</div>
+              <h3 style="margin:0">${g.displayName}</h3>
+              <div class="meta" style="margin-top:.25rem">${fmt$(total)} total</div>
             </div>
-            <span class="chip">${fighters.length} fighter${fighters.length===1?'':'s'}</span>
+            <span class="chip">${g.fighters.length} fighter${g.fighters.length===1?'':'s'}</span>
           </div>
           <div class="roster prose" hidden>
             <ul style="margin-left:1rem">${list}</ul>
@@ -161,7 +171,7 @@
       }).join('') || '<div class="card">No gyms found.</div>';
     }
 
-    // accordion
+    // Accordion
     document.addEventListener('click', (e)=>{
       const acc = e.target.closest('[data-acc]');
       if (!acc) return;
@@ -174,19 +184,25 @@
         const res=await fetch(url,{cache:'no-store'});
         const text=await res.text();
         const rows=parseGViz(text);
-        const groups={};
+
+        // Group by normalized gym key, keep first display name
+        const groups = {};
         for (const r of rows){
-          (groups[r.gym] = groups[r.gym] || []).push(r);
+          const key = normKey(r.gym || 'Independent');
+          if (!groups[key]) groups[key] = { displayName: r.gym || 'Independent', fighters: [] };
+          groups[key].fighters.push(r);
         }
+
         render(groups);
       }catch(e){
-        grid.innerHTML='<div class="card">Failed to load gyms.</div>';
+        grid.innerHTML = '<div class="card">Failed to load gyms.</div>';
         console.error('gyms parse error', e);
       }
     }
     boot();
   })();
 </script>
+
 
 
 
