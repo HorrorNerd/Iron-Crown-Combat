@@ -1,27 +1,98 @@
-<main>
-  <section class="bracket-section">
-    <h2>Live Crucible Tournament Bracket</h2>
-    <div class="bracket">
-      
-      <div class="round">
-        <h3>Quarterfinals</h3>
-        <div class="match winner">Abigail Jones <span>(Winner)</span> vs Hotarubi Kendo</div>
-        <div class="match winner">Rich Action <span>(Winner)</span> vs Dante Marcheli</div>
-        <div class="match winner">Sophia Rodriques <span>(Winner)</span> vs Fernando Riveiro</div>
-        <div class="match winner">Augg Action <span>(Winner)</span> vs Kumari Twins</div>
-      </div>
-      
-      <div class="round">
-        <h3>Semifinals</h3>
-        <div class="match winner">Abigail Jones <span>(Winner)</span> vs Rich Action</div>
-        <div class="match">Sophia Rodriques vs Augg Action</div>
-      </div>
-      
-      <div class="round">
-        <h3>Final</h3>
-        <div class="match">Abigail Jones vs Winner of Sophia/Augg</div>
-      </div>
-
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iron Crown Combat — Tournament</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .bracket-section { 
+      max-width: 900px; 
+      margin: 2rem auto; 
+      background: var(--bg-2); 
+      border-radius: 16px; 
+      border: 1px solid var(--border); 
+      padding: 2rem 1.5rem; 
+      box-shadow: 0 8px 25px rgba(0,0,0,.35); 
+    }
+    .bracket-section h2 { text-align:center; margin-bottom:1.5rem; }
+    .bracket { margin:0 auto; max-width:650px; }
+    .round { margin-bottom:2.5rem; }
+    .round h3 { color:var(--accent); margin-bottom:1rem; text-transform:uppercase; letter-spacing:.5px; }
+    .match { 
+      background: var(--bg-1); 
+      padding: .75rem 1rem; 
+      margin-bottom:.75rem; 
+      border-radius:8px; 
+      border-left:4px solid var(--accent); 
+      font-size:1rem; 
+    }
+    .match.winner { 
+      border-left-color: var(--gold); 
+      font-weight:600; 
+      background:rgba(255,215,0,.1); 
+    }
+    .match span { font-size:.9em; color:var(--muted); margin-left:.25rem; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container nav" data-nav>
+      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
+        <span>Iron Crown Combat</span>
+      </a>
+      <nav class="menu" aria-label="Primary">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="rules.html">Rules</a>
+        <a href="tournament.html" aria-current="page">Tournaments</a>
+        <a href="about.html">About</a>
+      </nav>
     </div>
-  </section>
-</main>
+  </header>
+
+  <main class="container">
+    <div class="pagehead"><h1>Tournament Bracket</h1></div>
+
+    <section class="bracket-section">
+      <h2>Live Crucible Tournament Bracket</h2>
+      <div class="bracket">
+
+        <div class="round">
+          <h3>Quarterfinals</h3>
+          <div class="match winner">Abigail Jones <span>(Winner)</span> vs Hotarubi Kendo</div>
+          <div class="match winner">Rich Action <span>(Winner)</span> vs Dante Marcheli</div>
+          <div class="match winner">Sophia Rodriques <span>(Winner)</span> vs Fernando Riveiro</div>
+          <div class="match winner">Augg Action <span>(Winner)</span> vs Kumari Twins</div>
+        </div>
+
+        <div class="round">
+          <h3>Semifinals</h3>
+          <div class="match winner">Abigail Jones <span>(Winner)</span> vs Rich Action</div>
+          <div class="match">Sophia Rodriques vs Augg Action</div>
+        </div>
+
+        <div class="round">
+          <h3>Final</h3>
+          <div class="match">Abigail Jones vs Winner of Sophia/Augg</div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container cols">
+      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent=new Date().getFullYear();
+  </script>
+</body>
+</html>
