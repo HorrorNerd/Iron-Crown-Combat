@@ -1,6 +1,4 @@
 [
-  { "slug": "iron-trial", "name": "The Iron Trial", "year": 2025 }
-  // Add past tournaments here:
-  // { "slug": "iron-trial-2024", "name": "The Iron Trial", "year": 2024 },
-  // { "slug": "autumn-crown-2023", "name": "Autumn Crown", "year": 2023 }
+  { "slug": "iron-trial", "name": "The Iron Trial", "year": 2025 },
+  { "slug": "king-of-the-crown", "name": "King of the Crown", "year": 2024 }
 ]
