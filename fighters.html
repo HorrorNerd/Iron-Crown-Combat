@@ -6,7 +6,7 @@
   <title>Iron Crown Combat — Fighters</title>
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
-    /* Page sprinkles */
+    /* Grid of fighter images with name overlay */
     .fighters-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -35,13 +35,13 @@
     }
     .fighter-name-overlay {
       position: absolute; left: 0; right: 0; bottom: 0;
-      padding: .45rem .6rem;
-      background: linear-gradient(0deg, rgba(0,0,0,.7), rgba(0,0,0,0));
+      padding: .5rem .6rem;
+      background: linear-gradient(0deg, rgba(0,0,0,.75), rgba(0,0,0,0));
       color: #fff; font-weight: 700; letter-spacing: .02em;
-      text-shadow: 0 2px 6px rgba(0,0,0,.5);
+      text-shadow: 0 2px 6px rgba(0,0,0,.6);
     }
 
-    /* Modal */
+    /* Modal layout */
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(0,0,0,.6);
       display: none; align-items: center; justify-content: center; z-index: 50;
@@ -61,15 +61,18 @@
       display: grid; grid-template-columns: 320px 1fr; gap: 1rem;
       padding: 1rem;
     }
-    .modal .left-col .thumb {
-      width: 100%; height: 260px; object-fit: cover; border-radius: 10px;
+    .left-col .thumb-wrap {
+      width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; overflow:hidden;
       border: 1px solid var(--border); background: var(--bg);
-      display: block; margin-bottom: .75rem;
+      margin-bottom: .75rem;
+    }
+    .left-col .thumb {
+      width:100%; height:100%; object-fit: cover; display:block;
     }
     .stat {
       display:flex; justify-content: space-between; align-items:center;
       border: 1px solid var(--border); border-radius: 10px;
-      padding: .5rem .7rem; margin-bottom: .5rem; background: var(--bg);
+      padding: .55rem .7rem; margin-bottom: .5rem; background: var(--bg);
       font-weight: 600;
     }
     .awards { margin-top: .6rem; }
@@ -79,12 +82,12 @@
       border:1px solid var(--border); padding:.2rem .5rem; border-radius: 999px;
       font-size: .85em; margin: 0 .3rem .3rem 0; background: var(--bg);
     }
-    .right-col h3 { margin: .1rem 0 .4rem 0; font-size: 1.35rem; }
-    .right-col .prose { white-space: pre-wrap; }
+    .right-col h3 { margin: .1rem 0 .5rem 0; font-size: 1.35rem; }
+    .right-col .prose { white-space: pre-wrap; line-height: 1.5; }
 
     @media (max-width: 860px){
       .modal .content { grid-template-columns: 1fr; }
-      .modal .left-col .thumb { height: 220px; }
+      .left-col .thumb-wrap { aspect-ratio: 4/3; }
     }
   </style>
 </head>
@@ -124,12 +127,12 @@
         </header>
         <div class="content">
           <div class="left-col">
-            <img id="modalImg" class="thumb" src="" alt="" />
+            <div class="thumb-wrap"><img id="modalImg" class="thumb" src="" alt="" /></div>
             <div class="stat"><span>Record</span><span id="modalRecord">0-0-0</span></div>
             <div class="stat"><span>Total Earnings</span><span id="modalMoney">$0</span></div>
             <div class="awards">
               <h4>Awards</h4>
-              <div id="modalAwards"></div>
+              <div id="modalAwards" class="meta">No awards yet.</div>
             </div>
           </div>
           <div class="right-col">
@@ -148,177 +151,197 @@
   </footer>
 
   <script>
-  document.getElementById('yr').textContent = new Date().getFullYear();
+    document.getElementById('yr').textContent = new Date().getFullYear();
 
-  // Try several common locations (case-sensitive on GitHub Pages!)
-  const CANDIDATE_URLS = [
-    'assets/fighters.json',
-    'assets/data/fighters.json',
-    'assets/json/fighters.json'
-  ];
+    // ---- Google Sheets setup (provided by you) ----
+    const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
+    const GID_FIGHTERS = '1277877160';   // Fighter Tracker
+    const GID_RESULTS  = '676906080';    // Event Results (for bonus/awards)
+    const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
 
-  const $ = s => document.querySelector(s);
-  const grid = $('#fightersGrid');
-  const modal = $('#fighterModal');
-  const mTitle = $('#fighterModalTitle');
-  const mName  = $('#modalName');
-  const mImg   = $('#modalImg');
-  const mRecord = $('#modalRecord');
-  const mMoney = $('#modalMoney');
-  const mAwards = $('#modalAwards');
-  const mBio   = $('#modalBio');
+    // ---- DOM shorthands ----
+    const $ = s => document.querySelector(s);
+    const grid = $('#fightersGrid');
+    const modal = $('#fighterModal');
+    const mTitle = $('#fighterModalTitle');
+    const mName  = $('#modalName');
+    const mImg   = $('#modalImg');
+    const mRecord = $('#modalRecord');
+    const mMoney = $('#modalMoney');
+    const mAwards = $('#modalAwards');
+    const mBio   = $('#modalBio');
 
-  function formatMoney(n){
-    const num = (typeof n === 'string') ? Number(n.replace(/[^0-9.-]/g,'')) : Number(n||0);
-    return num.toLocaleString(undefined, { style:'currency', currency:'USD', maximumFractionDigits:0 });
-  }
-  function recordStr(w=0,l=0,d=0){
-    const wi = parseInt(w||0,10), lo=parseInt(l||0,10), dr=parseInt(d||0,10);
-    return `${wi}-${lo}-${dr}`;
-  }
-  function safe(val, fallback=''){ return (val === null || val === undefined) ? fallback : String(val); }
-
-  function normalize(data){
-    // Accepts:
-    // 1) { fighters: { "Name": {...}, ... } }
-    // 2) { "Name": {...}, ... }
-    // 3) [ {...}, {...} ]
-    let raw = data;
-    if (data && typeof data === 'object' && !Array.isArray(data) && data.fighters) raw = data.fighters;
-
-    const arr = [];
-    if (Array.isArray(raw)) {
-      raw.forEach(f => arr.push(one(f)));
-    } else if (raw && typeof raw === 'object') {
-      Object.entries(raw).forEach(([key, f]) => arr.push(one(f, key)));
-    } else {
-      throw new Error('fighters.json has an unexpected shape. Expected an object or array.');
+    // ---- Utils ----
+    function slugify(s){
+      return String(s||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    }
+    function safe(val, fallback=''){ return (val === null || val === undefined) ? fallback : String(val); }
+    function formatMoney(n){
+      const num = (typeof n === 'string') ? Number(n.replace(/[^0-9.-]/g,'')) : Number(n||0);
+      return num.toLocaleString(undefined, { style:'currency', currency:'USD', maximumFractionDigits:0 });
+    }
+    function recordStr(w=0,l=0,d=0){
+      const wi = parseInt(w||0,10), lo=parseInt(l||0,10), dr=parseInt(d||0,10);
+      return `${isFinite(wi)?wi:0}-${isFinite(lo)?lo:0}-${isFinite(dr)?dr:0}`;
     }
 
-    arr.sort((a,b)=> String(a.name).localeCompare(String(b.name)));
-    return arr;
-
-    function one(f, keyName){
-      if (!f || typeof f !== 'object') f = {};
-      const name = f.name || f.Fighter || keyName || 'Unknown';
-      return {
-        name,
-        img: f.img || f.Image || '',
-        wins: f.wins ?? f.Wins ?? 0,
-        losses: f.losses ?? f.Losses ?? 0,
-        draws: f.draws ?? f.Draws ?? 0,
-        earnings: f.earnings ?? f.Earnings ?? 0,
-        bio: f.bio ?? f.Bio ?? '',
-        awards: f.awards || f.Awards || []
-      };
-    }
-  }
-
-  function cardHTML(f, idx){
-    const imgAttr = f.img ? `src="${f.img}"` : '';
-    return `
-      <article class="fighter-card" data-idx="${idx}" title="View ${safe(f.name)}">
-        <img ${imgAttr} alt="${safe(f.name)}" onerror="this.removeAttribute('src')" />
-        <div class="fighter-name-overlay">${safe(f.name)}</div>
-      </article>
-    `;
-  }
-  function awardsHTML(list){
-    const a = Array.isArray(list) ? list : [];
-    if (!a.length) return '<span class="meta">No awards yet.</span>';
-    return a.map(x => `<span class="badge">🏅 ${safe(x)}</span>`).join('');
-  }
-
-  function openModal(f){
-    mTitle.textContent = safe(f.name);
-    mName.textContent  = safe(f.name);
-    mImg.src = f.img || '';
-    mImg.alt = f.name || 'Fighter';
-    mRecord.textContent = recordStr(f.wins, f.losses, f.draws);
-    mMoney.textContent = formatMoney(f.earnings);
-    mAwards.innerHTML = awardsHTML(f.awards);
-    mBio.textContent = safe(f.bio) || '—';
-    modal.classList.add('show');
-    modal.setAttribute('aria-hidden','false');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeModal(){
-    modal.classList.remove('show');
-    modal.setAttribute('aria-hidden','true');
-    document.body.style.overflow = '';
-  }
-
-  document.addEventListener('click', (e)=>{
-    if (e.target.matches('[data-close]')) closeModal();
-    if (e.target === modal) closeModal();
-    const card = e.target.closest('.fighter-card');
-    if (card && window.__Fighters) {
-      const i = Number(card.getAttribute('data-idx'));
-      if (!isNaN(i) && window.__Fighters[i]) openModal(window.__Fighters[i]);
-    }
-  });
-  document.addEventListener('keydown', (e)=>{
-    if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
-  });
-
-  async function headOk(url){
-    try {
-      const r = await fetch(url, { method:'HEAD', cache:'no-store' });
-      return r.ok;
-    } catch { return false; }
-  }
-  async function fetchJSON(url){
-    const r = await fetch(url, { cache:'no-store' });
-    if (!r.ok) {
-      const text = await r.text().catch(()=> '');
-      throw new Error(`HTTP ${r.status} at ${url}${text ? ` — ${text.slice(0,140)}...` : ''}`);
-    }
-    return r.json();
-  }
-
-  async function boot(){
-    // find the first existing fighters.json
-    let chosen = null;
-    for (const u of CANDIDATE_URLS) {
-      // quick HEAD check to avoid noisy console errors
-      /* eslint-disable no-await-in-loop */
-      if (await headOk(u)) { chosen = u; break; }
-    }
-    if (!chosen) {
-      grid.innerHTML = `
-        <div class="card">
-          <strong>Couldn’t find <code>fighters.json</code>.</strong><br>
-          Looked for:<br>
-          ${CANDIDATE_URLS.map(u=>`<code>${u}</code>`).join('<br>')}<br><br>
-          Make sure the file path and casing match exactly on GitHub Pages.
-        </div>`;
-      return;
-    }
-
-    try {
-      const data = await fetchJSON(chosen);
-      const fighters = normalize(data);
-      window.__Fighters = fighters;
-
-      if (!fighters.length) {
-        grid.innerHTML = '<div class="card">No fighters found in fighters.json.</div>';
-        return;
+    // Robust CSV parser (supports quoted fields with commas/newlines)
+    function parseCSV(csv){
+      const rows=[]; let i=0, field='', row=[], q=false;
+      const pushField=()=>{ row.push(field); field=''; };
+      const pushRow=()=>{ rows.push(row); row=[]; };
+      while(i<csv.length){
+        const c = csv[i];
+        if (q){
+          if (c === '"'){
+            if (csv[i+1] === '"'){ field+='"'; i++; }
+            else { q = false; }
+          } else {
+            field += c;
+          }
+        } else {
+          if (c === '"'){ q = true; }
+          else if (c === ','){ pushField(); }
+          else if (c === '\n'){ pushField(); pushRow(); }
+          else if (c === '\r'){ /* skip */ }
+          else { field += c; }
+        }
+        i++;
       }
-
-      grid.innerHTML = fighters.map((f, i)=>cardHTML(f, i)).join('');
-    } catch (e){
-      console.error(e);
-      grid.innerHTML = `
-        <div class="card">
-          <strong>Failed to load fighters.</strong><br>
-          ${safe(e.message)}<br><br>
-          Tip: JSON must be valid (no trailing commas or comments).
-        </div>`;
+      // last field
+      if (field!=='' || row.length){ pushField(); pushRow(); }
+      if (!rows.length) return [];
+      const headers = rows[0].map(h=>h.trim());
+      return rows.slice(1).filter(r=>r.some(x=>String(x).trim()!=='')).map(r=>{
+        const o={}; headers.forEach((h,k)=>o[h]=(r[k]||'').trim()); return o;
+      });
     }
-  }
 
-  boot();
-</script>
+    async function fetchCSV(gid){
+      const res = await fetch(csvUrl(gid), { cache:'no-store' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      const text = await res.text();
+      return parseCSV(text);
+    }
 
+    // Build awards map from Event Results (bonus type assigned to Winner)
+    async function buildAwards(){
+      const rows = await fetchCSV(GID_RESULTS);
+      const map = Object.create(null);
+      for (const r of rows){
+        const winner = (r['Winner']||'').trim();
+        const bonus  = (r['bonus type']||r['Bonus']||'').trim();
+        if (!winner || !bonus) continue;
+        map[winner] = map[winner] || [];
+        map[winner].push(bonus);
+      }
+      // compact to unique
+      Object.keys(map).forEach(k=>{
+        map[k] = Array.from(new Set(map[k]));
+      });
+      return map;
+    }
+
+    function fighterCardHTML(f, idx){
+      const imgAttr = f._thumb ? `src="${f._thumb}"` : '';
+      return `
+        <article class="fighter-card" data-idx="${idx}" title="View ${safe(f.Fighter)}">
+          <img ${imgAttr} alt="${safe(f.Fighter)}" onerror="this.removeAttribute('src')" />
+          <div class="fighter-name-overlay">${safe(f.Fighter)}</div>
+        </article>
+      `;
+    }
+
+    function awardsHTML(list){
+      const a = Array.isArray(list) ? list : [];
+      if (!a.length) return '<span class="meta">No awards yet.</span>';
+      return a.map(x => `<span class="badge">🏅 ${safe(x)}</span>`).join('');
+    }
+
+    function openModal(f){
+      mTitle.textContent = safe(f.Fighter);
+      mName.textContent  = safe(f.Fighter);
+      mImg.src = f._headshot || f._thumb || '';
+      mImg.alt = f.Fighter || 'Fighter';
+      mRecord.textContent = recordStr(f.Wins, f.Losses, f.Draws);
+      mMoney.textContent = formatMoney(f.Earnings);
+      mAwards.innerHTML = awardsHTML(f._awards);
+      mBio.textContent = safe(f.Bio) || '—';
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(){
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('click', (e)=>{
+      if (e.target.matches('[data-close]')) closeModal();
+      if (e.target === modal) closeModal();
+      const card = e.target.closest('.fighter-card');
+      if (card && window.__Fighters) {
+        const i = Number(card.getAttribute('data-idx'));
+        if (!isNaN(i) && window.__Fighters[i]) openModal(window.__Fighters[i]);
+      }
+    });
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+    });
+
+    // Choose best image:
+    // 1) Image column (absolute or relative URL)
+    // 2) assets/images/fighters/<slug>.png (your uploaded headshots)
+    function chooseImagesFor(f){
+      const name = f.Fighter || '';
+      const fromSheet = (f.Image || '').trim();
+      const slug = slugify(name);
+      const local = `assets/images/fighters/${slug}.png`;
+
+      // Thumbnail for grid: prefer local (typically tighter crop), else sheet
+      f._thumb = local || fromSheet || '';
+      // Headshot in modal: prefer sheet (if it’s a portrait URL), else local
+      f._headshot = fromSheet || local || '';
+    }
+
+    async function boot(){
+      try {
+        // Load awards first
+        const awardsMap = await buildAwards();
+
+        // Load Fighter Tracker
+        const rows = await fetchCSV(GID_FIGHTERS);
+        // Expected columns:
+        // Fighter, Wins, Losses, Draws, Total Fights, Gender, Earnings, Bio, Image, Gym, Win %
+        const fighters = rows.filter(r => (r['Fighter']||'').trim() !== '');
+        // attach derived fields
+        for (const f of fighters){
+          chooseImagesFor(f);
+          f._awards = awardsMap[f.Fighter] || [];
+        }
+        // sort A→Z by Fighter
+        fighters.sort((a,b)=> String(a.Fighter).localeCompare(String(b.Fighter)));
+
+        window.__Fighters = fighters;
+
+        if (!fighters.length){
+          grid.innerHTML = '<div class="card">No fighters found in the spreadsheet.</div>';
+          return;
+        }
+
+        grid.innerHTML = fighters.map((f,i)=>fighterCardHTML(f,i)).join('');
+      } catch (e){
+        console.error(e);
+        grid.innerHTML = `
+          <div class="card">
+            <strong>Failed to load fighters from Google Sheets.</strong><br>
+            ${e.message || e.toString()}
+          </div>`;
+      }
+    }
+
+    boot();
+  </script>
 </body>
 </html>
