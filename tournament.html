@@ -1,93 +1,158 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iron Crown Combat - Tournament</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iron Crown Combat — Tournament</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
   <style>
-    body { background:#000; color:#ffd700; font-family:'Oswald',Arial,sans-serif; margin:0; }
-    .header { background:#181a1b; border-bottom:3px solid #ffd700; padding:1em 0; text-align:center;}
-    .logo { font-size:2.2em; font-weight:bold; color:#ffd700;}
-    nav { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; }
-    nav ul { list-style:none; margin:0; padding:0; display:flex; }
-    nav li { margin:0 7px; }
-    nav a { color:#e56915; text-decoration:none; padding:8px 16px; border-radius:6px; font-weight:bold; display:block;}
-    nav a.active, nav a:hover { background:#ffd700; color:#181a1b;}
-    #nav-toggle { display:none; background:none; border:none; color:#ffd700; font-size:2.1em; position:absolute; top:25px; right:16px; cursor:pointer; z-index:20; }
-    @media (max-width:760px) {
-      .logo { font-size:1.3em; padding-bottom:0.5em;}
-      nav ul { 
-        flex-direction:column; 
-        position:absolute; top:75px; left:0; width:100vw; 
-        background:#181a1b; 
-        border-top:2px solid #ffd700;
-        display:none;
-      }
-      nav ul.show { display:flex; }
-      nav li { margin:8px 0; }
-      #nav-toggle { display:block; }
-      nav { position:relative; }
+    /* Page-specific light styling that sits on top of main.css */
+    .bracket-wrap { display:grid; gap:1rem; }
+    .round-card h3 { margin:0 0 .6rem 0; }
+    .match {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:.6rem .8rem; border:1px solid var(--border); border-radius:10px;
+      background: var(--bg);
     }
-    .bracket-section { max-width:800px; margin:2em auto; background:#1a1a1a; border-radius:12px; border:2px solid #ffd700; padding:2em 1em; }
-    .bracket-section h2 { text-align:center; color:#ffd700; margin-bottom:1.4em;}
-    .bracket { margin:0 auto; max-width:600px;}
-    .round { margin-bottom:2.5em; }
-    .round h3 { color:#e56915; margin-bottom:1.2em; text-align:left; }
-    .match { background:#222; color:#ffd700; padding:12px 2vw; margin-bottom:10px; border-radius:8px; font-size:1.14em; border-left:5px solid #e56915; box-shadow:0 1px 4px #111;}
-    .winner { background:#2a201a; color:#ffd700; font-weight:bold; border-left:5px solid #ffd700;}
-    .footer { margin-top:3em; padding:1em 0; border-top:2px solid #ffd700; text-align:center; background:#181a1b; font-size:0.95em; color:#e56915;}
+    .match + .match { margin-top:.5rem; }
+    .match .badge { margin-left:.6rem; }
+    .match.winner {
+      border-left:4px solid var(--icc-gold, #c8a64d);
+      background: var(--bg-2);
+      font-weight:600;
+    }
+    @media (min-width: 900px){
+      .bracket-grid {
+        display:grid; gap:1rem;
+        grid-template-columns: repeat(3, 1fr);
+        align-items:start;
+      }
+    }
   </style>
 </head>
 <body>
   <header class="header">
-    <div class="logo">IRON <span style="color:#e56915;">CROWN</span> COMBAT</div>
-    <button id="nav-toggle" aria-label="Show navigation">&#9776;</button>
-    <nav>
-      <ul id="nav-list">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="fighters.html">Fighters</a></li>
-        <li><a href="events.html">Events</a></li>
-        <li><a href="rankings.html">Rankings</a></li>
-        <li><a href="news.html">News</a></li>
-        <li><a href="tournament.html" class="active">Tournament</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="rules.html">Test Your Metal</a></li>
-        <li><a href="guestbook.html">Guestbook</a></li>
-      </ul>
-    </nav>
+    <div class="container nav" data-nav>
+      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
+        <span>Iron Crown Combat</span>
+      </a>
+      <nav class="menu" aria-label="Primary">
+        <a href="events.html">Events</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="fighters.html">Fighters</a>
+        <a href="gyms.html">Gyms</a>
+        <a href="news.html">News</a>
+        <a href="tournament.html" aria-current="page">Tournaments</a>
+        <a href="rules.html">Rules</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="actions" style="display:flex;gap:.5rem;align-items:center">
+        <button class="btn" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">🌓</button>
+        <button class="btn burger" data-drawer aria-label="Open menu">☰</button>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <section class="bracket-section">
-      <h2>Live Crucible Tournament Bracket</h2>
-      <div class="bracket">
-        <div class="round">
+  <main class="container">
+    <div class="pagehead">
+      <h1>Live Crucible Tournament Bracket</h1>
+      <p class="meta">Updated as results come in.</p>
+    </div>
+
+    <section class="bracket-wrap">
+      <div class="bracket-grid">
+        <!-- Quarterfinals -->
+        <article class="card round-card">
           <h3>Quarterfinals</h3>
-          <div class="match winner">Abigail Jones <span>(Winner)</span> vs Hotarubi Kendo</div>
-          <div class="match winner">Rich Action <span>(Winner)</span> vs Dante Marcheli</div>
-          <div class="match">Sophia Rodriques vs Fernando Riveiro</div>
-          <div class="match">Kumari Twins vs Augg Action</div>
-        </div>
-        <div class="round">
+          <div class="match winner">
+            <span>Abigail Jones</span>
+            <span class="chip badge">Winner</span>
+          </div>
+          <div class="match">
+            <span>Hotarubi Kendo</span>
+          </div>
+
+          <div class="match winner" style="margin-top:.5rem">
+            <span>Rich Action</span>
+            <span class="chip badge">Winner</span>
+          </div>
+          <div class="match">
+            <span>Dante Marcheli</span>
+          </div>
+
+          <div class="match" style="margin-top:.5rem">
+            <span>Sophia Rodriques</span>
+          </div>
+          <div class="match">
+            <span>Fernando Riveiro</span>
+          </div>
+
+          <div class="match" style="margin-top:.5rem">
+            <span>Kumari Twins</span>
+          </div>
+          <div class="match">
+            <span>Augg Action</span>
+          </div>
+        </article>
+
+        <!-- Semifinals -->
+        <article class="card round-card">
           <h3>Semifinals</h3>
-          <div class="match">Abigail Jones vs Winner of Kumari Twins/Augg Action</div>
-          <div class="match">Rich Action vs Winner of Sophia Rodriques/Fernando Riveiro</div>
-        </div>
-        <div class="round">
+          <div class="match">
+            <span>Abigail Jones</span>
+          </div>
+          <div class="match">
+            <span>Winner of Kumari Twins / Augg Action</span>
+          </div>
+
+          <div class="match" style="margin-top:.5rem">
+            <span>Rich Action</span>
+          </div>
+          <div class="match">
+            <span>Winner of Sophia Rodriques / Fernando Riveiro</span>
+          </div>
+        </article>
+
+        <!-- Final -->
+        <article class="card round-card">
           <h3>Final</h3>
-          <div class="match">Winner of Abigail’s Semi vs Winner of Rich’s Semi</div>
-        </div>
+          <div class="match">
+            <span>Winner of Abigail’s Semi</span>
+          </div>
+          <div class="match">
+            <span>Winner of Rich’s Semi</span>
+          </div>
+        </article>
       </div>
     </section>
   </main>
-  
-  <footer class="footer">&copy; 2025 Iron Crown Combat. All rights reserved.</footer>
+
+  <footer class="footer">
+    <div class="container cols">
+      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
+      <div style="display:flex;gap:.6rem">
+        <a class="chip" href="https://youtube.com/@SwtTNGaming" target="_blank" rel="noopener">YouTube</a>
+        <a class="chip" href="https://www.twitch.tv/" target="_blank" rel="noopener">Twitch</a>
+        <a class="chip" href="https://beacons.ai/tngamingyt" target="_blank" rel="noopener">Links</a>
+      </div>
+    </div>
+  </footer>
+
   <script>
-    document.getElementById('nav-toggle').onclick = function() {
-      var navList = document.getElementById('nav-list');
-      navList.classList.toggle('show');
-    };
+    // Year + theme toggle (same pattern as other pages)
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    (function(){
+      const root=document.documentElement;
+      const saved=localStorage.getItem('icc:theme');
+      if(saved==='light') root.classList.add('light');
+      document.addEventListener('click',(e)=>{
+        const t=e.target.closest('[data-theme-toggle]');
+        if(!t) return;
+        root.classList.toggle('light');
+        localStorage.setItem('icc:theme', root.classList.contains('light') ? 'light' : 'dark');
+      });
+    })();
   </script>
 </body>
 </html>
-
