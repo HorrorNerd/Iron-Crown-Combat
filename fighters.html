@@ -148,153 +148,177 @@
   </footer>
 
   <script>
-    document.getElementById('yr').textContent = new Date().getFullYear();
+  document.getElementById('yr').textContent = new Date().getFullYear();
 
-    const FIGHTERS_URL = 'assets/fighters.json';
+  // Try several common locations (case-sensitive on GitHub Pages!)
+  const CANDIDATE_URLS = [
+    'assets/fighters.json',
+    'assets/data/fighters.json',
+    'assets/json/fighters.json'
+  ];
 
-    const $ = s => document.querySelector(s);
-    const grid = $('#fightersGrid');
-    const modal = $('#fighterModal');
-    const mTitle = $('#fighterModalTitle');
-    const mName  = $('#modalName');
-    const mImg   = $('#modalImg');
-    const mRecord = $('#modalRecord');
-    const mMoney = $('#modalMoney');
-    const mAwards = $('#modalAwards');
-    const mBio   = $('#modalBio');
+  const $ = s => document.querySelector(s);
+  const grid = $('#fightersGrid');
+  const modal = $('#fighterModal');
+  const mTitle = $('#fighterModalTitle');
+  const mName  = $('#modalName');
+  const mImg   = $('#modalImg');
+  const mRecord = $('#modalRecord');
+  const mMoney = $('#modalMoney');
+  const mAwards = $('#modalAwards');
+  const mBio   = $('#modalBio');
 
-    function formatMoney(n){
-      const num = (typeof n === 'string') ? Number(n.replace(/[^0-9.-]/g,'')) : Number(n||0);
-      return num.toLocaleString(undefined, { style:'currency', currency:'USD', maximumFractionDigits:0 });
+  function formatMoney(n){
+    const num = (typeof n === 'string') ? Number(n.replace(/[^0-9.-]/g,'')) : Number(n||0);
+    return num.toLocaleString(undefined, { style:'currency', currency:'USD', maximumFractionDigits:0 });
+  }
+  function recordStr(w=0,l=0,d=0){
+    const wi = parseInt(w||0,10), lo=parseInt(l||0,10), dr=parseInt(d||0,10);
+    return `${wi}-${lo}-${dr}`;
+  }
+  function safe(val, fallback=''){ return (val === null || val === undefined) ? fallback : String(val); }
+
+  function normalize(data){
+    // Accepts:
+    // 1) { fighters: { "Name": {...}, ... } }
+    // 2) { "Name": {...}, ... }
+    // 3) [ {...}, {...} ]
+    let raw = data;
+    if (data && typeof data === 'object' && !Array.isArray(data) && data.fighters) raw = data.fighters;
+
+    const arr = [];
+    if (Array.isArray(raw)) {
+      raw.forEach(f => arr.push(one(f)));
+    } else if (raw && typeof raw === 'object') {
+      Object.entries(raw).forEach(([key, f]) => arr.push(one(f, key)));
+    } else {
+      throw new Error('fighters.json has an unexpected shape. Expected an object or array.');
     }
-    function recordStr(w=0,l=0,d=0){
-      const wi = parseInt(w||0,10), lo=parseInt(l||0,10), dr=parseInt(d||0,10);
-      return `${wi}-${lo}-${dr}`;
+
+    arr.sort((a,b)=> String(a.name).localeCompare(String(b.name)));
+    return arr;
+
+    function one(f, keyName){
+      if (!f || typeof f !== 'object') f = {};
+      const name = f.name || f.Fighter || keyName || 'Unknown';
+      return {
+        name,
+        img: f.img || f.Image || '',
+        wins: f.wins ?? f.Wins ?? 0,
+        losses: f.losses ?? f.Losses ?? 0,
+        draws: f.draws ?? f.Draws ?? 0,
+        earnings: f.earnings ?? f.Earnings ?? 0,
+        bio: f.bio ?? f.Bio ?? '',
+        awards: f.awards || f.Awards || []
+      };
     }
-    function safe(val, fallback=''){
-      return (val === null || val === undefined) ? fallback : String(val);
+  }
+
+  function cardHTML(f, idx){
+    const imgAttr = f.img ? `src="${f.img}"` : '';
+    return `
+      <article class="fighter-card" data-idx="${idx}" title="View ${safe(f.name)}">
+        <img ${imgAttr} alt="${safe(f.name)}" onerror="this.removeAttribute('src')" />
+        <div class="fighter-name-overlay">${safe(f.name)}</div>
+      </article>
+    `;
+  }
+  function awardsHTML(list){
+    const a = Array.isArray(list) ? list : [];
+    if (!a.length) return '<span class="meta">No awards yet.</span>';
+    return a.map(x => `<span class="badge">🏅 ${safe(x)}</span>`).join('');
+  }
+
+  function openModal(f){
+    mTitle.textContent = safe(f.name);
+    mName.textContent  = safe(f.name);
+    mImg.src = f.img || '';
+    mImg.alt = f.name || 'Fighter';
+    mRecord.textContent = recordStr(f.wins, f.losses, f.draws);
+    mMoney.textContent = formatMoney(f.earnings);
+    mAwards.innerHTML = awardsHTML(f.awards);
+    mBio.textContent = safe(f.bio) || '—';
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(){
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('click', (e)=>{
+    if (e.target.matches('[data-close]')) closeModal();
+    if (e.target === modal) closeModal();
+    const card = e.target.closest('.fighter-card');
+    if (card && window.__Fighters) {
+      const i = Number(card.getAttribute('data-idx'));
+      if (!isNaN(i) && window.__Fighters[i]) openModal(window.__Fighters[i]);
+    }
+  });
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+  });
+
+  async function headOk(url){
+    try {
+      const r = await fetch(url, { method:'HEAD', cache:'no-store' });
+      return r.ok;
+    } catch { return false; }
+  }
+  async function fetchJSON(url){
+    const r = await fetch(url, { cache:'no-store' });
+    if (!r.ok) {
+      const text = await r.text().catch(()=> '');
+      throw new Error(`HTTP ${r.status} at ${url}${text ? ` — ${text.slice(0,140)}...` : ''}`);
+    }
+    return r.json();
+  }
+
+  async function boot(){
+    // find the first existing fighters.json
+    let chosen = null;
+    for (const u of CANDIDATE_URLS) {
+      // quick HEAD check to avoid noisy console errors
+      /* eslint-disable no-await-in-loop */
+      if (await headOk(u)) { chosen = u; break; }
+    }
+    if (!chosen) {
+      grid.innerHTML = `
+        <div class="card">
+          <strong>Couldn’t find <code>fighters.json</code>.</strong><br>
+          Looked for:<br>
+          ${CANDIDATE_URLS.map(u=>`<code>${u}</code>`).join('<br>')}<br><br>
+          Make sure the file path and casing match exactly on GitHub Pages.
+        </div>`;
+      return;
     }
 
-    // Normalize fighters.json => array of objects { name, img, wins, losses, draws, earnings, bio, awards[] }
-    function normalize(data){
-      // supports either { fighters: {...} } or flat { ... }
-      const raw = data && data.fighters ? data.fighters : data;
-      const out = [];
+    try {
+      const data = await fetchJSON(chosen);
+      const fighters = normalize(data);
+      window.__Fighters = fighters;
 
-      if (Array.isArray(raw)) {
-        raw.forEach(f => {
-          if (!f) return;
-          const name = f.name || f.Fighter || f.id || 'Unknown';
-          out.push({
-            name,
-            img: f.img || f.Image || '',
-            wins: f.wins ?? f.Wins ?? 0,
-            losses: f.losses ?? f.Losses ?? 0,
-            draws: f.draws ?? f.Draws ?? 0,
-            earnings: f.earnings ?? f.Earnings ?? 0,
-            bio: f.bio ?? f.Bio ?? '',
-            awards: f.awards || f.Awards || []
-          });
-        });
-      } else if (raw && typeof raw === 'object') {
-        Object.entries(raw).forEach(([key, f])=>{
-          if (!f || typeof f !== 'object') return;
-          const name = f.name || f.Fighter || key;
-          out.push({
-            name,
-            img: f.img || f.Image || '',
-            wins: f.wins ?? f.Wins ?? 0,
-            losses: f.losses ?? f.Losses ?? 0,
-            draws: f.draws ?? f.Draws ?? 0,
-            earnings: f.earnings ?? f.Earnings ?? 0,
-            bio: f.bio ?? f.Bio ?? '',
-            awards: f.awards || f.Awards || []
-          });
-        });
+      if (!fighters.length) {
+        grid.innerHTML = '<div class="card">No fighters found in fighters.json.</div>';
+        return;
       }
 
-      // Sort A→Z by name
-      out.sort((a,b)=> String(a.name).localeCompare(String(b.name)));
-      return out;
+      grid.innerHTML = fighters.map((f, i)=>cardHTML(f, i)).join('');
+    } catch (e){
+      console.error(e);
+      grid.innerHTML = `
+        <div class="card">
+          <strong>Failed to load fighters.</strong><br>
+          ${safe(e.message)}<br><br>
+          Tip: JSON must be valid (no trailing commas or comments).
+        </div>`;
     }
+  }
 
-    function cardHTML(f, idx){
-      // If missing image, still render card (with neutral bg)
-      const imgAttr = f.img ? `src="${f.img}"` : '';
-      return `
-        <article class="fighter-card" data-idx="${idx}" title="View ${safe(f.name)}">
-          <img ${imgAttr} alt="${safe(f.name)}" onerror="this.removeAttribute('src')" />
-          <div class="fighter-name-overlay">${safe(f.name)}</div>
-        </article>
-      `;
-    }
+  boot();
+</script>
 
-    function awardsHTML(awards){
-      const list = Array.isArray(awards) ? awards : [];
-      if (!list.length) return '<span class="meta">No awards yet.</span>';
-      return list.map(a => `<span class="badge">🏅 ${safe(a)}</span>`).join('');
-    }
-
-    function openModal(f){
-      mTitle.textContent = safe(f.name);
-      mName.textContent  = safe(f.name);
-      mImg.src = f.img || '';
-      mImg.alt = f.name || 'Fighter';
-      mRecord.textContent = recordStr(f.wins, f.losses, f.draws);
-      mMoney.textContent = formatMoney(f.earnings);
-      mAwards.innerHTML = awardsHTML(f.awards);
-      mBio.textContent = safe(f.bio) || '—';
-      modal.classList.add('show');
-      modal.setAttribute('aria-hidden','false');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal(){
-      modal.classList.remove('show');
-      modal.setAttribute('aria-hidden','true');
-      document.body.style.overflow = '';
-    }
-
-    // Close handlers
-    document.addEventListener('click', (e)=>{
-      if (e.target.matches('[data-close]')) closeModal();
-      if (e.target === modal) closeModal();
-      const card = e.target.closest('.fighter-card');
-      if (card) {
-        const i = Number(card.getAttribute('data-idx'));
-        if (!isNaN(i) && window.__Fighters && window.__Fighters[i]) {
-          openModal(window.__Fighters[i]);
-        }
-      }
-    });
-    document.addEventListener('keydown', (e)=>{
-      if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
-    });
-
-    async function fetchJSON(url){
-      const r = await fetch(url, { cache:'no-store' });
-      if (!r.ok) throw new Error('HTTP '+r.status);
-      return r.json();
-    }
-
-    async function boot(){
-      try {
-        const data = await fetchJSON(FIGHTERS_URL);
-        const fighters = normalize(data);
-        window.__Fighters = fighters;
-
-        if (!fighters.length) {
-          grid.innerHTML = '<div class="card">No fighters found in assets/fighters.json.</div>';
-          return;
-        }
-
-        grid.innerHTML = fighters.map((f, i)=>cardHTML(f, i)).join('');
-      } catch (e){
-        console.error(e);
-        grid.innerHTML = '<div class="card">Failed to load fighters.</div>';
-      }
-    }
-
-    boot();
-  </script>
 </body>
 </html>
