@@ -314,16 +314,23 @@
     // 1) Image column (absolute or relative URL)
     // 2) assets/images/fighters/<slug>.png (your uploaded headshots)
     function chooseImagesFor(f){
-      const name = f.Fighter || '';
-      const fromSheet = (f.Image || '').trim();
-      const slug = slugify(name);
-      const local = `assets/images/fighters/${slug}.png`;
+  const name = f.Fighter || '';
+  const fromSheet = (f.Image || '').trim();  // optional sheet URL
+  const slug = slugify(name);
 
-      // Thumbnail for grid: prefer local (typically tighter crop), else sheet
-      f._thumb = local || fromSheet || '';
-      // Headshot in modal: prefer sheet (if it’s a portrait URL), else local
-      f._headshot = fromSheet || local || '';
-    }
+  // Your folders:
+  // - Grid card uses: assets/images/fighters/<slug>.png
+  // - Modal headshot uses: assets/images/fighters/headshots/<slug>.png
+  const localGrid = `assets/images/fighters/${slug}.png`;
+  const localHead = `assets/images/fighters/headshots/${slug}.png`;
+
+  // Thumbnail for the grid: prefer local card image
+  f._thumb = localGrid || fromSheet || '';
+
+  // Headshot in modal: prefer local headshot, then sheet, then grid image
+  f._headshot = localHead || fromSheet || localGrid || '';
+}
+
 
     async function boot(){
       try {
