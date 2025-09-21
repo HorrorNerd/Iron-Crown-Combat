@@ -11,28 +11,33 @@
     --muted:#b9c0cf; --card:#1b1e25; --border:#2a2f39;
   }
   body{background:var(--bg); color:#fff; margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
-  /* keep content centered but don't break the header/menu */
-  main, .pagehead, .fighters-grid { text-align:center; }
 
-  /* Header/menu overrides so centering doesn't mess layout */
-  .header .container[data-nav] { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
-  .header .menu { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; }
-  .header .menu a { display:inline-flex; align-items:center; }
+  /* ---- Header / Nav: lock proper layout regardless of global centering ---- */
+  .header .container[data-nav]{display:flex; align-items:center; justify-content:space-between; gap:1rem;}
+  .header .menu{display:flex; flex-wrap:wrap; gap:.6rem; justify-content:flex-end; text-align:left;}
+  .header .menu a{display:inline-flex; align-items:center; white-space:nowrap;}
 
+  @media (max-width:860px){
+    .header .container[data-nav]{flex-wrap:wrap; justify-content:center;}
+    .header .menu{justify-content:center;}
+  }
+
+  .pagehead, main{ text-align:center; }
   .pagehead h1{color:var(--gold); margin:1.2rem 0 .5rem;}
 
-  /* GRID */
+  /* ---- Grid ---- */
   .fighters-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; padding:1rem; max-width:1200px; margin:0 auto 2rem;}
   .fighter-card{position:relative; width:250px; height:250px; margin:0 auto; overflow:hidden; border-radius:14px; background:#111; box-shadow:0 10px 25px rgba(0,0,0,.35); border:1px solid var(--border); cursor:pointer;}
   .fighter-card img{width:100%; height:100%; object-fit:cover; display:block;}
   .fighter-name{position:absolute; left:0; right:0; bottom:0; padding:.5rem .6rem; background:linear-gradient(180deg,transparent,rgba(0,0,0,.7) 35%,rgba(0,0,0,.85)); color:var(--gold); font-weight:700; text-shadow:0 2px 8px #000;}
 
-  /* MODAL */
+  /* ---- Modal ---- */
   .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; padding:12px; z-index:60;}
   .modal-backdrop.show{display:flex;}
-  .modal{background:var(--bg-2); border:1px solid var(--border); max-width:980px; width:100%; border-radius:16px; overflow:hidden; display:flex; flex-direction:row; box-shadow:0 30px 80px rgba(0,0,0,.6);}
-  .modal-left{flex:1; background:#0f1116; border-right:3px solid var(--gold); display:flex; align-items:center; justify-content:center; padding:10px;}
-  .modal-left img{max-width:100%; height:auto; border-radius:10px; display:block}
+  .modal{position:relative; background:var(--bg-2); border:1px solid var(--border); max-width:980px; width:100%; border-radius:16px; overflow:hidden; display:flex; flex-direction:row; box-shadow:0 30px 80px rgba(0,0,0,.6);}
+  .close-btn{position:absolute; top:10px; right:16px; font-size:1.9rem; color:#fff; cursor:pointer; line-height:1; z-index:2; background:none; border:none;}
+  .modal-left{flex:1; background:#0f1116; border-right:3px solid var(--gold); display:flex; align-items:center; justify-content:center; padding:10px; max-height:85vh;}
+  .modal-left img{max-width:100%; max-height:80vh; height:auto; width:auto; object-fit:contain; border-radius:10px; display:block;}
   .modal-right{flex:1.2; padding:1rem 1rem 1.2rem 1rem; text-align:left; max-height:85vh; overflow:auto;}
   .modal-right h2{margin:.2rem 0 .6rem; color:var(--gold); line-height:1.15}
 
@@ -45,11 +50,11 @@
   .bio{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1rem; color:#e7ebf5; line-height:1.55; word-wrap:break-word; overflow-wrap:break-word;}
   .awards{margin-top:.9rem; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:.75rem 1rem; color:#e7ebf5;}
   .awards strong{color:var(--gold)}
-  .close-btn{position:absolute; top:10px; right:16px; font-size:1.9rem; color:#fff; cursor:pointer; line-height:1;}
 
   @media (max-width:820px){
     .modal{flex-direction:column;}
-    .modal-left{border-right:none; border-bottom:3px solid var(--gold);}
+    .modal-left{border-right:none; border-bottom:3px solid var(--gold); max-height:52vh;}
+    .modal-left img{max-height:48vh;}
     .stat-grid{grid-template-columns:1fr;}
     .modal-right{text-align:center;}
     .bio{text-align:left;}
@@ -155,7 +160,7 @@
       fetchCSV(GID_EVENT_RESULTS).catch(()=>[]) // optional
     ]);
 
-    // Build awards map for winners
+    // Awards map
     const awardsByName = new Map();
     for(const r of ev){
       const winner = (r['Winner']||'').trim();
@@ -171,7 +176,7 @@
       if(!name) continue;
       const slug = slugify(name);
 
-      // ALWAYS use local images (ignore sheet image field)
+      // Local images only
       const headshot = `assets/images/fighters/headshots/${slug}.png`;
       const fullImg  = `assets/images/fighters/${slug}.png`;
 
@@ -187,7 +192,6 @@
       const gym = (r['Gym']||'Independent').trim();
       const earnings = r['Earnings']||0;
 
-      // Keep newlines in bio; render as <br>
       const bioRaw = (r['Bio']||'').trim();
       const bioHTML = bioRaw ? bioRaw.replace(/\n/g,'<br>') : '—';
 
@@ -221,21 +225,32 @@
     }, { passive:true });
   }
 
-  const modalEl = document.getElementById('fighterModal');
+  const modalBackdrop = document.getElementById('fighterModal');
+
   function openModal(f){
-    document.getElementById('modalImage').src = f.image;      // local full image
+    document.getElementById('modalImage').src = f.image;
     document.getElementById('modalName').textContent = f.name;
     document.getElementById('modalRecord').innerHTML   = `<div class="label">Record</div><div class="value"><span>${f.record}</span></div>`;
     document.getElementById('modalWin').innerHTML      = `<div class="label">Win %</div><div class="value"><span>${f.winPct||'—'}</span></div>`;
     document.getElementById('modalGym').innerHTML      = `<div class="label">Gym</div><div class="value"><span title="${f.gym}">${f.gym}</span></div>`;
     document.getElementById('modalEarnings').innerHTML = `<div class="label">Earnings</div><div class="value"><span>${money(f.earnings)}</span></div>`;
-    document.getElementById('modalBio').innerHTML = f.bioHTML;   // preserve line breaks
+    document.getElementById('modalBio').innerHTML = f.bioHTML;
     document.getElementById('modalAwards').textContent = (f.awards && f.awards.length) ? f.awards.join(', ') : 'No awards yet.';
-    modalEl.classList.add('show'); modalEl.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+    modalBackdrop.classList.add('show');
+    modalBackdrop.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
   }
-  function closeModal(){ modalEl.classList.remove('show'); modalEl.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
-  modalEl.addEventListener('click', e=>{ if(e.target===modalEl) closeModal(); }, { passive:true });
+
+  function closeModal(){
+    modalBackdrop.classList.remove('show');
+    modalBackdrop.setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+  }
   window.closeModal = closeModal;
+
+  // close on backdrop click and on ESC
+  modalBackdrop.addEventListener('click', e=>{ if(e.target===modalBackdrop) closeModal(); }, { passive:true });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
   (async function(){
     try{
