@@ -63,48 +63,24 @@
 </head>
 <body>
  <!-- Header / Navbar -->
-<header class="site-header">
-  <div class="container">
-    <a class="brand" href="/">Iron Crown Combat</a>
-
-    <!-- Hamburger -->
-    <button class="nav-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
-      <svg class="icon icon-menu" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-        <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-      </svg>
-      <svg class="icon icon-close" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-        <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-      </svg>
-    </button>
-
-        <!-- Nav -->
-    <nav id="primary-nav" class="nav" hidden>
-      <ul class="nav-links">
+<header class="header">
+    <div class="container nav" data-nav>
+      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
+        <span>Iron Crown Combat</span>
+      </a>
+      <nav class="menu" aria-label="Primary">
         <a href="events.html">Events</a>
         <a href="rankings.html">Rankings</a>
-        <a href="fighters.html" aria-current="page">Fighters</a>
+        <a href="fighters.html">Fighters</a>
         <a href="gyms.html">Gyms</a>
         <a href="news.html">News</a>
         <a href="rules.html">Rules</a>
         <a href="tournament.html">Tournaments</a>
-        <a href="about.html">About</a>
-     </ul>
-
-      <!-- Theme Switcher -->
-      <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
-        <svg class="icon theme-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-          <path d="M12 4V2M12 22v-2M4.93 4.93 3.52 3.52M20.48 20.48l-1.41-1.41M4 12H2m20 0h-2M4.93 19.07 3.52 20.48M20.48 3.52l-1.41 1.41M12 7a5 5 0 100 10 5 5 0 000-10z"
-                stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <svg class="icon theme-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"
-                stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="theme-label">Theme</span>
-      </button>
-    </nav>
-  </div>
-</header>
+        <a href="about.html" aria-current="page">About</a>
+      </nav>
+    </div>
+  </header>
 
   <main class="container">
     <div class="pagehead"><h1>Iron Crown Combat Fighters</h1></div>
