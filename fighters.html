@@ -12,8 +12,8 @@
   }
   body{background:var(--bg); color:#fff; margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
 
-  /* ---- Header / Nav: lock proper layout regardless of global centering ---- */
-  .header .container[data-nav]{display:flex; align-items:center; justify-content:space-between; gap:1rem;}
+  /* ---- Header / Nav: preserve your layout ---- */
+  .header .container[data-nav]{display:flex; align-items:center; justify-content:space-between; gap:1rem; position:relative;}
   .header .menu{display:flex; flex-wrap:wrap; gap:.6rem; justify-content:flex-end; text-align:left;}
   .header .menu a{display:inline-flex; align-items:center; white-space:nowrap;}
 
@@ -59,29 +59,65 @@
     .modal-right{text-align:center;}
     .bio{text-align:left;}
   }
+
+  /* ===== Minimal, namespaced mobile hamburger (won’t affect other pages) ===== */
+  .icc-nav-toggle{
+    display:none; margin-left:auto; inline-size:44px; block-size:44px;
+    border:1px solid var(--border); background:transparent; color:#fff;
+    border-radius:.6rem; align-items:center; justify-content:center;
+  }
+  .icc-nav-toggle .icc-close{display:none;}
+
+  /* Use your existing nav styles; only control visibility on small screens */
+  @media (max-width:767px){
+    .icc-nav-toggle{display:inline-flex;}
+    #icc-primary-nav{display:none;}
+    #icc-primary-nav.icc-open{
+      display:block; position:absolute; inset-inline:0; top:100%;
+      background:var(--bg-2); border-top:1px solid var(--border);
+      box-shadow:0 10px 24px rgba(0,0,0,.35); z-index:50;
+      padding:.5rem .75rem;
+    }
+    #icc-primary-nav.icc-open .menu{justify-content:center;}
+    body.icc-menu-open .icc-nav-toggle .icc-ham{display:none;}
+    body.icc-menu-open .icc-nav-toggle .icc-close{display:block;}
+  }
 </style>
 </head>
 <body>
- <!-- Header / Navbar -->
- <header class="header">
+  <!-- Header / Navbar -->
+  <header class="header">
     <div class="container nav" data-nav>
       <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
         <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
         <span>Iron Crown Combat</span>
       </a>
-      <nav class="menu" aria-label="Primary">
+
+      <!-- SAFE mobile toggle button (namespaced) -->
+      <button id="icc-nav-toggle" class="icc-nav-toggle" aria-expanded="false" aria-controls="icc-primary-nav" aria-label="Open menu">
+        <!-- hamburger -->
+        <svg class="icc-ham" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <!-- close -->
+        <svg class="icc-close" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <!-- Your existing nav, just add an id so the mobile toggle can target it -->
+      <nav id="icc-primary-nav" class="menu" aria-label="Primary">
         <a href="events.html">Events</a>
         <a href="rankings.html">Rankings</a>
-        <a href="fighters.html">Fighters</a>
+        <a href="fighters.html" aria-current="page">Fighters</a>
         <a href="gyms.html">Gyms</a>
         <a href="news.html">News</a>
         <a href="rules.html">Rules</a>
         <a href="tournament.html">Tournaments</a>
-        <a href="about.html" aria-current="page">About</a>
+        <a href="about.html">About</a>
       </nav>
     </div>
   </header>
-
 
   <main class="container">
     <div class="pagehead"><h1>Iron Crown Combat Fighters</h1></div>
@@ -254,6 +290,7 @@
   modalBackdrop.addEventListener('click', e=>{ if(e.target===modalBackdrop) closeModal(); }, { passive:true });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
+  // ==== Load fighters ====
   (async function(){
     try{
       const fighters = await loadFighters();
@@ -265,8 +302,42 @@
     }
     document.getElementById('yr').textContent = new Date().getFullYear();
   })();
-  
-})();
+
+  // ==== Mobile nav toggle (namespaced; won’t affect desktop) ====
+  (function(){
+    const btn = document.getElementById('icc-nav-toggle');
+    const nav = document.getElementById('icc-primary-nav');
+    if (!btn || !nav) return;
+
+    function openNav(){
+      document.body.classList.add('icc-menu-open');
+      nav.classList.add('icc-open');
+      btn.setAttribute('aria-expanded','true');
+      btn.setAttribute('aria-label','Close menu');
+    }
+    function closeNav(){
+      document.body.classList.remove('icc-menu-open');
+      nav.classList.remove('icc-open');
+      btn.setAttribute('aria-expanded','false');
+      btn.setAttribute('aria-label','Open menu');
+    }
+    function toggleNav(){
+      nav.classList.contains('icc-open') ? closeNav() : openNav();
+    }
+
+    btn.addEventListener('click', toggleNav);
+    document.addEventListener('keydown', e => { if(e.key==='Escape') closeNav(); });
+    document.addEventListener('click', e => {
+      if (!nav.contains(e.target) && e.target !== btn && !btn.contains(e.target) && nav.classList.contains('icc-open')) {
+        closeNav();
+      }
+    });
+
+    // Ensure desktop view resets any mobile state
+    const mq = window.matchMedia('(min-width:768px)');
+    function sync(e){ if (e.matches) closeNav(); }
+    mq.addEventListener ? mq.addEventListener('change', sync) : mq.addListener(sync);
+  })();
 </script>
 </body>
 </html>
