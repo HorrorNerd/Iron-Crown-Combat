@@ -1,410 +1,219 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Iron Crown Combat — Fighters</title>
-  <link rel="stylesheet" href="assets/css/main.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ICC Fighters</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
-    /* ===== Grid (headshots 250x250 with name overlay) ===== */
+    body {
+      background: #0e0e0e;
+      color: #f1f1f1;
+      font-family: 'Oswald','Impact',sans-serif;
+      text-align: center;
+      margin: 0;
+    }
     .fighters-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5em;
+      padding: 2em;
+      max-width: 1200px;
+      margin: auto;
     }
     .fighter-card {
       position: relative;
-      border: 1px solid var(--border);
-      border-radius: 14px;
+      width: 250px;
+      height: 250px;
+      margin: auto;
       overflow: hidden;
-      background: var(--bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px #0009;
       cursor: pointer;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-      width: 250px; height: 250px;  /* lock square cells */
-      margin: 0 auto; /* center when column wider than 250 */
-    }
-    .fighter-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent);
-      box-shadow: 0 10px 24px rgba(0,0,0,.25);
     }
     .fighter-card img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
-      background: var(--bg-2);
     }
-    .fighter-name-overlay {
-      position: absolute; left: 0; right: 0; bottom: 0;
-      padding: .45rem .6rem;
-      background: linear-gradient(0deg, rgba(0,0,0,.8), rgba(0,0,0,0));
-      color: #fff; font-weight: 800; letter-spacing: .02em;
-      text-shadow: 0 2px 6px rgba(0,0,0,.6);
+    .fighter-name {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.65);
+      color: #ffd700;
+      padding: 0.5em;
+      font-weight: bold;
+      font-size: 1.2em;
       text-align: center;
     }
 
-    /* ===== Modal layout ===== */
-    .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(0,0,0,.6);
-      display: none; align-items: center; justify-content: center; z-index: 50;
-      padding: 1rem;
-    }
-    .modal-backdrop.show { display: flex; }
+    /* Modal */
     .modal {
-      background: var(--bg-2); border: 1px solid var(--border);
-      border-radius: 16px; width: min(1100px, 100%); max-height: 92vh;
-      display: flex; flex-direction: column;
-      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 1em;
     }
-    .modal header {
-      flex: 0 0 auto;
-      display:flex; justify-content:space-between; align-items:center;
-      padding: .8rem 1rem; border-bottom:1px solid var(--border);
+    .modal-content {
+      background: #1a1a1a;
+      max-width: 900px;
+      width: 100%;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      box-shadow: 0 6px 22px #000;
     }
-    .modal .content {
-      flex: 1 1 auto; overflow: auto;
-      display: grid; grid-template-columns: 480px 1fr; gap: 0;
-    }
-    /* Left: full image */
     .modal-left {
-      padding: 1rem;
-      border-right: 2px solid #d4af37; /* golden divider */
-      display: flex; align-items: center; justify-content: center;
-      background: var(--bg);
+      flex: 1;
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1em;
+      border-right: 3px solid #ffd700;
     }
-    .modal-left .fullpic {
-      width: 100%; height: auto; max-height: 70vh; object-fit: cover;
-      border-radius: 12px; border: 1px solid var(--border);
-      background: var(--bg-2);
+    .modal-left img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
     }
-    /* Right: info */
     .modal-right {
-      padding: 1rem 1.25rem;
-      display: grid; grid-template-rows: auto auto auto 1fr auto;
-      gap: .6rem;
+      flex: 1.2;
+      padding: 1.5em;
+      text-align: left;
+      overflow-y: auto;
+      max-height: 80vh;
     }
-    .modal-right h3 {
-      margin: .1rem 0 .3rem 0; font-size: 1.6rem; letter-spacing: .02em;
+    .modal-right h2 {
+      color: #ffd700;
+      margin-top: 0;
     }
     .stats {
-      display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: .6rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      margin: 1em 0;
     }
-    .stat {
-      display:flex; justify-content: space-between; align-items:center;
-      border: 1px solid var(--border); border-radius: 10px;
-      padding: .55rem .7rem; background: var(--bg);
-      font-weight: 600;
+    .stat-box {
+      flex: 1 1 45%;
+      background: #23272a;
+      padding: 0.8em;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.95em;
+      word-break: break-word;
+      text-align: center;
     }
     .bio {
-      white-space: pre-wrap; line-height: 1.55; border: 1px solid var(--border);
-      border-radius: 10px; padding: .8rem; background: var(--bg);
+      margin: 1em 0;
+      font-size: 1em;
+      line-height: 1.5;
+      color: #ddd;
     }
-    .awards { margin-top: .4rem; }
-    .awards h4 { margin: 0 0 .4rem 0; }
-    .badge {
-      display:inline-flex; align-items:center; gap:.35rem;
-      border:1px solid var(--border); padding:.2rem .55rem; border-radius:999px;
-      font-size:.87em; margin:0 .3rem .35rem 0; background: var(--bg);
+    .awards {
+      margin-top: 1.2em;
+    }
+    .awards strong {
+      color: #ffd700;
+    }
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 2em;
+      color: #fff;
+      cursor: pointer;
     }
 
-    @media (max-width: 980px){
-      .modal .content { grid-template-columns: 1fr; }
-      .modal-left { border-right: none; border-bottom: 2px solid #d4af37; }
-      .modal-left .fullpic { max-height: 42vh; }
+    /* Mobile */
+    @media (max-width: 768px) {
+      .modal-content {
+        flex-direction: column;
+      }
+      .modal-left {
+        border-right: none;
+        border-bottom: 3px solid #ffd700;
+        padding: 1em;
+      }
+      .modal-right {
+        padding: 1em;
+      }
+      .stats {
+        flex-direction: column;
+      }
+      .stat-box {
+        flex: 1 1 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="container nav" data-nav>
-      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
-        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
-        <span>Iron Crown Combat</span>
-      </a>
-      <nav class="menu" aria-label="Primary">
-        <a href="events.html">Events</a>
-        <a href="rankings.html">Rankings</a>
-        <a href="fighters.html" aria-current="page">Fighters</a>
-        <a href="gyms.html">Gyms</a>
-        <a href="news.html">News</a>
-        <a href="rules.html">Rules</a>
-        <a href="tournament.html">Tournaments</a>
-        <a href="about.html">About</a>
-      </nav>
-    </div>
-  </header>
+  <h1 style="color:#ffd700; margin:1em 0;">Iron Crown Combat Fighters</h1>
+  <div class="fighters-grid" id="fightersGrid"></div>
 
-  <main class="container">
-    <div class="pagehead"><h1>Fighters</h1></div>
-
-    <section class="fighters-grid" id="fightersGrid">
-      <div class="card">Loading fighters…</div>
-    </section>
-
-    <!-- Modal -->
-    <div class="modal-backdrop" id="fighterModal" aria-hidden="true">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fighterModalTitle">
-        <header>
-          <h3 id="fighterModalTitle">Fighter</h3>
-          <button class="btn" data-close aria-label="Close">✕</button>
-        </header>
-        <div class="content">
-          <div class="modal-left">
-            <img id="modalFull" class="fullpic" alt="" />
-          </div>
-          <div class="modal-right">
-            <h3 id="modalName">Fighter Name</h3>
-
-            <div class="stats">
-              <div class="stat"><span>Record</span><span id="modalRecord">0-0-0</span></div>
-              <div class="stat"><span>Win %</span><span id="modalWinPct">0%</span></div>
-              <div class="stat"><span>Gym</span><span id="modalGym">—</span></div>
-              <div class="stat"><span>Earnings</span><span id="modalMoney">$0</span></div>
-            </div>
-
-            <div class="bio" id="modalBio">Bio</div>
-
-            <div class="awards">
-              <h4>Awards</h4>
-              <div id="modalAwards" class="meta">No awards yet.</div>
-            </div>
-          </div>
+  <!-- Modal -->
+  <div class="modal" id="fighterModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <div class="modal-left">
+        <img id="modalImage" src="" alt="Fighter full">
+      </div>
+      <div class="modal-right">
+        <h2 id="modalName"></h2>
+        <div class="stats">
+          <div class="stat-box" id="modalRecord"></div>
+          <div class="stat-box" id="modalWin"></div>
+          <div class="stat-box" id="modalGym"></div>
+          <div class="stat-box" id="modalEarnings"></div>
         </div>
+        <div class="bio" id="modalBio"></div>
+        <div class="awards"><strong>Awards:</strong> <span id="modalAwards"></span></div>
       </div>
     </div>
-  </main>
-
-  <footer class="footer">
-    <div class="container cols">
-      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
-    </div>
-  </footer>
+  </div>
 
   <script>
-    document.getElementById('yr').textContent = new Date().getFullYear();
+    async function loadFighters() {
+      const res = await fetch('fighters.json');
+      const fighters = await res.json();
+      const grid = document.getElementById('fightersGrid');
 
-    // ===== Google Sheets setup =====
-    const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
-    const GID_FIGHTERS = '1277877160';   // Fighter Tracker
-    const GID_RESULTS  = '676906080';    // Event Results (for bonus/awards)
-    const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
-
-    // ===== DOM =====
-    const $ = s => document.querySelector(s);
-    const grid = $('#fightersGrid');
-    const modal = $('#fighterModal');
-
-    const mTitle   = $('#fighterModalTitle');
-    const mName    = $('#modalName');
-    const mFull    = $('#modalFull');
-    const mRecord  = $('#modalRecord');
-    const mWinPct  = $('#modalWinPct');
-    const mGym     = $('#modalGym');
-    const mMoney   = $('#modalMoney');
-    const mAwards  = $('#modalAwards');
-    const mBio     = $('#modalBio');
-
-    // ===== Utils =====
-    function slugify(s){
-      return String(s||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-    }
-    function safe(val, fallback=''){ return (val === null || val === undefined) ? fallback : String(val); }
-    function fmtMoney(n){
-      const num = (typeof n === 'string') ? Number(n.replace(/[^0-9.-]/g,'')) : Number(n||0);
-      return num.toLocaleString(undefined, { style:'currency', currency:'USD', maximumFractionDigits:0 });
-    }
-    function recordStr(w=0,l=0,d=0){
-      const wi = parseInt(w||0,10), lo=parseInt(l||0,10), dr=parseInt(d||0,10);
-      return `${isFinite(wi)?wi:0}-${isFinite(lo)?lo:0}-${isFinite(dr)?dr:0}`;
-    }
-    function pctStr(val, wins, totalFights){
-      // Prefer sheet Win %, fallback to compute
-      if (val && String(val).trim() !== '') {
-        const num = Number(String(val).replace('%',''));
-        if (!isNaN(num)) return `${Math.round(num)}%`;
-      }
-      const tf = parseInt(totalFights||0,10);
-      const w  = parseInt(wins||0,10);
-      if (tf > 0) return `${Math.round((w/tf)*100)}%`;
-      return '0%';
-    }
-
-    // Robust CSV parser (quoted fields, commas, newlines)
-    function parseCSV(csv){
-      const rows=[]; let i=0, field='', row=[], q=false;
-      const pushField=()=>{ row.push(field); field=''; };
-      const pushRow=()=>{ rows.push(row); row=[]; };
-      while(i<csv.length){
-        const c = csv[i];
-        if (q){
-          if (c === '"'){
-            if (csv[i+1] === '"'){ field+='"'; i++; }
-            else { q = false; }
-          } else { field += c; }
-        } else {
-          if (c === '"'){ q = true; }
-          else if (c === ','){ pushField(); }
-          else if (c === '\n'){ pushField(); pushRow(); }
-          else if (c === '\r'){ /* skip */ }
-          else { field += c; }
-        }
-        i++;
-      }
-      if (field!=='' || row.length){ pushField(); pushRow(); }
-      if (!rows.length) return [];
-      const headers = rows[0].map(h=>h.trim());
-      return rows.slice(1).filter(r=>r.some(x=>String(x).trim()!=='')).map(r=>{
-        const o={}; headers.forEach((h,k)=>o[h]=(r[k]||'').trim()); return o;
-      });
-    }
-    async function fetchCSV(gid){
-      const res = await fetch(csvUrl(gid), { cache:'no-store' });
-      if (!res.ok) throw new Error('HTTP '+res.status);
-      const text = await res.text();
-      return parseCSV(text);
-    }
-
-    // ===== Awards from Event Results (assign bonus type to Winner) =====
-    async function buildAwards(){
-      const rows = await fetchCSV(GID_RESULTS);
-      const map = Object.create(null);
-      for (const r of rows){
-        const winner = (r['Winner']||'').trim();
-        const bonus  = (r['bonus type']||r['Bonus']||'').trim();
-        if (!winner || !bonus) continue;
-        (map[winner] ||= []).push(bonus);
-      }
-      Object.keys(map).forEach(k => map[k] = Array.from(new Set(map[k])));
-      return map;
-    }
-
-    // ===== Image helpers with extension fallbacks =====
-    const EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
-
-    function headshotCandidates(slug, sheetUrl){
-      const localHeadBase = `assets/images/fighters/headshots/${slug}`;
-      const list = EXTENSIONS.map(ext => `${localHeadBase}${ext}`);
-      if (sheetUrl) list.push(sheetUrl);
-      return list;
-    }
-    function fullpicCandidates(slug, sheetUrl){
-      const localFullBase = `assets/images/fighters/${slug}`;
-      const list = EXTENSIONS.map(ext => `${localFullBase}${ext}`);
-      if (sheetUrl) list.push(sheetUrl);
-      // if headshot exists but fullpic missing, could still fallback to headshot:
-      list.push(...EXTENSIONS.map(ext => `assets/images/fighters/headshots/${slug}${ext}`));
-      return list;
-    }
-    function tryLoad(urls){
-      return new Promise(resolve=>{
-        if (!urls || !urls.length) return resolve('');
-        let i = 0;
-        const tryNext = () => {
-          if (i >= urls.length) return resolve('');
-          const u = urls[i++]; if (!u) return tryNext();
-          const img = new Image();
-          img.onload = () => resolve(u);
-          img.onerror = tryNext;
-          img.src = u + (u.includes('?') ? '&' : '?') + 'v=' + Date.now();
-        };
-        tryNext();
+      fighters.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'fighter-card';
+        card.innerHTML = `
+          <img src="${f.headshot}" alt="${f.name}">
+          <div class="fighter-name">${f.name}</div>
+        `;
+        card.onclick = () => openModal(f);
+        grid.appendChild(card);
       });
     }
 
-    // ===== Page rendering =====
-    function cardHTML(f, idx, headSrc){
-      const name = safe(f.Fighter);
-      return `
-        <article class="fighter-card" data-idx="${idx}" title="View ${name}">
-          <img alt="${name}" ${headSrc ? `src="${headSrc}"` : ''} />
-          <div class="fighter-name-overlay">${name}</div>
-        </article>
-      `;
-    }
-    function awardsHTML(list){
-      const a = Array.isArray(list) ? list : [];
-      if (!a.length) return '<span class="meta">No awards yet.</span>';
-      return a.map(x => `<span class="badge">🏅 ${safe(x)}</span>`).join('');
+    function openModal(f) {
+      document.getElementById('fighterModal').style.display = 'flex';
+      document.getElementById('modalImage').src = f.image;
+      document.getElementById('modalName').textContent = f.name;
+      document.getElementById('modalRecord').textContent = `Record: ${f.record}`;
+      document.getElementById('modalWin').textContent = `Win %: ${f.winPct}`;
+      document.getElementById('modalGym').textContent = `Gym: ${f.gym}`;
+      document.getElementById('modalEarnings').textContent = `Earnings: $${f.earnings}`;
+      document.getElementById('modalBio').textContent = f.bio;
+      document.getElementById('modalAwards').textContent = f.awards.length ? f.awards.join(', ') : 'No awards yet.';
     }
 
-    async function openModal(f){
-      const name = safe(f.Fighter);
-      mTitle.textContent = name;
-      mName.textContent  = name;
-      mRecord.textContent = recordStr(f.Wins, f.Losses, f.Draws);
-      mWinPct.textContent = pctStr(f['Win %'], f.Wins, f['Total Fights']);
-      mGym.textContent    = safe(f.Gym) || '—';
-      mMoney.textContent  = fmtMoney(f.Earnings);
-      mAwards.innerHTML   = awardsHTML(f._awards);
-      mBio.textContent    = safe(f.Bio) || '—';
-
-      // Choose best full picture
-      const slug = slugify(name);
-      const fullCandidates = fullpicCandidates(slug, f.Image);
-      const chosen = await tryLoad(fullCandidates);
-      if (chosen) { mFull.src = chosen; mFull.alt = name; }
-      else { mFull.removeAttribute('src'); mFull.alt = ''; }
-
-      modal.classList.add('show');
-      modal.setAttribute('aria-hidden','false');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal(){
-      modal.classList.remove('show');
-      modal.setAttribute('aria-hidden','true');
-      document.body.style.overflow = '';
+    function closeModal() {
+      document.getElementById('fighterModal').style.display = 'none';
     }
 
-    document.addEventListener('click', (e)=>{
-      if (e.target.matches('[data-close]')) closeModal();
-      if (e.target === modal) closeModal();
-      const card = e.target.closest('.fighter-card');
-      if (card && window.__Fighters) {
-        const i = Number(card.getAttribute('data-idx'));
-        if (!isNaN(i) && window.__Fighters[i]) openModal(window.__Fighters[i]);
-      }
-    });
-    document.addEventListener('keydown', (e)=>{
-      if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
-    });
-
-    async function boot(){
-      try {
-        const [awardsMap, rows] = await Promise.all([buildAwards(), fetchCSV(GID_FIGHTERS)]);
-
-        const fighters = rows
-          .filter(r => (r['Fighter']||'').trim() !== '')
-          .map(r => ({ ...r, _awards: awardsMap[r.Fighter] || [] }))
-          .sort((a,b)=> String(a.Fighter).localeCompare(String(b.Fighter)));
-
-        window.__Fighters = fighters;
-
-        if (!fighters.length){
-          grid.innerHTML = '<div class="card">No fighters found in the spreadsheet.</div>';
-          return;
-        }
-
-        // Resolve headshots first (so grid is clean)
-        const resolved = await Promise.all(fighters.map(async f=>{
-          const slug = slugify(f.Fighter);
-          const head = await tryLoad(headshotCandidates(slug, f.Image));
-          return { f, head };
-        }));
-
-        grid.innerHTML = resolved.map(({f, head}, i)=>cardHTML(f, i, head)).join('');
-      } catch (e){
-        console.error(e);
-        grid.innerHTML = `
-          <div class="card">
-            <strong>Failed to load fighters from Google Sheets.</strong><br>
-            ${e.message || e.toString()}
-          </div>`;
-      }
-    }
-
-    boot();
+    loadFighters();
   </script>
 </body>
 </html>
