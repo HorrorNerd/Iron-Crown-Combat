@@ -6,10 +6,10 @@
   <title>Iron Crown Combat — Fighters</title>
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
-    /* Grid of fighter images with name overlay */
+    /* ===== Grid (headshots 250x250 with name overlay) ===== */
     .fighters-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 1rem;
     }
     .fighter-card {
@@ -20,6 +20,8 @@
       background: var(--bg);
       cursor: pointer;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      width: 250px; height: 250px;  /* lock square cells */
+      margin: 0 auto; /* center when column wider than 250 */
     }
     .fighter-card:hover {
       transform: translateY(-2px);
@@ -28,86 +30,89 @@
     }
     .fighter-card img {
       width: 100%;
-      height: 230px;
+      height: 100%;
       object-fit: cover;
       display: block;
       background: var(--bg-2);
     }
     .fighter-name-overlay {
       position: absolute; left: 0; right: 0; bottom: 0;
-      padding: .5rem .6rem;
-      background: linear-gradient(0deg, rgba(0,0,0,.75), rgba(0,0,0,0));
-      color: #fff; font-weight: 700; letter-spacing: .02em;
+      padding: .45rem .6rem;
+      background: linear-gradient(0deg, rgba(0,0,0,.8), rgba(0,0,0,0));
+      color: #fff; font-weight: 800; letter-spacing: .02em;
       text-shadow: 0 2px 6px rgba(0,0,0,.6);
+      text-align: center;
     }
 
-  /* Modal layout */
-.modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,.6);
-  display: none; align-items: center; justify-content: center; z-index: 50;
-  padding: 1rem;
-}
-.modal-backdrop.show { display: flex; }
+    /* ===== Modal layout ===== */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.6);
+      display: none; align-items: center; justify-content: center; z-index: 50;
+      padding: 1rem;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: 16px; width: min(1100px, 100%); max-height: 92vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .modal header {
+      flex: 0 0 auto;
+      display:flex; justify-content:space-between; align-items:center;
+      padding: .8rem 1rem; border-bottom:1px solid var(--border);
+    }
+    .modal .content {
+      flex: 1 1 auto; overflow: auto;
+      display: grid; grid-template-columns: 480px 1fr; gap: 0;
+    }
+    /* Left: full image */
+    .modal-left {
+      padding: 1rem;
+      border-right: 2px solid #d4af37; /* golden divider */
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+    }
+    .modal-left .fullpic {
+      width: 100%; height: auto; max-height: 70vh; object-fit: cover;
+      border-radius: 12px; border: 1px solid var(--border);
+      background: var(--bg-2);
+    }
+    /* Right: info */
+    .modal-right {
+      padding: 1rem 1.25rem;
+      display: grid; grid-template-rows: auto auto auto 1fr auto;
+      gap: .6rem;
+    }
+    .modal-right h3 {
+      margin: .1rem 0 .3rem 0; font-size: 1.6rem; letter-spacing: .02em;
+    }
+    .stats {
+      display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: .6rem;
+    }
+    .stat {
+      display:flex; justify-content: space-between; align-items:center;
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: .55rem .7rem; background: var(--bg);
+      font-weight: 600;
+    }
+    .bio {
+      white-space: pre-wrap; line-height: 1.55; border: 1px solid var(--border);
+      border-radius: 10px; padding: .8rem; background: var(--bg);
+    }
+    .awards { margin-top: .4rem; }
+    .awards h4 { margin: 0 0 .4rem 0; }
+    .badge {
+      display:inline-flex; align-items:center; gap:.35rem;
+      border:1px solid var(--border); padding:.2rem .55rem; border-radius:999px;
+      font-size:.87em; margin:0 .3rem .35rem 0; background: var(--bg);
+    }
 
-/* Make modal a flex column so header stays fixed and body scrolls */
-.modal {
-  background: var(--bg-2); border: 1px solid var(--border);
-  border-radius: 16px; width: min(980px, 100%);
-  max-height: 90vh; display: flex; flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0,0,0,.5);
-}
-
-/* Header stays at top, content scrolls */
-.modal header {
-  flex: 0 0 auto;
-  display:flex; justify-content:space-between; align-items:center;
-  padding: .8rem 1rem; border-bottom:1px solid var(--border);
-}
-.modal .content {
-  flex: 1 1 auto;
-  overflow: auto;
-  display: grid; grid-template-columns: 320px 1fr; gap: 1rem;
-  padding: 1rem;
-}
-
-/* Left column image + stats */
-.left-col .thumb-wrap {
-  width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; overflow:hidden;
-  border: 1px solid var(--border); background: var(--bg);
-  margin-bottom: .75rem;
-}
-.left-col .thumb {
-  width:100%; height:100%; object-fit: cover; display:block;
-}
-
-.stat {
-  display:flex; justify-content: space-between; align-items:center;
-  border: 1px solid var(--border); border-radius: 10px;
-  padding: .55rem .7rem; margin-bottom: .5rem; background: var(--bg);
-  font-weight: 600;
-}
-.awards { margin-top: .6rem; }
-.awards h4 { margin: 0 0 .4rem 0; }
-.badge {
-  display:inline-flex; align-items:center; gap:.35rem;
-  border:1px solid var(--border); padding:.2rem .5rem; border-radius: 999px;
-  font-size: .85em; margin: 0 .3rem .3rem 0; background: var(--bg);
-}
-
-.right-col h3 { margin: .1rem 0 .5rem 0; font-size: 1.35rem; }
-.right-col .prose { white-space: pre-wrap; line-height: 1.5; }
-
-/* Mobile: stack columns and keep content scrollable */
-@media (max-width: 860px){
-  .modal { width: 100%; max-height: 100vh; border-radius: 12px; }
-  .modal .content { grid-template-columns: 1fr; }
-  .left-col .thumb-wrap { aspect-ratio: 4/3; }
-}
-
-
-    @media (max-width: 860px){
+    @media (max-width: 980px){
       .modal .content { grid-template-columns: 1fr; }
-      .left-col .thumb-wrap { aspect-ratio: 4/3; }
+      .modal-left { border-right: none; border-bottom: 2px solid #d4af37; }
+      .modal-left .fullpic { max-height: 42vh; }
     }
   </style>
 </head>
@@ -146,18 +151,25 @@
           <button class="btn" data-close aria-label="Close">✕</button>
         </header>
         <div class="content">
-          <div class="left-col">
-            <div class="thumb-wrap"><img id="modalImg" class="thumb" src="" alt="" /></div>
-            <div class="stat"><span>Record</span><span id="modalRecord">0-0-0</span></div>
-            <div class="stat"><span>Total Earnings</span><span id="modalMoney">$0</span></div>
+          <div class="modal-left">
+            <img id="modalFull" class="fullpic" alt="" />
+          </div>
+          <div class="modal-right">
+            <h3 id="modalName">Fighter Name</h3>
+
+            <div class="stats">
+              <div class="stat"><span>Record</span><span id="modalRecord">0-0-0</span></div>
+              <div class="stat"><span>Win %</span><span id="modalWinPct">0%</span></div>
+              <div class="stat"><span>Gym</span><span id="modalGym">—</span></div>
+              <div class="stat"><span>Earnings</span><span id="modalMoney">$0</span></div>
+            </div>
+
+            <div class="bio" id="modalBio">Bio</div>
+
             <div class="awards">
               <h4>Awards</h4>
               <div id="modalAwards" class="meta">No awards yet.</div>
             </div>
-          </div>
-          <div class="right-col">
-            <h3 id="modalName">Fighter Name</h3>
-            <div class="prose" id="modalBio">Bio</div>
           </div>
         </div>
       </div>
@@ -173,30 +185,33 @@
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
 
-    // ---- Google Sheets setup (provided by you) ----
+    // ===== Google Sheets setup =====
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_FIGHTERS = '1277877160';   // Fighter Tracker
     const GID_RESULTS  = '676906080';    // Event Results (for bonus/awards)
     const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
 
-    // ---- DOM shorthands ----
+    // ===== DOM =====
     const $ = s => document.querySelector(s);
     const grid = $('#fightersGrid');
     const modal = $('#fighterModal');
-    const mTitle = $('#fighterModalTitle');
-    const mName  = $('#modalName');
-    const mImg   = $('#modalImg');
-    const mRecord = $('#modalRecord');
-    const mMoney = $('#modalMoney');
-    const mAwards = $('#modalAwards');
-    const mBio   = $('#modalBio');
 
-    // ---- Utils ----
+    const mTitle   = $('#fighterModalTitle');
+    const mName    = $('#modalName');
+    const mFull    = $('#modalFull');
+    const mRecord  = $('#modalRecord');
+    const mWinPct  = $('#modalWinPct');
+    const mGym     = $('#modalGym');
+    const mMoney   = $('#modalMoney');
+    const mAwards  = $('#modalAwards');
+    const mBio     = $('#modalBio');
+
+    // ===== Utils =====
     function slugify(s){
       return String(s||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
     }
     function safe(val, fallback=''){ return (val === null || val === undefined) ? fallback : String(val); }
-    function formatMoney(n){
+    function fmtMoney(n){
       const num = (typeof n === 'string') ? Number(n.replace(/[^0-9.-]/g,'')) : Number(n||0);
       return num.toLocaleString(undefined, { style:'currency', currency:'USD', maximumFractionDigits:0 });
     }
@@ -204,8 +219,19 @@
       const wi = parseInt(w||0,10), lo=parseInt(l||0,10), dr=parseInt(d||0,10);
       return `${isFinite(wi)?wi:0}-${isFinite(lo)?lo:0}-${isFinite(dr)?dr:0}`;
     }
+    function pctStr(val, wins, totalFights){
+      // Prefer sheet Win %, fallback to compute
+      if (val && String(val).trim() !== '') {
+        const num = Number(String(val).replace('%',''));
+        if (!isNaN(num)) return `${Math.round(num)}%`;
+      }
+      const tf = parseInt(totalFights||0,10);
+      const w  = parseInt(wins||0,10);
+      if (tf > 0) return `${Math.round((w/tf)*100)}%`;
+      return '0%';
+    }
 
-    // Robust CSV parser (supports quoted fields with commas/newlines)
+    // Robust CSV parser (quoted fields, commas, newlines)
     function parseCSV(csv){
       const rows=[]; let i=0, field='', row=[], q=false;
       const pushField=()=>{ row.push(field); field=''; };
@@ -216,9 +242,7 @@
           if (c === '"'){
             if (csv[i+1] === '"'){ field+='"'; i++; }
             else { q = false; }
-          } else {
-            field += c;
-          }
+          } else { field += c; }
         } else {
           if (c === '"'){ q = true; }
           else if (c === ','){ pushField(); }
@@ -228,7 +252,6 @@
         }
         i++;
       }
-      // last field
       if (field!=='' || row.length){ pushField(); pushRow(); }
       if (!rows.length) return [];
       const headers = rows[0].map(h=>h.trim());
@@ -236,7 +259,6 @@
         const o={}; headers.forEach((h,k)=>o[h]=(r[k]||'').trim()); return o;
       });
     }
-
     async function fetchCSV(gid){
       const res = await fetch(csvUrl(gid), { cache:'no-store' });
       if (!res.ok) throw new Error('HTTP '+res.status);
@@ -244,7 +266,7 @@
       return parseCSV(text);
     }
 
-    // Build awards map from Event Results (bonus type assigned to Winner)
+    // ===== Awards from Event Results (assign bonus type to Winner) =====
     async function buildAwards(){
       const rows = await fetchCSV(GID_RESULTS);
       const map = Object.create(null);
@@ -252,41 +274,79 @@
         const winner = (r['Winner']||'').trim();
         const bonus  = (r['bonus type']||r['Bonus']||'').trim();
         if (!winner || !bonus) continue;
-        map[winner] = map[winner] || [];
-        map[winner].push(bonus);
+        (map[winner] ||= []).push(bonus);
       }
-      // compact to unique
-      Object.keys(map).forEach(k=>{
-        map[k] = Array.from(new Set(map[k]));
-      });
+      Object.keys(map).forEach(k => map[k] = Array.from(new Set(map[k])));
       return map;
     }
 
-    function fighterCardHTML(f, idx){
-      const imgAttr = f._thumb ? `src="${f._thumb}"` : '';
+    // ===== Image helpers with extension fallbacks =====
+    const EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
+
+    function headshotCandidates(slug, sheetUrl){
+      const localHeadBase = `assets/images/fighters/headshots/${slug}`;
+      const list = EXTENSIONS.map(ext => `${localHeadBase}${ext}`);
+      if (sheetUrl) list.push(sheetUrl);
+      return list;
+    }
+    function fullpicCandidates(slug, sheetUrl){
+      const localFullBase = `assets/images/fighters/${slug}`;
+      const list = EXTENSIONS.map(ext => `${localFullBase}${ext}`);
+      if (sheetUrl) list.push(sheetUrl);
+      // if headshot exists but fullpic missing, could still fallback to headshot:
+      list.push(...EXTENSIONS.map(ext => `assets/images/fighters/headshots/${slug}${ext}`));
+      return list;
+    }
+    function tryLoad(urls){
+      return new Promise(resolve=>{
+        if (!urls || !urls.length) return resolve('');
+        let i = 0;
+        const tryNext = () => {
+          if (i >= urls.length) return resolve('');
+          const u = urls[i++]; if (!u) return tryNext();
+          const img = new Image();
+          img.onload = () => resolve(u);
+          img.onerror = tryNext;
+          img.src = u + (u.includes('?') ? '&' : '?') + 'v=' + Date.now();
+        };
+        tryNext();
+      });
+    }
+
+    // ===== Page rendering =====
+    function cardHTML(f, idx, headSrc){
+      const name = safe(f.Fighter);
       return `
-        <article class="fighter-card" data-idx="${idx}" title="View ${safe(f.Fighter)}">
-          <img ${imgAttr} alt="${safe(f.Fighter)}" onerror="this.removeAttribute('src')" />
-          <div class="fighter-name-overlay">${safe(f.Fighter)}</div>
+        <article class="fighter-card" data-idx="${idx}" title="View ${name}">
+          <img alt="${name}" ${headSrc ? `src="${headSrc}"` : ''} />
+          <div class="fighter-name-overlay">${name}</div>
         </article>
       `;
     }
-
     function awardsHTML(list){
       const a = Array.isArray(list) ? list : [];
       if (!a.length) return '<span class="meta">No awards yet.</span>';
       return a.map(x => `<span class="badge">🏅 ${safe(x)}</span>`).join('');
     }
 
-    function openModal(f){
-      mTitle.textContent = safe(f.Fighter);
-      mName.textContent  = safe(f.Fighter);
-      mImg.src = f._headshot || f._thumb || '';
-      mImg.alt = f.Fighter || 'Fighter';
+    async function openModal(f){
+      const name = safe(f.Fighter);
+      mTitle.textContent = name;
+      mName.textContent  = name;
       mRecord.textContent = recordStr(f.Wins, f.Losses, f.Draws);
-      mMoney.textContent = formatMoney(f.Earnings);
-      mAwards.innerHTML = awardsHTML(f._awards);
-      mBio.textContent = safe(f.Bio) || '—';
+      mWinPct.textContent = pctStr(f['Win %'], f.Wins, f['Total Fights']);
+      mGym.textContent    = safe(f.Gym) || '—';
+      mMoney.textContent  = fmtMoney(f.Earnings);
+      mAwards.innerHTML   = awardsHTML(f._awards);
+      mBio.textContent    = safe(f.Bio) || '—';
+
+      // Choose best full picture
+      const slug = slugify(name);
+      const fullCandidates = fullpicCandidates(slug, f.Image);
+      const chosen = await tryLoad(fullCandidates);
+      if (chosen) { mFull.src = chosen; mFull.alt = name; }
+      else { mFull.removeAttribute('src'); mFull.alt = ''; }
+
       modal.classList.add('show');
       modal.setAttribute('aria-hidden','false');
       document.body.style.overflow = 'hidden';
@@ -310,45 +370,14 @@
       if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
     });
 
-    // Choose best image:
-    // 1) Image column (absolute or relative URL)
-    // 2) assets/images/fighters/<slug>.png (your uploaded headshots)
-    function chooseImagesFor(f){
-  const name = f.Fighter || '';
-  const fromSheet = (f.Image || '').trim();  // optional sheet URL
-  const slug = slugify(name);
-
-  // Your folders:
-  // - Grid card uses: assets/images/fighters/<slug>.png
-  // - Modal headshot uses: assets/images/fighters/headshots/<slug>.png
-  const localGrid = `assets/images/fighters/${slug}.png`;
-  const localHead = `assets/images/fighters/headshots/${slug}.png`;
-
-  // Thumbnail for the grid: prefer local card image
-  f._thumb = localGrid || fromSheet || '';
-
-  // Headshot in modal: prefer local headshot, then sheet, then grid image
-  f._headshot = localHead || fromSheet || localGrid || '';
-}
-
-
     async function boot(){
       try {
-        // Load awards first
-        const awardsMap = await buildAwards();
+        const [awardsMap, rows] = await Promise.all([buildAwards(), fetchCSV(GID_FIGHTERS)]);
 
-        // Load Fighter Tracker
-        const rows = await fetchCSV(GID_FIGHTERS);
-        // Expected columns:
-        // Fighter, Wins, Losses, Draws, Total Fights, Gender, Earnings, Bio, Image, Gym, Win %
-        const fighters = rows.filter(r => (r['Fighter']||'').trim() !== '');
-        // attach derived fields
-        for (const f of fighters){
-          chooseImagesFor(f);
-          f._awards = awardsMap[f.Fighter] || [];
-        }
-        // sort A→Z by Fighter
-        fighters.sort((a,b)=> String(a.Fighter).localeCompare(String(b.Fighter)));
+        const fighters = rows
+          .filter(r => (r['Fighter']||'').trim() !== '')
+          .map(r => ({ ...r, _awards: awardsMap[r.Fighter] || [] }))
+          .sort((a,b)=> String(a.Fighter).localeCompare(String(b.Fighter)));
 
         window.__Fighters = fighters;
 
@@ -357,7 +386,14 @@
           return;
         }
 
-        grid.innerHTML = fighters.map((f,i)=>fighterCardHTML(f,i)).join('');
+        // Resolve headshots first (so grid is clean)
+        const resolved = await Promise.all(fighters.map(async f=>{
+          const slug = slugify(f.Fighter);
+          const head = await tryLoad(headshotCandidates(slug, f.Image));
+          return { f, head };
+        }));
+
+        grid.innerHTML = resolved.map(({f, head}, i)=>cardHTML(f, i, head)).join('');
       } catch (e){
         console.error(e);
         grid.innerHTML = `
