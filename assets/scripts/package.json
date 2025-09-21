@@ -1,0 +1,8 @@
+{
+  "name": "iron-crown-combat-build",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:fighters": "node scripts/build-fighters-json.mjs"
+  }
+}
