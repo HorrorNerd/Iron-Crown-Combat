@@ -10,12 +10,23 @@
     --gold:#ffd700; --ink:#0b0c10; --bg:#0e0f13; --bg-2:#15171c;
     --muted:#b9c0cf; --card:#1b1e25; --border:#2a2f39;
   }
-  body{background:var(--bg); color:#fff; margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
 
-  /* ---- Header / Nav: preserve your layout ---- */
-  .header .container[data-nav]{display:flex; align-items:center; justify-content:space-between; gap:1rem; position:relative;}
+  /* DO NOT override site font here so main.css can control it */
+  body{background:var(--bg); color:#fff; margin:0;}
+
+  /* ---- Header / Nav: match other pages' centering ---- */
+  .header .container[data-nav]{
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    /* these 3 lines center it like the rest of the site */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: .75rem 1rem;
+    position: relative;
+  }
+
+  /* Inherit your global font from main.css for nav links */
   .header .menu{display:flex; flex-wrap:wrap; gap:.6rem; justify-content:flex-end; text-align:left;}
-  .header .menu a{display:inline-flex; align-items:center; white-space:nowrap;}
+  .header .menu a{display:inline-flex; align-items:center; white-space:nowrap; font: inherit;}
 
   @media (max-width:860px){
     .header .container[data-nav]{flex-wrap:wrap; justify-content:center;}
@@ -60,7 +71,7 @@
     .bio{text-align:left;}
   }
 
-  /* ===== Minimal, namespaced mobile hamburger (won’t affect other pages) ===== */
+  /* ===== Minimal, namespaced mobile hamburger ===== */
   .icc-nav-toggle{
     display:none; margin-left:auto; inline-size:44px; block-size:44px;
     border:1px solid var(--border); background:transparent; color:#fff;
@@ -68,7 +79,6 @@
   }
   .icc-nav-toggle .icc-close{display:none;}
 
-  /* Use your existing nav styles; only control visibility on small screens */
   @media (max-width:767px){
     .icc-nav-toggle{display:inline-flex;}
     #icc-primary-nav{display:none;}
@@ -83,6 +93,7 @@
     body.icc-menu-open .icc-nav-toggle .icc-close{display:block;}
   }
 </style>
+
 </head>
 <body>
   <!-- Header / Navbar -->
