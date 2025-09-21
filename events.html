@@ -324,45 +324,26 @@
     }
 
     // Render
-    function fightRow(f){
-    const hasWinner = !!(f.winner && f.winner.trim() && f.winner !== 'Draw');
-    const winnerSide =
-      hasWinner && f.winner === f.a ? 'win-left' :
-      hasWinner && f.winner === f.b ? 'win-right' : '';
+   function fightRow(f){
+  const winnerA = f.winner && f.winner === f.a;
+  const winnerB = f.winner && f.winner === f.b;
 
-    const badges = [];
-    if (f.winner && f.winner === 'Draw'){
-      badges.push(`<span class="badge draw">Draw</span>`);
-    } else if (hasWinner){
-      badges.push(`<span class="badge win">Winner</span>`);
-    }
-    if (f.bonus)  badges.push(`<span class="badge bonus">${f.bonus}</span>`);
-    if (f.rating) badges.push(`<span class="badge rate">★ ${f.rating}</span>`);
-
-    const resultBar =
-      hasWinner ? `<div class="result-bar">Winner: <strong>${f.winner}</strong></div>` :
-      (f.winner === 'Draw' ? `<div class="result-bar">Result: <strong>Draw</strong></div>` : '');
-
-    return `
-      <div class="fight ${winnerSide}">
-        ${badges.length ? `<div class="badge-wrap">${badges.join('')}</div>` : ''}
-
-        <div class="headshot">
-          <img src="${headshotPath(f.a)}" alt="${f.a}" onerror="this.style.opacity=.25">
-          <div class="name-overlay">${f.a}</div>
-        </div>
-
-        <div class="vs" aria-hidden="true">VS</div>
-
-        <div class="headshot">
-          <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
-          <div class="name-overlay">${f.b}</div>
-        </div>
-
-        ${resultBar}
+  return `
+    <div class="fight">
+      <div class="headshot">
+        <img src="${headshotPath(f.a)}" alt="${f.a}" onerror="this.style.opacity=.25">
+        <div class="name-overlay ${winnerA ? 'winner' : ''}">${f.a}</div>
       </div>
-    `;
-  }
+
+      <div class="vs">VS</div>
+
+      <div class="headshot">
+        <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
+        <div class="name-overlay ${winnerB ? 'winner' : ''}">${f.b}</div>
+      </div>
+    </div>
+  `;
+}
 
     function fillEvent(nameId, dateId, fightsId, ev){
       document.getElementById(nameId).textContent = ev.name;
