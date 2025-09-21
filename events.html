@@ -132,6 +132,55 @@
     .ribbon.win{ background:rgba(0,180,90,.18); border-color:rgba(0,180,90,.35); }
     .ribbon.bonus{ background:rgba(255,215,0,.14); border-color:rgba(255,215,0,.35); color:var(--gold); }
     .ribbon.rating{ background:rgba(135,206,250,.14); border-color:rgba(135,206,250,.35); }
+/* ===== Winner visibility upgrades ===== */
+
+/* Winner side glow/outline */
+.fight.win-left  .headshot:first-child,
+.fight.win-right .headshot:last-child{
+  outline:3px solid rgba(0, 190, 100, .9);
+  box-shadow:0 0 0 3px rgba(0, 190, 100, .28), 0 10px 30px rgba(0,0,0,.45);
+}
+.fight.win-left  .headshot:first-child::after,
+.fight.win-right .headshot:last-child::after{
+  content:"✓";
+  position:absolute; top:.5rem; left:.5rem;
+  width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:900; font-size:.9rem;
+  color:#fff; background:rgba(0, 190, 100, .9);
+  box-shadow:0 2px 8px rgba(0,0,0,.5);
+}
+
+/* Top badges (bonus, rating, etc.) */
+.badge-wrap{
+  position:absolute; left:1rem; top:.75rem;
+  display:flex; gap:.45rem; flex-wrap:wrap; z-index:2;
+}
+.badge{
+  display:inline-block; padding:.28rem .55rem; border-radius:.55rem;
+  font-size:.8rem; font-weight:800; letter-spacing:.2px;
+  border:1px solid var(--border); background:rgba(0,0,0,.5); color:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+.badge.win   { background:rgba(0,180,90,.18);  border-color:rgba(0,180,90,.45); }
+.badge.bonus { background:rgba(255,215,0,.18); border-color:rgba(255,215,0,.45); color:var(--gold); }
+.badge.rate  { background:rgba(120,180,255,.18); border-color:rgba(120,180,255,.45); }
+
+/* Big center bar for the winner text (super obvious) */
+.result-bar{
+  position:absolute; left:50%; bottom:.6rem; transform:translateX(-50%);
+  padding:.5rem .9rem; border-radius:.7rem;
+  font-weight:900; letter-spacing:.3px;
+  background:linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.65));
+  border:1px solid var(--border);
+  color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.7);
+  box-shadow:0 6px 24px rgba(0,0,0,.35);
+}
+.result-bar strong{ color:#8ff3b5; }
+
+/* Draw state: neutral badge */
+.badge.draw { background:rgba(160,160,160,.22); border-color:rgba(160,160,160,.45); }
+
   </style>
 </head>
 <body>
@@ -276,26 +325,44 @@
 
     // Render
     function fightRow(f){
-      const ribbon = [];
-      if (f.winner && f.winner !== 'Draw') ribbon.push(`<span class="ribbon win">Winner: ${f.winner}</span>`);
-      if (f.bonus) ribbon.push(`<span class="ribbon bonus">${f.bonus}</span>`);
-      if (f.rating) ribbon.push(`<span class="ribbon rating">★ ${f.rating}</span>`);
+    const hasWinner = !!(f.winner && f.winner.trim() && f.winner !== 'Draw');
+    const winnerSide =
+      hasWinner && f.winner === f.a ? 'win-left' :
+      hasWinner && f.winner === f.b ? 'win-right' : '';
 
-      return `
-        <div class="fight">
-          <div class="headshot">
-            <img src="${headshotPath(f.a)}" alt="${f.a}" onerror="this.style.opacity=.25">
-            <div class="name-overlay">${f.a}</div>
-          </div>
-          <div class="vs">VS</div>
-          <div class="headshot">
-            <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
-            <div class="name-overlay">${f.b}</div>
-          </div>
-          ${ribbon.length ? `<div class="ribbon-wrap" style="position:absolute;left:1rem;top:.75rem;display:flex;gap:.4rem;flex-wrap:wrap;">${ribbon.join('')}</div>` : ''}
-        </div>
-      `;
+    const badges = [];
+    if (f.winner && f.winner === 'Draw'){
+      badges.push(`<span class="badge draw">Draw</span>`);
+    } else if (hasWinner){
+      badges.push(`<span class="badge win">Winner</span>`);
     }
+    if (f.bonus)  badges.push(`<span class="badge bonus">${f.bonus}</span>`);
+    if (f.rating) badges.push(`<span class="badge rate">★ ${f.rating}</span>`);
+
+    const resultBar =
+      hasWinner ? `<div class="result-bar">Winner: <strong>${f.winner}</strong></div>` :
+      (f.winner === 'Draw' ? `<div class="result-bar">Result: <strong>Draw</strong></div>` : '');
+
+    return `
+      <div class="fight ${winnerSide}">
+        ${badges.length ? `<div class="badge-wrap">${badges.join('')}</div>` : ''}
+
+        <div class="headshot">
+          <img src="${headshotPath(f.a)}" alt="${f.a}" onerror="this.style.opacity=.25">
+          <div class="name-overlay">${f.a}</div>
+        </div>
+
+        <div class="vs" aria-hidden="true">VS</div>
+
+        <div class="headshot">
+          <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
+          <div class="name-overlay">${f.b}</div>
+        </div>
+
+        ${resultBar}
+      </div>
+    `;
+  }
 
     function fillEvent(nameId, dateId, fightsId, ev){
       document.getElementById(nameId).textContent = ev.name;
