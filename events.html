@@ -33,7 +33,7 @@
       max-width:1200px; margin:0 auto 1.25rem; padding: 0 1rem;
       display:grid; gap:1rem; grid-template-columns: 1fr;
     }
-    @media (min-width: 980px){ .featured-wrap{ grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1100px){ .featured-wrap{ grid-template-columns: 1fr 1fr; } }
 
     .event-block{
       background: var(--surface);
@@ -55,44 +55,53 @@
     }
     .event-date{ margin:.25rem 0 0; color: var(--muted); font-size:.95rem; }
 
-    /* Fight card grid */
+    /* ===== Single-column fight list with bigger thumbs ===== */
     .fight-grid{
-      display:grid; gap:.8rem; padding: 1rem; grid-template-columns: 1fr;
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+      padding:1rem;
     }
-    @media (min-width:700px){ .fight-grid{ grid-template-columns: 1fr 1fr; } }
-
     .fight{
-      position:relative;
+      display:grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items:center;
+      gap:1rem;
       background: var(--bg-2);
       border:1px solid var(--border);
       border-radius:14px;
-      padding:.75rem .75rem;
-      display:grid; grid-template-columns: 1fr auto 1fr;
-      align-items:center; gap:.5rem; min-height:140px; overflow:hidden;
+      padding:1rem;
+      min-height:220px;
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
     }
     .headshot{
-      position:relative; aspect-ratio: 16/10; border-radius:10px; overflow:hidden;
+      position:relative;
+      height:220px; /* bigger thumbnails */
+      border-radius:10px;
+      overflow:hidden;
       border:1px solid var(--border);
-      display:flex; align-items:flex-end; justify-content:center;
       background:#0b0c10;
+      display:flex; align-items:flex-end; justify-content:center;
     }
     .headshot img{ width:100%; height:100%; object-fit:cover; display:block; }
     .name-overlay{
       position:absolute; left:0; right:0; bottom:0;
-      padding:.4rem .5rem;
-      background:linear-gradient(180deg, transparent, rgba(0,0,0,.75) 40%, rgba(0,0,0,.92));
+      padding:.6rem .8rem;
+      background:linear-gradient(180deg,transparent,rgba(0,0,0,.75) 40%,rgba(0,0,0,.92));
       color:#fff; font-weight:800; text-align:center;
-      font-size:.95rem; text-shadow:0 2px 8px rgba(0,0,0,.8);
+      font-size:1.05rem; text-shadow:0 2px 8px rgba(0,0,0,.9);
       letter-spacing:.2px;
     }
     .vs{
       display:flex; align-items:center; justify-content:center;
-      width: 64px; height:64px; border-radius: 50%;
+      width: 72px; height:72px; border-radius: 50%;
       border:1px solid var(--border);
-      background: radial-gradient(ellipse at center, rgba(255,215,0,.2), rgba(224,177,90,.08) 60%, transparent 100%);
+      background: radial-gradient(ellipse at center, rgba(255,215,0,.22), rgba(224,177,90,.1) 60%, transparent 100%);
       color: var(--gold);
-      font-weight:900; font-size: 1.1rem; text-shadow:0 1px 10px rgba(255,215,0,.25);
-      box-shadow: inset 0 0 20px rgba(255,215,0,.08);
+      font-weight:900; font-size: 1.25rem; text-shadow:0 1px 10px rgba(255,215,0,.3);
+      box-shadow: inset 0 0 20px rgba(255,215,0,.1);
       user-select:none;
     }
 
@@ -113,10 +122,20 @@
 
     .muted{ color: var(--muted); }
     .empty{ padding:1rem; text-align:center; color:var(--muted); }
+
+    /* ribbons (winner/bonus/rating) */
+    .ribbon{
+      display:inline-block; padding:.2rem .45rem; border-radius:.4rem;
+      font-size:.75rem; font-weight:800; letter-spacing:.2px;
+      border:1px solid var(--border); background:rgba(0,0,0,.35); color:#fff;
+    }
+    .ribbon.win{ background:rgba(0,180,90,.18); border-color:rgba(0,180,90,.35); }
+    .ribbon.bonus{ background:rgba(255,215,0,.14); border-color:rgba(255,215,0,.35); color:var(--gold); }
+    .ribbon.rating{ background:rgba(135,206,250,.14); border-color:rgba(135,206,250,.35); }
   </style>
 </head>
 <body>
-  <!-- Header (same structure/styles as other pages) -->
+  <!-- Header -->
   <header class="header">
     <div class="container nav" data-nav>
       <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
@@ -174,10 +193,9 @@
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_EVENTS_ALL = '676906080'; // your one tab with everything
 
-    // Headshot path (same slug rule as Fighters page)
     const headshotPath = (name) => `assets/images/fighters/headshots/${slugify(name)}.png`;
 
-    // ====== CSV helpers ======
+    // CSV helpers
     const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
     function parseCSV(text){
       const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length);
@@ -208,7 +226,7 @@
       return parseCSV(await res.text());
     }
 
-    // ====== Parse "Event" like "Crucible 01(05-26-2025)" ======
+    // Parse "Crucible 01(05-26-2025)"
     function parseEventTitle(s){
       const m = /^(.+?)\s*\(\s*(\d{2})-(\d{2})-(\d{4})\s*\)\s*$/.exec(s || '');
       if(!m) return { name: s?.trim() || 'Event', date: null, dateStr: '' };
@@ -217,15 +235,13 @@
       return { name: rawName.trim(), date, dateStr: `${yyyy}-${mm}-${dd}` };
     }
 
-    // ====== Load + model from single tab ======
+    // Load + model
     async function loadEvents(){
       const rows = await fetchCSV(GID_EVENTS_ALL);
-
-      // Expected headers from your tab:
-      // Tournament | Event | Fighter A | Fighter B | Winner | Match Rating | bonus type
+      // Headers: Tournament | Event | Fighter A | Fighter B | Winner | Match Rating | bonus type
       const map = new Map(); // key: name||dateStr
 
-      let order = 0; // preserve CSV order within each event
+      let order = 0;
       for (const r of rows){
         const evt = (r['Event'] || '').trim();
         if(!evt) continue;
@@ -240,7 +256,7 @@
         const b = (r['Fighter B'] || '').trim();
         if (a || b){
           map.get(key).fights.push({
-            order: ++order,
+            order: ++order,        // preserve CSV order
             a: a || 'TBA',
             b: b || 'TBA',
             winner: (r['Winner']||'').trim(),
@@ -258,7 +274,7 @@
       return events;
     }
 
-    // ====== Render helpers ======
+    // Render
     function fightRow(f){
       const ribbon = [];
       if (f.winner && f.winner !== 'Draw') ribbon.push(`<span class="ribbon win">Winner: ${f.winner}</span>`);
@@ -276,7 +292,7 @@
             <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
             <div class="name-overlay">${f.b}</div>
           </div>
-          ${ribbon.length ? `<div class="ribbon-wrap" style="position:absolute;left:.75rem;top:.5rem;display:flex;gap:.35rem;flex-wrap:wrap;">${ribbon.join('')}</div>` : ''}
+          ${ribbon.length ? `<div class="ribbon-wrap" style="position:absolute;left:1rem;top:.75rem;display:flex;gap:.4rem;flex-wrap:wrap;">${ribbon.join('')}</div>` : ''}
         </div>
       `;
     }
@@ -350,7 +366,6 @@
       }, { passive: true });
     }
 
-    // ====== Boot ======
     (async function(){
       try{
         const events = await loadEvents();
@@ -367,17 +382,5 @@
       document.getElementById('yr').textContent = new Date().getFullYear();
     })();
   </script>
-
-  <style>
-    /* Tiny ribbons for winners/bonuses/ratings */
-    .ribbon{
-      display:inline-block; padding:.2rem .45rem; border-radius:.4rem;
-      font-size:.75rem; font-weight:800; letter-spacing:.2px;
-      border:1px solid var(--border); background:rgba(0,0,0,.35); color:#fff;
-    }
-    .ribbon.win{ background:rgba(0,180,90,.18); border-color:rgba(0,180,90,.35); }
-    .ribbon.bonus{ background:rgba(255,215,0,.14); border-color:rgba(255,215,0,.35); color:var(--gold); }
-    .ribbon.rating{ background:rgba(135,206,250,.14); border-color:rgba(135,206,250,.35); }
-  </style>
 </body>
 </html>
