@@ -4,16 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Iron Crown Combat — Hall of Champions</title>
-  <meta name="description" content="Current and past ICC title holders: King of the Crown champion history." />
-
   <style>
     :root{
       --bg: #0a0a0f;
-      --card: #13131a;
-      --ring: #262638;
       --muted: #aeb5cc;
       --text: #eaf0ff;
-      --accent: #ff6a00; 
+      --accent: #ff6a00;
       --accent-2:#ffb86b;
       --shadow: 0 10px 30px rgba(0,0,0,.45);
       --radius: 18px;
@@ -21,178 +17,59 @@
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif}
     a{color:inherit;text-decoration:none}
-    img{display:block;max-width:100%}
+    img{display:block;max-width:100%;height:auto}
 
-    .container{max-width:1100px;margin:auto;padding:24px}
-    header.page{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:20px}
+    .container{max-width:900px;margin:auto;padding:24px}
+    header.page{margin-bottom:20px}
     header.page h1{font-size:clamp(1.6rem,3vw,2.2rem);margin:0}
     header.page small{color:var(--muted)}
 
-    .hero{
+    /* Champion card */
+    .champion-card{
       position:relative;
       border-radius:var(--radius);
       overflow:hidden;
       box-shadow:var(--shadow);
-      background:linear-gradient(180deg,#161621,#0c0c13);
-      min-height: 420px;
-      isolation:isolate;
+      background:#12121a;
+      padding:16px;
+      text-align:center;
     }
-    .hero img.bg{
-      position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-      filter:saturate(1.05) contrast(1.05) brightness(.92);
-      z-index:-2;
-    }
-    .hero::after{
-      content:""; position:absolute; inset:0;
-      background:linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.25) 55%, rgba(0,0,0,0) 80%);
-      z-index:-1;
+    .champion-card img{
+      max-width:100%;
+      height:auto;
+      display:block;
+      margin:0 auto;
+      border-radius:var(--radius);
     }
     .belt-badge{
-      position:absolute; top:14px; left:14px;
+      position:absolute; top:16px; left:16px;
       background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      color:#181818; font-weight:800; letter-spacing:.5px;
+      color:#181818; font-weight:800;
       border-radius:999px; padding:8px 14px; box-shadow:var(--shadow);
     }
     .overlay{
-      position:absolute; left:0; right:0; bottom:0; padding:16px 18px;
-      background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.55) 30%,rgba(0,0,0,.78) 100%);
-      display:flex; flex-direction:column; gap:4px;
+      margin-top:12px;
     }
-    .overlay .name{ font-weight:900; font-size:clamp(1.35rem,3.2vw,2rem); text-shadow:0 2px 16px rgba(0,0,0,.55)}
-    .overlay .meta{ color:var(--muted); font-size:.95rem }
-
-    .past{ margin-top:28px; border:1px solid var(--ring); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); background:linear-gradient(180deg,#12121a,#0c0c12) }
-    .past header{ padding:12px 16px; background:linear-gradient(90deg,rgba(255,106,0,.12),rgba(255,184,107,.05)); border-bottom:1px solid var(--ring) }
-    .past header h2{ margin:0; font-size:1.05rem; letter-spacing:.4px }
-    .list{ display:flex; flex-direction:column }
-
-    .champ-row{ display:grid; grid-template-columns:64px 1fr auto; gap:12px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--ring) }
-    .champ-row:last-child{ border-bottom:none }
-    .headshot{ width:64px; height:64px; border-radius:12px; overflow:hidden; border:1px solid var(--ring); background:#0a0a0d }
-    .titleline{ line-height:1.15 }
-    .titleline .n{ font-weight:800 }
-    .titleline .dates{ font-size:.9rem; color:var(--muted); margin-top:4px }
-    .more a{ font-size:.9rem; padding:8px 10px; border:1px solid var(--ring); border-radius:10px; background:#0f0f16 }
-    .more a:hover{ border-color:var(--accent); box-shadow:0 0 0 2px rgba(255,106,0,.15) inset }
-
-    .tip{font-size:.9rem;color:var(--muted);margin-top:6px}
-    @media (max-width:640px){
-      .champ-row{ grid-template-columns:56px 1fr }
-      .more{ display:none }
-      .hero{ min-height: 360px }
-    }
+    .overlay .name{font-weight:900;font-size:1.5rem}
+    .overlay .meta{color:var(--muted);font-size:.95rem;margin-top:4px}
   </style>
 </head>
 <body>
   <div class="container">
     <header class="page">
       <h1>Hall of Champions</h1>
-      <small>Current and past ICC title holders</small>
-      <div class="tip">To update: edit the <code>champions</code> array or call <code>addNewChampion({...})</code>. The previous champ will automatically drop into the Past list.</div>
+      <small>Current ICC Title Holder</small>
     </header>
 
     <!-- Current Champion -->
-    <section id="current" class="hero" aria-label="Current Champion">
-      <span class="belt-badge" aria-hidden="true">KING OF THE CROWN</span>
-      <img id="currentImg" class="bg" alt="" />
+    <section class="champion-card" aria-label="Current Champion">
+      <span class="belt-badge">KING OF THE CROWN</span>
+      <img src="assets/images/fighters/champion/maddox-champion-card.png" alt="Cole Maddox — Current Champion" />
       <div class="overlay">
-        <div class="name" id="currentName">Loading…</div>
-        <div class="meta" id="currentMeta">—</div>
+        <div class="name"><a href="fighters.html#cole-maddox">Cole Maddox</a></div>
+        <div class="meta">Reign began Jun 15, 2025</div>
       </div>
     </section>
-
-    <!-- Past Champions -->
-    <section class="past" aria-label="Past Champions">
-      <header><h2>Past Champions</h2></header>
-      <div id="pastList" class="list"></div>
-    </section>
   </div>
-
-  <script>
-    const FIGHTERS_PAGE_URL = 'https://horrornerd.github.io/Iron-Crown-Combat/fighters.html';
-
-    let champions = [
-      {
-        name: "Cole Maddox",
-        slug: "cole-maddox",
-        start: "2025-06-15",
-        end: null,
-        heroImage: "assets/images/fighters/champion/maddox-champion-card.png",
-        headshot: "assets/images/fighters/headshots/cole-maddox.png",
-        titleName: "KING OF THE CROWN"
-      },
-      {
-        name: "Master Bo Quin",
-        slug: "master-bo-quin",
-        start: "2025-05-26",
-        end: "2025-06-15",
-        heroImage: "assets/images/fighters/champion/bo-quin-champion-card.png",
-        headshot: "assets/images/fighters/headshots/master-bo-quin.png",
-        titleName: "KING OF THE CROWN"
-      }
-    ];
-
-    function fmtDate(iso){
-      const d = new Date(iso);
-      if (isNaN(d)) return iso;
-      return d.toLocaleDateString(undefined, {month:'short', day:'2-digit', year:'numeric'});
-    }
-    function fighterLink(slug){ return `${FIGHTERS_PAGE_URL}#${encodeURIComponent(slug)}`; }
-
-    function render(){
-      if (!champions.length) return;
-      const cur = champions[0];
-      document.getElementById('currentImg').src = cur.heroImage;
-      document.getElementById('currentImg').alt = `${cur.name} — Current Champion`;
-      document.getElementById('currentName').innerHTML = `<a href=\"${fighterLink(cur.slug)}\">${cur.name}</a>`;
-      document.getElementById('currentMeta').textContent = `Reign began ${fmtDate(cur.start)}`;
-      document.querySelector('.belt-badge').textContent = cur.titleName || 'CHAMPION';
-
-      const past = champions.slice(1);
-      const list = document.getElementById('pastList');
-      list.innerHTML = '';
-      past.forEach(ch => {
-        const row = document.createElement('div');
-        row.className = 'champ-row';
-
-        const imgWrap = document.createElement('a');
-        imgWrap.className = 'headshot';
-        imgWrap.href = fighterLink(ch.slug);
-        const img = document.createElement('img');
-        img.src = ch.headshot;
-        img.alt = `${ch.name} headshot`;
-        imgWrap.appendChild(img);
-
-        const text = document.createElement('div');
-        text.className = 'titleline';
-        const dates = ch.end ? `${fmtDate(ch.start)} – ${fmtDate(ch.end)}` : `${fmtDate(ch.start)} – —`;
-        text.innerHTML = `<div class=\"n\">${ch.name}</div><div class=\"dates\">${dates}</div>`;
-
-        const more = document.createElement('div');
-        more.className = 'more';
-        more.innerHTML = `<a href=\"${fighterLink(ch.slug)}\">View profile</a>`;
-
-        row.appendChild(imgWrap);
-        row.appendChild(text);
-        row.appendChild(more);
-        list.appendChild(row);
-      });
-    }
-
-    function addNewChampion({ name, slug, startISO, heroImage, headshot, titleName, endPrevISO }) {
-      if (champions.length){
-        champions[0] = { ...champions[0], end: endPrevISO || startISO };
-      }
-      champions.unshift({
-        name, slug, start: startISO, end: null,
-        heroImage, headshot,
-        titleName: titleName || champions[1]?.titleName || 'CHAMPION'
-      });
-      render();
-    }
-
-    window.addNewChampion = addNewChampion;
-    render();
-  </script>
 </body>
 </html>
