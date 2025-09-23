@@ -25,11 +25,29 @@
     header.page h1{font-size:clamp(1.6rem,3vw,2.2rem);margin:0}
     header.page small{color:var(--muted)}
 
+    /* === NAVBAR === */
+    .nav-wrap{position:sticky;top:0;z-index:50;background:rgba(10,10,15,.9);backdrop-filter:blur(6px);border-bottom:1px solid var(--ring)}
+    .nav{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:10px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.5px}
+    .brand img.logo{height:36px;width:auto;display:block}
+    .nav ul{list-style:none;display:flex;gap:14px;margin:0;padding:0}
+    .nav a.item{display:inline-flex;align-items:center;padding:8px 10px;border-radius:10px}
+    .nav a.item:hover{background:#161622}
+    .nav a.item.active{background:linear-gradient(90deg,rgba(255,106,0,.12),rgba(255,184,107,.06));border:1px solid var(--ring)}
+    .menu-btn{display:none;border:1px solid var(--ring);background:#0f0f16;border-radius:10px;padding:8px 10px}
+    .menu-btn:focus{outline:2px solid var(--accent)}
+    @media (max-width:860px){
+      .nav{flex-wrap:wrap}
+      .menu-btn{display:inline-flex}
+      .nav ul{width:100%;display:none;flex-direction:column;border-top:1px solid var(--ring);padding-top:8px}
+      .nav ul.open{display:flex}
+      .nav a.item{padding:10px 12px}
+    }
+
     /* Champion card */
     .champion-card{position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#12121a;padding:16px}
     .belt-badge{position:absolute;top:16px;left:16px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#181818;font-weight:800;border-radius:999px;padding:8px 14px;box-shadow:var(--shadow)}
 
-    /* Keep the whole image visible, centered */
     .img-box{display:flex;justify-content:center;align-items:center;background:#0f0f16;border-radius:var(--radius);padding:10px;min-height:220px}
     .img-box img{max-height:520px;width:auto;object-fit:contain}
 
@@ -37,7 +55,6 @@
     .overlay .name{font-weight:900;font-size:1.5rem}
     .overlay .meta{color:var(--muted);font-size:.95rem;margin-top:4px}
 
-    /* Past champions */
     .past{margin-top:28px;border:1px solid var(--ring);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:linear-gradient(180deg,#12121a,#0c0c12)}
     .past header{padding:12px 16px;background:linear-gradient(90deg,rgba(255,106,0,.12),rgba(255,184,107,.05));border-bottom:1px solid var(--ring)}
     .past header h2{margin:0;font-size:1.05rem;letter-spacing:.4px}
@@ -56,36 +73,16 @@
       .more{display:none}
       .img-box img{max-height:360px}
     }
-  
-    /* === NAVBAR === */
-    .nav-wrap{position:sticky;top:0;z-index:50;background:rgba(10,10,15,.9);backdrop-filter:blur(6px);border-bottom:1px solid var(--ring)}
-    .nav{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:10px}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.5px}
-    .brand a{display:flex;align-items:center;gap:10px}
-    .brand .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-    .nav ul{list-style:none;display:flex;gap:14px;margin:0;padding:0}
-    .nav a.item{display:inline-flex;align-items:center;padding:8px 10px;border-radius:10px}
-    .nav a.item:hover{background:#161622}
-    .nav a.item.active{background:linear-gradient(90deg,rgba(255,106,0,.12),rgba(255,184,107,.06));border:1px solid var(--ring)}
-    .nav .spacer{flex:1}
-
-    /* Mobile */
-    .menu-btn{display:none;border:1px solid var(--ring);background:#0f0f16;border-radius:10px;padding:8px 10px}
-    .menu-btn:focus{outline:2px solid var(--accent)}
-    @media (max-width:860px){
-      .nav{flex-wrap:wrap}
-      .menu-btn{display:inline-flex}
-      .nav ul{width:100%;display:none;flex-direction:column;border-top:1px solid var(--ring);padding-top:8px}
-      .nav ul.open{display:flex}
-      .nav a.item{padding:10px 12px}
-    }
   </style>
 </head>
 <body>
   <div class="nav-wrap" role="navigation" aria-label="Primary">
     <div class="nav">
       <div class="brand">
-        <a href="/Iron-Crown-Combat/"><span class="dot" aria-hidden="true"></span><span>IRON CROWN COMBAT</span></a>
+        <a href="/Iron-Crown-Combat/">
+          <img src="assets/images/logos/icc-logo.png" alt="Iron Crown Combat Logo" class="logo" />
+          <span>IRON CROWN COMBAT</span>
+        </a>
       </div>
       <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="primaryMenu">Menu</button>
       <ul id="primaryMenu">
@@ -101,6 +98,7 @@
       </ul>
     </div>
   </div>
+
   <div class="container">
     <header class="page">
       <h1>Hall of Champions</h1>
@@ -119,7 +117,7 @@
       </div>
     </section>
 
-    <!-- Past Champions (auto-hidden until there are any) -->
+    <!-- Past Champions (hidden until needed) -->
     <section id="pastSection" class="past" aria-label="Past Champions" style="display:none">
       <header><h2>Past Champions</h2></header>
       <div id="pastList" class="list"></div>
@@ -127,10 +125,7 @@
   </div>
 
   <script>
-    // Data-driven so it can expand later
-    const FIGHTERS_PAGE_URL = 'fighters.html'; // relative within site
-
-    // Start with only the current champion
+    const FIGHTERS_PAGE_URL = 'fighters.html';
     let champions = [
       {
         name: 'Cole Maddox',
@@ -179,7 +174,6 @@
           const imgWrap = document.createElement('a');
           imgWrap.className = 'headshot';
           imgWrap.href = fighterLink(ch.slug);
-          imgWrap.setAttribute('aria-label', `View ${ch.name}'s profile`);
           const im = document.createElement('img');
           im.src = ch.headshot;
           im.alt = `${ch.name} headshot`;
@@ -188,11 +182,11 @@
           const text = document.createElement('div');
           text.className = 'titleline';
           const dates = ch.end ? `${fmtDate(ch.start)} – ${fmtDate(ch.end)}` : `${fmtDate(ch.start)} – —`;
-          text.innerHTML = `<div class="n">${ch.name}</div><div class="dates">${dates}</div>`;
+          text.innerHTML = `<div class=\"n\">${ch.name}</div><div class=\"dates\">${dates}</div>`;
 
           const more = document.createElement('div');
           more.className = 'more';
-          more.innerHTML = `<a href="${fighterLink(ch.slug)}">View profile</a>`;
+          more.innerHTML = `<a href=\"${fighterLink(ch.slug)}\">View profile</a>`;
 
           row.appendChild(imgWrap);
           row.appendChild(text);
@@ -202,7 +196,6 @@
       }
     }
 
-    // Helper to add a new champ later; closes the current one and reveals Past section
     function addNewChampion({ name, slug, startISO, heroImage, headshot, titleName, endPrevISO }){
       if (champions.length){
         champions[0] = { ...champions[0], end: endPrevISO || startISO };
@@ -213,8 +206,7 @@
 
     window.addNewChampion = addNewChampion;
     render();
-    </script>
-  <script>
+
     // Mobile menu toggle
     (function(){
       const btn = document.getElementById('menuBtn');
