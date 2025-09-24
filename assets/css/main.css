@@ -6,13 +6,13 @@
 :root{
   --bg: #0e0f10;
   --bg-2: #141617;
-  --surface: #13161b; /* used by some components */
+  --surface: #13161b;
   --text: #f1f1f1;
   --muted: #b7b7b7;
   --border: #2a2d30;
-  --accent: #e56915;
-  --gold: #d4af37;      /* gold divider */
-  --ring: #262638;      /* NEW: needed by shared navbar */
+  --accent: #e56915;       /* orange accent */
+  --gold: #d4af37;         /* gold */
+  --ring: #262638;         /* navbar borders */
   --shadow: 0 8px 24px rgba(0,0,0,.25);
 }
 
@@ -25,7 +25,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font: 400 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-  text-align: center; /* per request: centered text sitewide */
+  text-align: center; /* sitewide center per project style */
 }
 
 /* Utility */
@@ -57,62 +57,62 @@ body {
 .pagehead h1 { margin: 0; font-size: clamp(1.4rem, 2vw, 1.9rem); letter-spacing:.02em; }
 
 /* =====================================
-   Shared LOGO NAVBAR (navbar.html)
+   Shared LOGO NAVBAR (fragment-driven)
    ===================================== */
-.nav-wrap{
-  position:sticky; top:0; z-index:50;
-  background:rgba(10,10,15,.9);
-  backdrop-filter:blur(6px);
+.header{
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(10,10,15,.9);
+  backdrop-filter: blur(6px);
   border-bottom:1px solid var(--ring);
 }
-.nav{
-  max-width:1100px; margin:0 auto;
+.header .nav{
   display:flex; align-items:center; justify-content:space-between;
   padding:10px 16px; gap:10px;
 }
-.brand{display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:.5px}
-.brand img.logo{height:36px; width:auto; display:block}
+.logo { display:flex; align-items:center; }
+.logo img.nav-logo{
+  height:56px;            /* bigger logo */
+  width:auto;
+  display:block;
+}
 
-/* links */
-.nav ul{list-style:none; display:flex; gap:14px; margin:0; padding:0}
-.nav a.item{
+/* Desktop nav */
+.menu{
+  display:flex; gap:.5rem; flex-wrap:wrap;
+  align-items:center;      /* vertical-center links with logo */
+  justify-content:center;
+}
+.menu a.item{
   display:inline-flex; align-items:center;
-  padding:8px 10px; border-radius:10px;
-  text-decoration:none;
+  padding:.45rem .7rem; border-radius:10px;
+  border:1px solid transparent;
+  color:inherit; text-decoration:none;
 }
-/* kill purple/underline across states */
-.brand a,
-.nav a.item,
-.nav a.item:visited{
-  color: inherit;
-  text-decoration: none;
-}
-
-.nav a.item:hover{background:#161622}
-.nav a.item.active{
+.menu a.item:hover{ background:#161622; }
+.menu a.item.active{
   background:linear-gradient(90deg,rgba(255,106,0,.12),rgba(255,184,107,.06));
-  border:1px solid var(--ring)
+  border:1px solid var(--ring);
 }
 
-/* mobile */
+/* Mobile toggle */
 .menu-btn{
-  display:none;
-  border:1px solid var(--ring);
-  background:#0f0f16;
-  border-radius:10px;
-  padding:8px 10px;
-  color:inherit;
+  font-size:1.6rem; line-height:1;
+  background:transparent; color:var(--text);
+  border:1px solid var(--border); border-radius:10px;
+  padding:.4rem .7rem;
+  display:none;            /* hidden on desktop */
+  align-items:center; justify-content:center;
+  margin-left:auto;
 }
-.menu-btn:focus{outline:2px solid var(--accent)}
+
+/* Mobile layout */
 @media (max-width:860px){
-  .nav{flex-wrap:wrap}
-  .menu-btn{display:inline-flex}
-  .nav ul{
-    width:100%; display:none; flex-direction:column;
-    border-top:1px solid var(--ring); padding-top:8px
+  .menu-btn{ display:inline-flex; height:48px; } /* balanced with logo height */
+  .menu{
+    display:none; flex-direction:column; gap:.5rem;
+    margin-top:.75rem;
   }
-  .nav ul.open{display:flex}
-  .nav a.item{padding:10px 12px}
+  .menu.open{ display:flex; }
 }
 
 /* ===============================
@@ -198,7 +198,7 @@ body {
 }
 .modal > header h3 { margin: 0; font-size: 1.2rem; }
 
-/* Close button (sticky, touch-friendly) */
+/* Close button */
 .modal [data-close]{
   position: sticky; top: 0;
   margin-left: auto;
@@ -211,7 +211,7 @@ body {
 }
 .modal [data-close]:hover { border-color: var(--accent); }
 
-/* Modal content area: desktop/tablet split */
+/* Modal content area */
 .modal .content,
 .modal-content {
   flex: 1 1 auto;
@@ -300,7 +300,7 @@ body {
 }
 
 /* ===============================
-   Responsive
+   Responsive tweaks
    =============================== */
 @media (max-width: 1100px){
   .modal .content,
