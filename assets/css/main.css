@@ -330,3 +330,13 @@ body {
   .modal-left .fullpic { max-height: 38vh; }
   .badge { font-size: .8em; }
 }
+/* Clamp navbar logo size everywhere, even if pages have global img rules */
+header.header .logo img.nav-logo {
+  height: 56px !important;   /* adjust if you want */
+  width: auto !important;
+  max-height: 56px !important;
+  object-fit: contain;
+}
+
+/* Optional: neutralize any generic img rules inside the header */
+header.header img { max-width: none !important; }
