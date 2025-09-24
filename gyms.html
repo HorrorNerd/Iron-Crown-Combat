@@ -12,24 +12,9 @@
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="container nav" data-nav>
-      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
-        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
-        <span>Iron Crown Combat</span>
-      </a>
-      <nav class="menu" aria-label="Primary">
-        <a href="events.html">Events</a>
-        <a href="rankings.html">Rankings</a>
-        <a href="fighters.html">Fighters</a>
-        <a href="gyms.html">Gyms</a>
-        <a href="news.html">News</a>
-        <a href="rules.html">Rules</a>
-        <a href="tournament.html">Tournaments</a>
-        <a href="about.html" aria-current="page">About</a>
-      </nav>
-    </div>
-  </header>
+
+  <!-- Shared navbar placeholder; populated by navbar.html -->
+  <div id="navbar"></div>
 
   <main class="container">
     <div class="pagehead"><h1>Gyms</h1></div>
@@ -68,7 +53,6 @@
     };
     const num$ = v => {
       if (v == null || v === '') return 0;
-      // Prefer numeric if GViz gave it (e.g., 66900), else strip currency
       const n = Number(v);
       if (Number.isFinite(n)) return n;
       const m = parseFloat(String(v).replace(/[^0-9.\-]/g,''));
@@ -86,7 +70,7 @@
       cols.forEach((c,i)=>{
         const label = (c && (c.label || c.id) || '').trim();
         if (!label) return;
-        if (c && c.type === 'boolean') return; // skip TRUE/FALSE col 0
+        if (c && c.type === 'boolean') return;
         map[label.toLowerCase()] = i;
       });
 
@@ -100,7 +84,7 @@
         gym:     map['gym'],
       };
 
-      // Fallbacks based on your known order if any are missing
+      // Fallbacks based on known order if any are missing
       if (idx.fighter == null) idx.fighter = 1;
       if (idx.wins    == null) idx.wins    = 2;
       if (idx.losses  == null) idx.losses  = 3;
@@ -112,7 +96,6 @@
         if (i == null || i < 0) return '';
         const c = row.c[i];
         if (!c) return '';
-        // Use formatted if present, else raw
         return (c.f != null ? c.f : c.v) ?? '';
       };
 
@@ -125,7 +108,6 @@
         const draws   = get(r, idx.draws);
         const earn    = get(r, idx.earn);
 
-        // Drop obvious header/blank rows
         if (!fighter && !gymRaw) continue;
         if (isHeaderish(fighter) || isHeaderish(gymRaw)) continue;
 
@@ -177,35 +159,59 @@
     });
 
     async function boot(){
-    try{
-      const res = await fetch(url, {cache:'no-store'});
-      const text = await res.text();
-      const rows = parseGViz(text);
+      try{
+        const res = await fetch(url, {cache:'no-store'});
+        const text = await res.text();
+        const rows = parseGViz(text);
 
-      // Group by normalized gym key, SKIP Independent/blank gyms
-      const groups = {};
-      for (const r of rows){
-        const display = (r.gym || '').trim();
-        const key = display.replace(/\s+/g,' ').toLowerCase();
-        if (!display) continue;                              // skip empty
-        if (key === 'independent') continue;                 // skip Independent
-
-        if (!groups[key]) groups[key] = { displayName: display, fighters: [] };
-        groups[key].fighters.push(r);
+        // Group by normalized gym key, SKIP Independent/blank gyms
+        const groups = {};
+        for (const r of rows){
+          const display = (r.gym || '').trim();
+          const key = display.replace(/\s+/g,' ').toLowerCase();
+          if (!display) continue;                 // skip empty
+          if (key === 'independent') continue;    // skip Independent
+          if (!groups[key]) groups[key] = { displayName: display, fighters: [] };
+          groups[key].fighters.push(r);
+        }
+        render(groups);
+      } catch(e){
+        grid.innerHTML = '<div class="card">Failed to load gyms.</div>';
+        console.error('gyms parse error', e);
       }
-
-      render(groups);
-    } catch(e){
-      grid.innerHTML = '<div class="card">Failed to load gyms.</div>';
-      console.error('gyms parse error', e);
     }
-  }
-  boot();
+    boot();
   })();
 </script>
 
+<!-- Load shared navbar (absolute path so it works everywhere) -->
+<script>
+  fetch("/Iron-Crown-Combat/navbar.html")
+    .then(r => r.text())
+    .then(html => {
+      const mount = document.getElementById("navbar");
+      if (mount) mount.innerHTML = html;
 
+      // Mobile menu toggle
+      const btn = document.getElementById("menuBtn");
+      const menu = document.getElementById("primaryMenu");
+      if (btn && menu){
+        btn.addEventListener("click", () => {
+          const open = menu.classList.toggle("open");
+          btn.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+      }
 
+      // Auto-highlight current page
+      const path = location.pathname;
+      document.querySelectorAll("#primaryMenu a.item").forEach(a => {
+        try {
+          const hrefPath = new URL(a.href, location.origin).pathname;
+          if (hrefPath === path) a.classList.add("active");
+        } catch(e){}
+      });
+    });
+</script>
 
 </body>
 </html>
