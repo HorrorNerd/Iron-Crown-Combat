@@ -93,8 +93,9 @@
         <li><a class="item" href="/Iron-Crown-Combat/rankings.html">Rankings</a></li>
         <li><a class="item" href="/Iron-Crown-Combat/gyms.html">Gyms</a></li>
         <li><a class="item" href="/Iron-Crown-Combat/news.html">News</a></li>
+        <li><a class="item" href="/Iron-Crown-Combat/about.html">About</a></li>
         <li><a class="item" href="/Iron-Crown-Combat/rules.html">Rules</a></li>
-        <li><a class="item active" href="/Iron-Crown-Combat/champions.html">Champions</a></li>
+        <li><a class="item" href="/Iron-Crown-Combat/champions.html">Champions</a></li>
       </ul>
     </div>
   </div>
@@ -211,10 +212,19 @@
     (function(){
       const btn = document.getElementById('menuBtn');
       const menu = document.getElementById('primaryMenu');
-      if (!btn || !menu) return;
-      btn.addEventListener('click',()=>{
-        const open = menu.classList.toggle('open');
-        btn.setAttribute('aria-expanded', open ? 'true':'false');
+      if (btn && menu){
+        btn.addEventListener('click',()=>{
+          const open = menu.classList.toggle('open');
+          btn.setAttribute('aria-expanded', open ? 'true':'false');
+        });
+      }
+      // Auto-highlight the current page in the navbar
+      const path = location.pathname;
+      document.querySelectorAll('#primaryMenu a.item').forEach(a=>{
+        try{
+          const hrefPath = new URL(a.href, location.origin).pathname;
+          if (hrefPath === path) a.classList.add('active');
+        }catch(e){/* ignore */}
       });
     })();
   </script>
