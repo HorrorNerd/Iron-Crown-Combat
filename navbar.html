@@ -1,28 +1,26 @@
-<div class="nav-wrap" role="navigation" aria-label="Primary">
-  <div class="nav">
-    <!-- Brand / Logo -->
-    <div class="brand">
-      <a href="/Iron-Crown-Combat/">
-        <img src="assets/images/logos/icc-logo.png" alt="Iron Crown Combat Logo" class="logo" />
-        <span>IRON CROWN COMBAT</span>
-      </a>
-    </div>
+<header class="header">
+  <div class="container nav" data-nav>
+    <!-- Bigger logo, no text -->
+    <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
+      <img src="assets/images/logos/icc-logo.png" alt="Iron Crown Combat" class="nav-logo">
+    </a>
 
     <!-- Mobile toggle -->
-    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="primaryMenu">Menu</button>
+    <button id="menuBtn" class="menu-btn" aria-expanded="false" aria-controls="primaryMenu" aria-label="Toggle menu">
+      ☰
+    </button>
 
-    <!-- Main nav links -->
-    <ul id="primaryMenu">
-      <li><a class="item" href="/Iron-Crown-Combat/">Home</a></li>
-      <li><a class="item" href="/Iron-Crown-Combat/fighters.html">Fighters</a></li>
-      <li><a class="item" href="/Iron-Crown-Combat/events.html">Events</a></li>
-      <li><a class="item" href="/Iron-Crown-Combat/tournament.html">Tournament</a></li>
-      <li><a class="item" href="/Iron-Crown-Combat/rankings.html">Rankings</a></li>
-      <li><a class="item" href="/Iron-Crown-Combat/gyms.html">Gyms</a></li>
-      <li><a class="item" href="/Iron-Crown-Combat/news.html">News</a></li>
-      <li><a class="item" href="/Iron-Crown-Combat/about.html">About</a></li>
-      <li><a class="item" href="/Iron-Crown-Combat/rules.html">Rules</a></li>
-      <li><a class="item" href="/Iron-Crown-Combat/champions.html">Champions</a></li>
-    </ul>
+    <!-- Primary nav -->
+    <nav id="primaryMenu" class="menu" aria-label="Primary">
+      <a class="item" href="events.html">Events</a>
+      <a class="item" href="rankings.html">Rankings</a>
+      <a class="item" href="fighters.html">Fighters</a>
+      <a class="item" href="gyms.html">Gyms</a>
+      <a class="item" href="news.html">News</a>
+      <a class="item" href="rules.html">Rules</a>
+      <a class="item" href="tournament.html">Tournaments</a>
+      <a class="item" href="about.html">About</a>
+      <a class="item" href="champions.html">Champions</a>
+    </nav>
   </div>
-</div>
+</header>
