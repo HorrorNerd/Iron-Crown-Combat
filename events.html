@@ -132,81 +132,57 @@
     .ribbon.win{ background:rgba(0,180,90,.18); border-color:rgba(0,180,90,.35); }
     .ribbon.bonus{ background:rgba(255,215,0,.14); border-color:rgba(255,215,0,.35); color:var(--gold); }
     .ribbon.rating{ background:rgba(135,206,250,.14); border-color:rgba(135,206,250,.35); }
-/* ===== Winner visibility upgrades ===== */
 
-/* Winner side glow/outline */
-.fight.win-left  .headshot:first-child,
-.fight.win-right .headshot:last-child{
-  outline:3px solid rgba(0, 190, 100, .9);
-  box-shadow:0 0 0 3px rgba(0, 190, 100, .28), 0 10px 30px rgba(0,0,0,.45);
-}
-.fight.win-left  .headshot:first-child::after,
-.fight.win-right .headshot:last-child::after{
-  content:"✓";
-  position:absolute; top:.5rem; left:.5rem;
-  width:26px; height:26px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-weight:900; font-size:.9rem;
-  color:#fff; background:rgba(0, 190, 100, .9);
-  box-shadow:0 2px 8px rgba(0,0,0,.5);
-}
+    /* ===== Winner visibility upgrades ===== */
+    .fight.win-left  .headshot:first-child,
+    .fight.win-right .headshot:last-child{
+      outline:3px solid rgba(0, 190, 100, .9);
+      box-shadow:0 0 0 3px rgba(0, 190, 100, .28), 0 10px 30px rgba(0,0,0,.45);
+    }
+    .fight.win-left  .headshot:first-child::after,
+    .fight.win-right .headshot:last-child::after{
+      content:"✓";
+      position:absolute; top:.5rem; left:.5rem;
+      width:26px; height:26px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; font-size:.9rem;
+      color:#fff; background:rgba(0, 190, 100, .9);
+      box-shadow:0 2px 8px rgba(0,0,0,.5);
+    }
 
-/* Top badges (bonus, rating, etc.) */
-.badge-wrap{
-  position:absolute; left:1rem; top:.75rem;
-  display:flex; gap:.45rem; flex-wrap:wrap; z-index:2;
-}
-.badge{
-  display:inline-block; padding:.28rem .55rem; border-radius:.55rem;
-  font-size:.8rem; font-weight:800; letter-spacing:.2px;
-  border:1px solid var(--border); background:rgba(0,0,0,.5); color:#fff;
-  box-shadow:0 2px 10px rgba(0,0,0,.35);
-}
-.badge.win   { background:rgba(0,180,90,.18);  border-color:rgba(0,180,90,.45); }
-.badge.bonus { background:rgba(255,215,0,.18); border-color:rgba(255,215,0,.45); color:var(--gold); }
-.badge.rate  { background:rgba(120,180,255,.18); border-color:rgba(120,180,255,.45); }
+    .badge-wrap{ position:absolute; left:1rem; top:.75rem; display:flex; gap:.45rem; flex-wrap:wrap; z-index:2; }
+    .badge{
+      display:inline-block; padding:.28rem .55rem; border-radius:.55rem;
+      font-size:.8rem; font-weight:800; letter-spacing:.2px;
+      border:1px solid var(--border); background:rgba(0,0,0,.5); color:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.35);
+    }
+    .badge.win   { background:rgba(0,180,90,.18);  border-color:rgba(0,180,90,.45); }
+    .badge.bonus { background:rgba(255,215,0,.18); border-color:rgba(255,215,0,.45); color:var(--gold); }
+    .badge.rate  { background:rgba(120,180,255,.18); border-color:rgba(120,180,255,.45); }
 
-/* Big center bar for the winner text (super obvious) */
-.result-bar{
-  position:absolute; left:50%; bottom:.6rem; transform:translateX(-50%);
-  padding:.5rem .9rem; border-radius:.7rem;
-  font-weight:900; letter-spacing:.3px;
-  background:linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.65));
-  border:1px solid var(--border);
-  color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.7);
-  box-shadow:0 6px 24px rgba(0,0,0,.35);
-}
-.result-bar strong{ color:#8ff3b5; }
+    .result-bar{
+      position:absolute; left:50%; bottom:.6rem; transform:translateX(-50%);
+      padding:.5rem .9rem; border-radius:.7rem;
+      font-weight:900; letter-spacing:.3px;
+      background:linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.65));
+      border:1px solid var(--border);
+      color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.7);
+      box-shadow:0 6px 24px rgba(0,0,0,.35);
+    }
+    .result-bar strong{ color:#8ff3b5; }
 
-/* Draw state: neutral badge */
-.badge.draw { background:rgba(160,160,160,.22); border-color:rgba(160,160,160,.45); }
-/* Winner name turns green */
-.name-overlay.winner {
-  color: #5cff9d; /* bright green */
-  text-shadow: 0 0 8px rgba(92, 255, 157, .65), 0 2px 8px rgba(0,0,0,.9);
-}
+    .badge.draw { background:rgba(160,160,160,.22); border-color:rgba(160,160,160,.45); }
+    .name-overlay.winner {
+      color: #5cff9d;
+      text-shadow: 0 0 8px rgba(92, 255, 157, .65), 0 2px 8px rgba(0,0,0,.9);
+    }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="container nav" data-nav>
-      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
-        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
-        <span>Iron Crown Combat</span>
-      </a>
-      <nav class="menu" aria-label="Primary">
-        <a href="events.html" aria-current="page">Events</a>
-        <a href="rankings.html">Rankings</a>
-        <a href="fighters.html">Fighters</a>
-        <a href="gyms.html">Gyms</a>
-        <a href="news.html">News</a>
-        <a href="rules.html">Rules</a>
-        <a href="tournament.html">Tournaments</a>
-        <a href="about.html">About</a>
-      </nav>
-    </div>
-  </header>
+
+  <!-- Shared navbar placeholder; populated by navbar.html -->
+  <div id="navbar"></div>
 
   <div class="pagehead">
     <h1>Events</h1>
@@ -291,9 +267,7 @@
     // Load + model
     async function loadEvents(){
       const rows = await fetchCSV(GID_EVENTS_ALL);
-      // Headers: Tournament | Event | Fighter A | Fighter B | Winner | Match Rating | bonus type
       const map = new Map(); // key: name||dateStr
-
       let order = 0;
       for (const r of rows){
         const evt = (r['Event'] || '').trim();
@@ -309,7 +283,7 @@
         const b = (r['Fighter B'] || '').trim();
         if (a || b){
           map.get(key).fights.push({
-            order: ++order,        // preserve CSV order
+            order: ++order,
             a: a || 'TBA',
             b: b || 'TBA',
             winner: (r['Winner']||'').trim(),
@@ -328,26 +302,26 @@
     }
 
     // Render
-   function fightRow(f){
-  const winnerA = f.winner && f.winner === f.a;
-  const winnerB = f.winner && f.winner === f.b;
+    function fightRow(f){
+      const winnerA = f.winner && f.winner === f.a;
+      const winnerB = f.winner && f.winner === f.b;
 
-  return `
-    <div class="fight">
-      <div class="headshot">
-        <img src="${headshotPath(f.a)}" alt="${f.a}" onerror="this.style.opacity=.25">
-        <div class="name-overlay ${winnerA ? 'winner' : ''}">${f.a}</div>
-      </div>
+      return `
+        <div class="fight">
+          <div class="headshot">
+            <img src="${headshotPath(f.a)}" alt="${f.a}" onerror="this.style.opacity=.25">
+            <div class="name-overlay ${winnerA ? 'winner' : ''}">${f.a}</div>
+          </div>
 
-      <div class="vs">VS</div>
+          <div class="vs">VS</div>
 
-      <div class="headshot">
-        <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
-        <div class="name-overlay ${winnerB ? 'winner' : ''}">${f.b}</div>
-      </div>
-    </div>
-  `;
-}
+          <div class="headshot">
+            <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
+            <div class="name-overlay ${winnerB ? 'winner' : ''}">${f.b}</div>
+          </div>
+        </div>
+      `;
+    }
 
     function fillEvent(nameId, dateId, fightsId, ev){
       document.getElementById(nameId).textContent = ev.name;
@@ -433,6 +407,35 @@
       }
       document.getElementById('yr').textContent = new Date().getFullYear();
     })();
+  </script>
+
+  <!-- Load shared navbar (absolute path so it works everywhere) -->
+  <script>
+    fetch("/Iron-Crown-Combat/navbar.html")
+      .then(r => r.text())
+      .then(html => {
+        const mount = document.getElementById("navbar");
+        if (mount) mount.innerHTML = html;
+
+        // Mobile menu toggle
+        const btn = document.getElementById("menuBtn");
+        const menu = document.getElementById("primaryMenu");
+        if (btn && menu){
+          btn.addEventListener("click", () => {
+            const open = menu.classList.toggle("open");
+            btn.setAttribute("aria-expanded", open ? "true" : "false");
+          });
+        }
+
+        // Auto-highlight current page
+        const path = location.pathname;
+        document.querySelectorAll("#primaryMenu a.item").forEach(a => {
+          try {
+            const hrefPath = new URL(a.href, location.origin).pathname;
+            if (hrefPath === path) a.classList.add("active");
+          } catch(e){}
+        });
+      });
   </script>
 </body>
 </html>
