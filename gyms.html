@@ -6,7 +6,6 @@
   <title>Iron Crown Combat — Gyms</title>
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
-    /* ===== Gyms Grid ===== */
     .gyms-grid{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -36,7 +35,6 @@
     .gym-name{ margin:.6rem 0 0; font-weight:800; letter-spacing:.02em; }
     .gym-meta{ color:var(--muted); font-size:.9rem; margin-top:.15rem; }
 
-    /* ===== Modal ===== */
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 60; padding: 10px; }
     .modal-backdrop.show { display:flex; }
     .modal{
@@ -65,7 +63,6 @@
       .modal-content{ grid-template-columns: 1fr; }
     }
 
-    /* Left column: identity */
     .gym-id{ display:grid; gap:.7rem; align-content:start; }
     .gym-hero{
       background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:.6rem;
@@ -98,7 +95,6 @@
       border:1px solid var(--border); background:var(--bg); border-radius:12px; padding:.7rem; line-height:1.55; text-align:left;
     }
 
-    /* Right column: Roster */
     .roster{ display:grid; gap:.75rem; align-content:start; }
     .roster h4{ margin:.2rem 0; }
     .fighters{
@@ -120,12 +116,10 @@
 </head>
 <body>
 
-  <!-- Shared navbar -->
   <div id="navbar"></div>
 
   <main class="container">
     <div class="pagehead"><h1>Gyms</h1></div>
-
     <section id="gymsGrid" class="gyms-grid">
       <div class="card">Loading gyms…</div>
     </section>
@@ -137,7 +131,6 @@
     </div>
   </footer>
 
-  <!-- Modal -->
   <div id="gymModal" class="modal-backdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gymTitle">
       <header>
@@ -145,7 +138,6 @@
         <button class="close-btn" aria-label="Close">✕</button>
       </header>
       <div class="modal-content">
-        <!-- Left -->
         <div class="gym-id">
           <div class="gym-hero">
             <img id="mLogo" class="logo" src="" alt="Gym logo">
@@ -168,7 +160,6 @@
           <div id="mBio" class="bio" style="display:none"></div>
         </div>
 
-        <!-- Right -->
         <div class="roster">
           <h4>Roster</h4>
           <div id="mFighters" class="fighters"><div class="card">No fighters found.</div></div>
@@ -177,21 +168,17 @@
     </div>
   </div>
 
-  <!-- Footer year -->
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
-  </script>
 
-  <!-- Data + Modal logic -->
-  <script>
-    // ====== Configs & helpers ======
+    // ===== Config =====
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_FIGHTER_TRACKER = '1277877160';
     const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID_FIGHTER_TRACKER}`;
+    const GYMS_CFG_URL = 'assets/data/gyms.json';
+    const PLACEHOLDER_LOGO = 'assets/images/gyms/_placeholder.png'; // create if you want
 
-    const GYMS_CFG_URL = 'assets/data/gyms.json'; // array file
-    const PLACEHOLDER_LOGO = 'assets/images/gyms/_placeholder.png'; // optional (create if you want)
-
+    // ===== Helpers =====
     const slugify = s => String(s||'')
       .toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
       .replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
@@ -202,16 +189,16 @@
     };
 
     const headshotPath = name => `assets/images/fighters/headshots/${slugify(name)}.png`;
-    const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
+    const gymLogoBase  = slug => `assets/images/gyms/${slug}`;
 
-    // Canonical key: strip punctuation, common suffixes, and spaces
+    // Canonical key for matching gym names across sources
     function canon(s){
       return String(s||'')
         .toLowerCase()
         .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')   // accents
         .replace(/&/g,'and')
         .replace(/['’`"]/g,'')                              // quotes
-        .replace(/\b(gym|mma|sports|bar|the)\b/g, '')       // drop generic words
+        .replace(/\b(the|gym|mma|sports|bar|club|academy)\b/g, '') // generic words
         .replace(/[^a-z0-9]+/g,'')                          // squash non-alnum
         .trim();
     }
@@ -264,7 +251,7 @@
     async function fetchText(url){ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error(r.status); return r.text(); }
     async function fetchJSON(url){ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error(r.status); return r.json(); }
 
-    // Build a fast index of sheet fighters by canonical gym
+    // Build index of fighters by canonical gym
     function indexFightersByGym(fighters){
       const map = new Map();
       for (const f of fighters){
@@ -276,25 +263,44 @@
       return map;
     }
 
-    // Convert gyms.json → enriched gyms, using aliases + canon
+    // === IMG fallback chain for logos (explicit → png → jpg → webp → jpeg → placeholder) ===
+    function setupLogoFallback(imgEl, explicitPath, slug){
+      const tries = [];
+      if (explicitPath) tries.push(explicitPath);
+      const base = gymLogoBase(slug);
+      tries.push(`${base}.png`, `${base}.jpg`, `${base}.webp`, `${base}.jpeg`);
+      if (PLACEHOLDER_LOGO) tries.push(PLACEHOLDER_LOGO);
+
+      let i = 0;
+      const tryNext = () => {
+        if (i >= tries.length) return;
+        imgEl.src = tries[i++];
+      };
+      imgEl.onerror = () => tryNext();
+      tryNext(); // kick off
+    }
+
+    // Merge gyms config with fighters (uses aliases + canonical)
     function buildGyms(gymsCfg, fighters){
       const byGym = indexFightersByGym(fighters);
 
-      function firstNonEmpty(arr){
-        for (const s of arr){
+      function firstNonEmpty(candidates){
+        for (const s of candidates){
           const k = canon(s);
           if (k && byGym.has(k)) return byGym.get(k);
         }
         return [];
       }
 
-      return (gymsCfg.gyms || []).map(g => {
+      const out = (gymsCfg.gyms || []).map(g => {
         const displayName = g.name || g.slug || 'Gym';
         const slug = g.slug || slugify(displayName);
 
-        // Build alias pool: display name, slug-as-words, plus provided aliases
+        // Alias pool: name variants
         const aliasPool = [displayName, slug.replace(/-/g,' ')]
-          .concat(Array.isArray(g.aliases) ? g.aliases : []);
+          .concat(Array.isArray(g.aliases) ? g.aliases : [])
+          // add a few auto variants (possessives off, spaces removed)
+          .concat([displayName.replace(/['’]/g,''), displayName.replace(/['’]/g,'').replace(/\s+/g,'')]);
 
         const rosterRows = firstNonEmpty(aliasPool);
 
@@ -314,16 +320,40 @@
         return {
           name: displayName,
           slug,
-          logo: g.logo || gymLogoPath(slug),
+          explicitLogo: g.logo || '',
           managerName: g.manager?.name || '',
           managerImg: g.manager?.image || '',
           bio: g.bio || '',
           totals, roster
         };
       }).sort((a,b)=> (b.roster.length - a.roster.length) || a.name.localeCompare(b.name));
+
+      // ---- Diagnostics: show any unmatched sheet gyms in console ----
+      const cfgKeys = new Set(out.flatMap(g => {
+        const variants = [g.name, g.slug.replace(/-/g,' '), g.name.replace(/['’]/g,''), g.name.replace(/['’]/g,'').replace(/\s+/g,'')];
+        return variants.map(v => canon(v));
+      }));
+      (gymsCfg.gyms || []).forEach(g=>{
+        (g.aliases||[]).forEach(a=>cfgKeys.add(canon(a)));
+      });
+
+      const seen = new Set();
+      const unmatched = new Map();
+      for (const f of fighters){
+        const k = canon(f.gym);
+        if (!k || cfgKeys.has(k) || seen.has(k)) continue;
+        seen.add(k);
+        unmatched.set(k, f.gym);
+      }
+      if (unmatched.size){
+        console.info('[ICC Gyms] Unmatched gyms found in sheet (add these spellings to gyms.json aliases):');
+        unmatched.forEach((orig, key)=> console.info('  •', orig, '→ canon:', key));
+      }
+
+      return out;
     }
 
-    // ====== Render Grid ======
+    // Render grid
     function renderGrid(gyms){
       const grid = document.getElementById('gymsGrid');
       if (!gyms.length){
@@ -332,14 +362,17 @@
       }
       grid.innerHTML = gyms.map((g,i)=>`
         <article class="gym-card" data-gym="${i}" title="Open ${g.name}">
-          <img class="gym-logo"
-               src="${g.logo}"
-               alt="${g.name} logo"
-               onerror="this.onerror=null;this.src='${gymLogoPath(g.slug)}';this.style.opacity=1;">
+          <img class="gym-logo" id="logo-${i}" alt="${g.name} logo">
           <div class="gym-name">${g.name}</div>
           <div class="gym-meta">${g.roster.length} fighter${g.roster.length===1?'':'s'}</div>
         </article>
       `).join('');
+
+      // Attach fallback loaders after DOM insert
+      gyms.forEach((g,i)=>{
+        const img = document.getElementById(`logo-${i}`);
+        setupLogoFallback(img, g.explicitLogo, g.slug);
+      });
 
       grid.addEventListener('click', e=>{
         const card = e.target.closest('.gym-card');
@@ -349,7 +382,7 @@
       }, { passive:true });
     }
 
-    // ====== Modal ======
+    // Modal
     const modal = document.getElementById('gymModal');
     const closeBtn = modal.querySelector('.close-btn');
 
@@ -358,15 +391,14 @@
       document.getElementById('gymTitle').textContent = g.name;
 
       const mLogo = document.getElementById('mLogo');
-      mLogo.src = g.logo; mLogo.alt = g.name + ' logo';
-      mLogo.onerror = () => { mLogo.onerror=null; mLogo.src = gymLogoPath(g.slug); };
+      // rebuild fallback chain for modal logo too
+      setupLogoFallback(mLogo, g.explicitLogo, g.slug);
 
       document.getElementById('mWins').textContent    = g.totals.wins;
       document.getElementById('mLosses').textContent  = g.totals.losses;
       document.getElementById('mDraws').textContent   = g.totals.draws;
       document.getElementById('mEarnings').textContent= money(g.totals.earn);
 
-      // Manager
       const mWrap = document.getElementById('mManager');
       const mImg  = document.getElementById('mManagerImg');
       const mName = document.getElementById('mManagerName');
@@ -384,7 +416,6 @@
         mWrap.style.display = 'none';
       }
 
-      // Bio
       const bioEl = document.getElementById('mBio');
       if (g.bio){
         bioEl.style.display = '';
@@ -394,7 +425,6 @@
         bioEl.textContent = '';
       }
 
-      // Roster
       const rosterEl = document.getElementById('mFighters');
       rosterEl.innerHTML = g.roster.length
         ? g.roster.map(f=>`
@@ -423,13 +453,10 @@
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); }, { passive:true });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    // ====== Boot ======
+    // Boot
     (async function(){
       try{
-        const [text, gymsCfg] = await Promise.all([
-          fetchText(GVIZ_URL),
-          fetchJSON(GYMS_CFG_URL)
-        ]);
+        const [text, gymsCfg] = await Promise.all([ fetchText(GVIZ_URL), fetchJSON(GYMS_CFG_URL) ]);
         const fighterRows = parseGViz(text);
         const gyms = buildGyms(gymsCfg, fighterRows);
         renderGrid(gyms);
@@ -448,7 +475,6 @@
         const mount = document.getElementById("navbar");
         if (mount) mount.innerHTML = html;
 
-        // Mobile menu toggle
         const btn = document.getElementById("menuBtn");
         const menu = document.getElementById("primaryMenu");
         if (btn && menu){
@@ -458,7 +484,6 @@
           });
         }
 
-        // Auto-highlight current page
         const path = location.pathname;
         document.querySelectorAll("#primaryMenu a.item").forEach(a => {
           try {
