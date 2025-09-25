@@ -1,4 +1,13 @@
 {
+  // Fallbacks for images
+function imageWithFallback(src, fallback, alt=''){
+  const img = new Image();
+  img.alt = alt;
+  img.src = src;
+  img.onerror = () => { img.onerror=null; img.src = fallback; };
+  return img;
+}
+const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
   "gyms": [
     {
       "name": "Solomon's Gold Mine",
