@@ -4,8 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Iron Crown Combat — Gyms</title>
+
+  <!-- Favicon (prevents /favicon.ico 404s) -->
+  <link rel="icon" href="assets/img/favicon.png">
+  <link rel="shortcut icon" href="assets/img/favicon.png">
+
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
+    /* ===== Gyms Grid ===== */
     .gyms-grid{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -35,6 +41,7 @@
     .gym-name{ margin:.6rem 0 0; font-weight:800; letter-spacing:.02em; }
     .gym-meta{ color:var(--muted); font-size:.9rem; margin-top:.15rem; }
 
+    /* ===== Modal ===== */
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 60; padding: 10px; }
     .modal-backdrop.show { display:flex; }
     .modal{
@@ -63,6 +70,7 @@
       .modal-content{ grid-template-columns: 1fr; }
     }
 
+    /* Left column */
     .gym-id{ display:grid; gap:.7rem; align-content:start; }
     .gym-hero{
       background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:.6rem;
@@ -95,6 +103,7 @@
       border:1px solid var(--border); background:var(--bg); border-radius:12px; padding:.7rem; line-height:1.55; text-align:left;
     }
 
+    /* Right column: Roster */
     .roster{ display:grid; gap:.75rem; align-content:start; }
     .roster h4{ margin:.2rem 0; }
     .fighters{
@@ -116,10 +125,12 @@
 </head>
 <body>
 
+  <!-- Shared navbar mount -->
   <div id="navbar"></div>
 
   <main class="container">
     <div class="pagehead"><h1>Gyms</h1></div>
+
     <section id="gymsGrid" class="gyms-grid">
       <div class="card">Loading gyms…</div>
     </section>
@@ -131,6 +142,7 @@
     </div>
   </footer>
 
+  <!-- Modal -->
   <div id="gymModal" class="modal-backdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gymTitle">
       <header>
@@ -138,6 +150,7 @@
         <button class="close-btn" aria-label="Close">✕</button>
       </header>
       <div class="modal-content">
+        <!-- Left -->
         <div class="gym-id">
           <div class="gym-hero">
             <img id="mLogo" class="logo" src="" alt="Gym logo">
@@ -160,6 +173,7 @@
           <div id="mBio" class="bio" style="display:none"></div>
         </div>
 
+        <!-- Right -->
         <div class="roster">
           <h4>Roster</h4>
           <div id="mFighters" class="fighters"><div class="card">No fighters found.</div></div>
@@ -168,15 +182,19 @@
     </div>
   </div>
 
+  <!-- Footer year -->
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
+  </script>
 
-    // ===== Config =====
+  <!-- Data + Modal logic -->
+  <script>
+    // ====== Config ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_FIGHTER_TRACKER = '1277877160';
     const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID_FIGHTER_TRACKER}`;
-    const GYMS_CFG_URL = 'assets/data/gyms.json';
-    const PLACEHOLDER_LOGO = 'assets/images/gyms/_placeholder.png'; // create if you want
+
+    const GYMS_CFG_URL = 'assets/data/gyms.json'; // your gyms config with aliases
 
     // ===== Helpers =====
     const slugify = s => String(s||'')
@@ -263,13 +281,26 @@
       return map;
     }
 
+    // Normalize any gym logo path coming from JSON (handles bare filenames)
+    function normGymPath(p){
+      if (!p) return '';
+      if (/^https?:\/\//i.test(p) || p.startsWith('/')) return p; // absolute
+      if (p.includes('/')) return p; // already includes subfolder
+      return `assets/images/gyms/${p}`; // bare filename → gyms folder
+    }
+
     // === IMG fallback chain for logos (explicit → png → jpg → webp → jpeg → placeholder) ===
     function setupLogoFallback(imgEl, explicitPath, slug){
       const tries = [];
-      if (explicitPath) tries.push(explicitPath);
+      const normExplicit = explicitPath ? normGymPath(explicitPath) : '';
+      if (normExplicit) tries.push(normExplicit);
+
       const base = gymLogoBase(slug);
       tries.push(`${base}.png`, `${base}.jpg`, `${base}.webp`, `${base}.jpeg`);
-      if (PLACEHOLDER_LOGO) tries.push(PLACEHOLDER_LOGO);
+
+      // Optional placeholder at end (create this file if you want)
+      const PLACEHOLDER_LOGO = 'assets/images/gyms/_placeholder.png';
+      tries.push(PLACEHOLDER_LOGO);
 
       let i = 0;
       const tryNext = () => {
@@ -296,10 +327,9 @@
         const displayName = g.name || g.slug || 'Gym';
         const slug = g.slug || slugify(displayName);
 
-        // Alias pool: name variants
+        // Alias pool: display name, slug-as-words, provided aliases, and a few auto variants
         const aliasPool = [displayName, slug.replace(/-/g,' ')]
           .concat(Array.isArray(g.aliases) ? g.aliases : [])
-          // add a few auto variants (possessives off, spaces removed)
           .concat([displayName.replace(/['’]/g,''), displayName.replace(/['’]/g,'').replace(/\s+/g,'')]);
 
         const rosterRows = firstNonEmpty(aliasPool);
@@ -328,7 +358,7 @@
         };
       }).sort((a,b)=> (b.roster.length - a.roster.length) || a.name.localeCompare(b.name));
 
-      // ---- Diagnostics: show any unmatched sheet gyms in console ----
+      // ---- Diagnostics: print unmatched sheet gym strings to console ----
       const cfgKeys = new Set(out.flatMap(g => {
         const variants = [g.name, g.slug.replace(/-/g,' '), g.name.replace(/['’]/g,''), g.name.replace(/['’]/g,'').replace(/\s+/g,'')];
         return variants.map(v => canon(v));
@@ -353,7 +383,7 @@
       return out;
     }
 
-    // Render grid
+    // ====== Render Grid ======
     function renderGrid(gyms){
       const grid = document.getElementById('gymsGrid');
       if (!gyms.length){
@@ -382,7 +412,7 @@
       }, { passive:true });
     }
 
-    // Modal
+    // ====== Modal ======
     const modal = document.getElementById('gymModal');
     const closeBtn = modal.querySelector('.close-btn');
 
@@ -391,7 +421,6 @@
       document.getElementById('gymTitle').textContent = g.name;
 
       const mLogo = document.getElementById('mLogo');
-      // rebuild fallback chain for modal logo too
       setupLogoFallback(mLogo, g.explicitLogo, g.slug);
 
       document.getElementById('mWins').textContent    = g.totals.wins;
@@ -399,6 +428,7 @@
       document.getElementById('mDraws').textContent   = g.totals.draws;
       document.getElementById('mEarnings').textContent= money(g.totals.earn);
 
+      // Manager
       const mWrap = document.getElementById('mManager');
       const mImg  = document.getElementById('mManagerImg');
       const mName = document.getElementById('mManagerName');
@@ -416,6 +446,7 @@
         mWrap.style.display = 'none';
       }
 
+      // Bio
       const bioEl = document.getElementById('mBio');
       if (g.bio){
         bioEl.style.display = '';
@@ -425,6 +456,7 @@
         bioEl.textContent = '';
       }
 
+      // Roster
       const rosterEl = document.getElementById('mFighters');
       rosterEl.innerHTML = g.roster.length
         ? g.roster.map(f=>`
@@ -453,10 +485,13 @@
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); }, { passive:true });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    // Boot
+    // ====== Boot ======
     (async function(){
       try{
-        const [text, gymsCfg] = await Promise.all([ fetchText(GVIZ_URL), fetchJSON(GYMS_CFG_URL) ]);
+        const [text, gymsCfg] = await Promise.all([
+          fetchText(GVIZ_URL),
+          fetchJSON(GYMS_CFG_URL)
+        ]);
         const fighterRows = parseGViz(text);
         const gyms = buildGyms(gymsCfg, fighterRows);
         renderGrid(gyms);
@@ -475,6 +510,7 @@
         const mount = document.getElementById("navbar");
         if (mount) mount.innerHTML = html;
 
+        // Mobile menu toggle
         const btn = document.getElementById("menuBtn");
         const menu = document.getElementById("primaryMenu");
         if (btn && menu){
@@ -484,6 +520,7 @@
           });
         }
 
+        // Auto-highlight current page
         const path = location.pathname;
         document.querySelectorAll("#primaryMenu a.item").forEach(a => {
           try {
