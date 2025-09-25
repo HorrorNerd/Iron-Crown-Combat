@@ -311,7 +311,11 @@ const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
       if (!gyms.length){
         grid.innerHTML = '<div class="card">No gyms found.</div>';
         return;
-      }
+      <img class="gym-logo"
+     src="${g.logo || gymLogoPath(g.slug)}"
+     alt="${g.name} logo"
+     onerror="this.onerror=null;this.src='${gymLogoPath(g.slug)}';this.style.opacity=1;">}
+
       grid.innerHTML = gyms.map((g,i)=>`
         <article class="gym-card" data-gym="${i}" title="Open ${g.name}">
           <img class="gym-logo" src="${g.logo}" alt="${g.name} logo" onerror="this.style.opacity=.25">
