@@ -1,9 +1,10 @@
 {
-"gyms": [
+  "gyms": [
     {
       "name": "Solomon's Gold Mine",
       "slug": "solomons-gold-mine",
       "logo": "assets/images/gyms/solomons-gold-mine.png",
+      "aliases": ["solomons gold mine", "solomons-gold-mine", "solomons gold mine mma", "gold mine", "solomons goldmine"],
       "manager": {
         "name": "Solomon Sanders",
         "image": "assets/images/managers/solomon-sanders.png"
@@ -14,6 +15,7 @@
       "name": "Henmaister's Sports Bar Gym",
       "slug": "henmaisters-sports-bar-gym",
       "logo": "assets/images/gyms/henmaisters-sports-bar-gym.png",
+      "aliases": ["henmaisters", "henmaisters gym", "henmaisters sports bar", "henmaister gym", "henmaister", "henmaisters sports bar gym"],
       "manager": {
         "name": "Henmaister",
         "image": "assets/images/managers/henmaister.png"
@@ -24,6 +26,7 @@
       "name": "Vanishing Point",
       "slug": "vanishing-point",
       "logo": "assets/images/gyms/vanishing-point.png",
+      "aliases": ["vanishing-point", "vanishingpoint"],
       "manager": {
         "name": "Grimm",
         "image": "assets/images/managers/grimm.png"
@@ -34,6 +37,7 @@
       "name": "Da Hit Squad",
       "slug": "da-hit-squad",
       "logo": "assets/images/gyms/da-hit-squad.png",
+      "aliases": ["da hit squad", "hit squad"],
       "manager": {
         "name": "Rich Action",
         "image": "assets/images/managers/rich-action.png"
@@ -44,6 +48,7 @@
       "name": "The Yard",
       "slug": "the-yard",
       "logo": "assets/images/gyms/the-yard.png",
+      "aliases": ["yard"],
       "manager": {
         "name": "Warden Silas Griggs",
         "image": "assets/images/managers/warden.png"
@@ -52,4 +57,3 @@
     }
   ]
 }
-
