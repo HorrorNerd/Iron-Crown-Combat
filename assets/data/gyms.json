@@ -1,1 +1,55 @@
+{
+  "gyms": [
+    {
+      "name": "Solomon's Gold Mine",
+      "slug": "solomons-gold-mine",
+      "logo": "assets/images/gyms/solomons-gold-mine.png",
+      "manager": {
+        "name": "Solomon Sanders",
+        "image": "assets/images/managers/solomon-sanders.png"
+      },
+      "bio": "Founded by businessman and opportunist Solomon Sanders, Solomon’s Gold Mine is more than just a gym—it’s a front for Sanders’ empire of bail bonds and jewelry stores in Tennessee. The fighters he recruits are seen as precious investments, molded under his watchful eye like raw ore forged into gold. Sanders teaches discipline but demands loyalty, with every fighter’s success directly feeding into his growing fortune."
+    },
+    {
+      "name": "Henmaister's Sports Bar Gym",
+      "slug": "henmaisters-sports-bar-gym",
+      "logo": "assets/images/gyms/henmaisters-sports-bar-gym.png",
+      "manager": {
+        "name": "Henmaister",
+        "image": "assets/images/managers/henmaister.png"
+      },
+      "bio": "Henmaister is notorious in underground circles for his love of brutal, no-rules pit fighting. His fighters—including his son, Henz—honed their skills in blood-soaked basements and back alleys before stepping into the Crucible. To Henmaister, fighters are both warriors and wagers—every bout a gamble, every outcome a payday. His motto is simple: 'More money, no matter the cost.'"
+    },
+    {
+      "name": "Vanishing Point",
+      "slug": "vanishing-point",
+      "logo": "assets/images/gyms/vanishing-point.png",
+      "manager": {
+        "name": "Grimm",
+        "image": "assets/images/managers/grimm.png"
+      },
+      "bio": "Led by the enigmatic Grimm, Vanishing Point thrives on mystery and precision. Grimm, once a feared competitor himself, keeps his fighters shrouded in secrecy, revealing nothing until the moment of combat. With MommaSweet’s presence alongside him, whispers spread of ties back to the Syndicate Wrestling Alliance (SWA). Vanishing Point doesn’t just produce fighters—it creates shadows with fists."
+    },
+    {
+      "name": "Da Hit Squad",
+      "slug": "da-hit-squad",
+      "logo": "assets/images/gyms/da-hit-squad.png",
+      "manager": {
+        "name": "Rich Action",
+        "image": "assets/images/managers/rich-action.png"
+      },
+      "bio": "Da Hit Squad is as brash and unrelenting as its leader, Rich Action. Loud, abrasive, and unfiltered, Rich built his gym around fighters who share his swagger and his hunger for the spotlight. Every member of Da Hit Squad fights with an edge, always looking to steal the show, prove dominance, and cash in while they’re at it. Backed by Rich’s ego and proven ability to win, the Squad fights hard and parties harder."
+    },
+    {
+      "name": "The Yard",
+      "slug": "the-yard",
+      "logo": "assets/images/gyms/the-yard.png",
+      "manager": {
+        "name": "Warden Silas Griggs",
+        "image": "assets/images/managers/warden.png"
+      },
+      "bio": "The Yard is unlike any other gym. Founded by Warden Silas Griggs, it serves as both a fighting stable and a prison yard parole system. Griggs recruits incarcerated talent, offering them a chance at redemption—or at least comfort—if they fight under his banner. Every victory earns his fighters favor, money, and privilege inside the prison walls. But make no mistake: in The Yard, loyalty to the Warden is non-negotiable."
+    }
+  ]
+}
 
