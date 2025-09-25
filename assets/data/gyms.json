@@ -4,56 +4,80 @@
       "name": "Solomon's Gold Mine",
       "slug": "solomons-gold-mine",
       "logo": "assets/images/gyms/solomons-gold-mine.png",
-      "aliases": ["solomons gold mine", "solomons-gold-mine", "solomons gold mine mma", "gold mine", "solomons goldmine"],
+      "aliases": [
+        "solomons gold mine",
+        "solomon's gold mine mma",
+        "solomon gold mine",
+        "the gold mine",
+        "gold mine"
+      ],
       "manager": {
         "name": "Solomon Sanders",
         "image": "assets/images/managers/solomon-sanders.png"
       },
-      "bio": "Founded by businessman and opportunist Solomon Sanders, Solomon’s Gold Mine is more than just a gym—it’s a front for Sanders’ empire of bail bonds and jewelry stores in Tennessee. The fighters he recruits are seen as precious investments, molded under his watchful eye like raw ore forged into gold. Sanders teaches discipline but demands loyalty, with every fighter’s success directly feeding into his growing fortune."
+      "bio": "Solomon’s Gold Mine is the pride project of bail bonds kingpin and jeweler Solomon Sanders. What started as an underground conditioning room behind his Tennessee pawn counters became a serious MMA pipeline—fighters with bite, grit, and debt to settle. The gym’s culture is simple: do the work, get paid, and leave a bigger mark than the bruises you take. Spars are mean, the conditioning is cruel, and nothing matters more than the purse. If you can’t survive the grind, you don’t belong in the Mine."
     },
     {
       "name": "Henmaister's Sports Bar Gym",
       "slug": "henmaisters-sports-bar-gym",
       "logo": "assets/images/gyms/henmaisters-sports-bar-gym.png",
-      "aliases": ["henmaisters", "henmaisters gym", "henmaisters sports bar", "henmaister gym", "henmaister", "henmaisters sports bar gym"],
+      "aliases": [
+        "henmaisters sports bar gym",
+        "henmaisters sport shop gym",
+        "henmaisters sport shop",
+        "henmaisters gym",
+        "henmaister gym",
+        "henmaister's gym",
+        "henmaisters sports bar"
+      ],
       "manager": {
         "name": "Henmaister",
         "image": "assets/images/managers/henmaister.png"
       },
-      "bio": "Henmaister is notorious in underground circles for his love of brutal, no-rules pit fighting. His fighters—including his son, Henz—honed their skills in blood-soaked basements and back alleys before stepping into the Crucible. To Henmaister, fighters are both warriors and wagers—every bout a gamble, every outcome a payday. His motto is simple: 'More money, no matter the cost.'"
+      "bio": "Rumor says Henmaister made his bones running illegal pit fights in back rooms and basements. The regulars swear the smell of spilled beer and blood still clings to the bags. Discipline here is transactional—if it makes money, it’s on the table. Fighters learn to be durable, unflinching, and a little mean; his son Henz and the stable cut their teeth in those same pits. Henmaister’s motto isn’t subtle: more money, more problems—for someone else."
     },
     {
       "name": "Vanishing Point",
       "slug": "vanishing-point",
       "logo": "assets/images/gyms/vanishing-point.png",
-      "aliases": ["vanishing-point", "vanishingpoint"],
+      "aliases": [
+        "the vanishing point",
+        "vanishingpoint"
+      ],
       "manager": {
         "name": "Grimm",
         "image": "assets/images/managers/grimm.png"
       },
-      "bio": "Led by the enigmatic Grimm, Vanishing Point thrives on mystery and precision. Grimm, once a feared competitor himself, keeps his fighters shrouded in secrecy, revealing nothing until the moment of combat. With MommaSweet’s presence alongside him, whispers spread of ties back to the Syndicate Wrestling Alliance (SWA). Vanishing Point doesn’t just produce fighters—it creates shadows with fists."
+      "bio": "No signage. No posted hours. You either know where Vanishing Point is, or you don’t. Grimm runs it like a ghost operation: sparse instruction, brutal sparring, and a focus on composure under pressure. The whispers about ties to the old SWA follow him—and when MommaSweet’s name drifts across the mat, sparring slows to a hush. Fighters here are tactical and unshakable, built to disappear from danger and reappear on the finish."
     },
     {
       "name": "Da Hit Squad",
       "slug": "da-hit-squad",
       "logo": "assets/images/gyms/da-hit-squad.png",
-      "aliases": ["da hit squad", "hit squad"],
+      "aliases": [
+        "hit squad",
+        "dhs",
+        "da hitsquad"
+      ],
       "manager": {
         "name": "Rich Action",
         "image": "assets/images/managers/rich-action.png"
       },
-      "bio": "Da Hit Squad is as brash and unrelenting as its leader, Rich Action. Loud, abrasive, and unfiltered, Rich built his gym around fighters who share his swagger and his hunger for the spotlight. Every member of Da Hit Squad fights with an edge, always looking to steal the show, prove dominance, and cash in while they’re at it. Backed by Rich’s ego and proven ability to win, the Squad fights hard and parties harder."
+      "bio": "Run by the brash and broadcast-loud Rich Action, Da Hit Squad is all pressure and swagger. Spars feel like televised main events. Fighters learn to weaponize momentum—swarms of volume, clinch mauling, and knockout hunting. If you can’t keep up, you get drowned. If you can, you leave with a finish and a microphone."
     },
     {
       "name": "The Yard",
       "slug": "the-yard",
       "logo": "assets/images/gyms/the-yard.png",
-      "aliases": ["yard"],
+      "aliases": [
+        "yard",
+        "the yard prison gym"
+      ],
       "manager": {
         "name": "Warden Silas Griggs",
         "image": "assets/images/managers/warden.png"
       },
-      "bio": "The Yard is unlike any other gym. Founded by Warden Silas Griggs, it serves as both a fighting stable and a prison yard parole system. Griggs recruits incarcerated talent, offering them a chance at redemption—or at least comfort—if they fight under his banner. Every victory earns his fighters favor, money, and privilege inside the prison walls. But make no mistake: in The Yard, loyalty to the Warden is non-negotiable."
+      "bio": "The Yard is where second chances are bartered for blood. Warden Silas Griggs recruits the talented and the desperate with a simple deal: fight for me, earn for me, and your time gets easier. Training is harsh but honest—dirty-tough clinch wrestling, farm-strong conditioning, and survival instincts sharpened to a point. Nobody leaves The Yard soft."
     }
   ]
 }
