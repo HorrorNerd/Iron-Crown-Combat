@@ -6,20 +6,127 @@
   <title>Iron Crown Combat — Gyms</title>
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
-    .gym-header { display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
-    .gym-header:hover { color: var(--icc-gold); }
-    .roster { margin-top:.6rem; }
+    /* ===== Gyms Grid ===== */
+    .gyms-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:1rem; padding: 0 0 1rem 0;
+    }
+    .gym-card{
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:.9rem;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      text-align:center;
+    }
+    .gym-card:hover{
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 16px 36px rgba(0,0,0,.35);
+    }
+    .gym-logo{
+      width:100%; max-width:280px; max-height:160px; object-fit:contain;
+      display:block; background:#0b0c10; border-radius:10px; border:1px solid var(--border);
+    }
+    .gym-name{ margin:.6rem 0 0; font-weight:800; letter-spacing:.02em; }
+    .gym-meta{ color:var(--muted); font-size:.9rem; margin-top:.15rem; }
+
+    /* ===== Modal ===== */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 60; padding: 10px; }
+    .modal-backdrop.show { display:flex; }
+    .modal{
+      background: var(--bg-2);
+      border:1px solid var(--border);
+      border-radius:16px; overflow:hidden;
+      width:min(1100px, 96vw); max-height:92vh; display:flex; flex-direction:column;
+      box-shadow: 0 30px 80px rgba(0,0,0,.6);
+    }
+    .modal header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.8rem 1rem; border-bottom:1px solid var(--border);
+    }
+    .modal header h3{ margin:0; }
+    .close-btn{
+      border:1px solid var(--border); background:var(--bg); color:var(--text);
+      padding:.4rem .7rem; border-radius:10px; cursor:pointer;
+    }
+    .close-btn:hover{ border-color: var(--accent); }
+
+    .modal-content{
+      display:grid; grid-template-columns: 320px 1fr; gap:1rem;
+      padding:1rem; overflow:auto;
+    }
+    @media (max-width: 900px){
+      .modal-content{ grid-template-columns: 1fr; }
+    }
+
+    /* Left column: identity */
+    .gym-id{ display:grid; gap:.7rem; align-content:start; }
+    .gym-hero{
+      background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:.6rem;
+      display:grid; gap:.6rem; justify-items:center;
+    }
+    .gym-hero img.logo{
+      width:100%; height:auto; max-height:160px; object-fit:contain;
+      background:#0b0c10; border-radius:10px; border:1px solid var(--border);
+    }
+    .totals{
+      display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:.6rem;
+      width:100%;
+    }
+    .total{
+      border:1px solid var(--border); background:var(--bg);
+      border-radius:10px; padding:.55rem .6rem; text-align:center;
+    }
+    .total .label{ color:var(--muted); font-size:.85rem; }
+    .total .value{ font-weight:800; }
+
+    .manager{
+      display:grid; grid-template-columns: 72px 1fr; gap:.7rem;
+      border:1px solid var(--border); background:var(--bg); border-radius:12px; padding:.6rem;
+      align-items:center;
+    }
+    .manager img{
+      width:72px; height:72px; border-radius:10px; object-fit:cover; border:1px solid var(--border); background:#111;
+    }
+    .bio{
+      border:1px solid var(--border); background:var(--bg); border-radius:12px; padding:.7rem; line-height:1.55; text-align:left;
+    }
+
+    /* Right column: Roster */
+    .roster{ display:grid; gap:.75rem; align-content:start; }
+    .roster h4{ margin:.2rem 0; }
+    .fighters{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap:.6rem;
+    }
+    .fighter{
+      display:grid; grid-template-columns: 56px 1fr; gap:.55rem; align-items:center;
+      border:1px solid var(--border); background:var(--bg); border-radius:10px; padding:.5rem;
+      text-align:left;
+    }
+    .fighter img{
+      width:56px; height:56px; border-radius:8px; object-fit:cover; border:1px solid var(--border); background:#0b0c10;
+    }
+    .fighter .name{ font-weight:700; }
+    .fighter .sub{ color:var(--muted); font-size:.9rem; }
   </style>
 </head>
 <body>
 
-  <!-- Shared navbar placeholder; populated by navbar.html -->
+  <!-- Shared navbar -->
   <div id="navbar"></div>
 
   <main class="container">
     <div class="pagehead"><h1>Gyms</h1></div>
 
-    <section class="grid grid-2" id="gyms-grid">
+    <section id="gymsGrid" class="gyms-grid">
       <div class="card">Loading gyms…</div>
     </section>
   </main>
@@ -30,67 +137,90 @@
     </div>
   </footer>
 
-<script>
-  // year + theme toggle
-  document.getElementById('yr').textContent = new Date().getFullYear();
-  (function(){ const root=document.documentElement; const saved=localStorage.getItem('icc:theme'); if(saved==='light') root.classList.add('light');
-    document.addEventListener('click',e=>{ const t=e.target.closest('[data-theme-toggle]'); if(!t) return;
-      root.classList.toggle('light'); localStorage.setItem('icc:theme', root.classList.contains('light')?'light':'dark'); }); })();
+  <!-- Modal -->
+  <div id="gymModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gymTitle">
+      <header>
+        <h3 id="gymTitle">Gym</h3>
+        <button class="close-btn" aria-label="Close">✕</button>
+      </header>
+      <div class="modal-content">
+        <!-- Left -->
+        <div class="gym-id">
+          <div class="gym-hero">
+            <img id="mLogo" class="logo" src="" alt="Gym logo">
+            <div class="totals">
+              <div class="total"><div class="label">Wins</div><div id="mWins" class="value">0</div></div>
+              <div class="total"><div class="label">Losses</div><div id="mLosses" class="value">0</div></div>
+              <div class="total"><div class="label">Draws</div><div id="mDraws" class="value">0</div></div>
+              <div class="total"><div class="label">Earnings</div><div id="mEarnings" class="value">$0</div></div>
+            </div>
+          </div>
 
-  (function(){
-    const SHEET_ID='1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
-    const GID='1277877160'; // Fighter Tracker
-    const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+          <div id="mManager" class="manager" style="display:none">
+            <img id="mManagerImg" src="" alt="Manager">
+            <div>
+              <div class="name" id="mManagerName">Manager</div>
+              <div class="sub">Head Coach / Manager</div>
+            </div>
+          </div>
 
-    const grid = document.getElementById('gyms-grid');
+          <div id="mBio" class="bio" style="display:none"></div>
+        </div>
 
-    // Helpers
-    const normKey = s => String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
-    const cleanGym = s => String(s||'').trim().replace(/\s+/g,' ');
-    const isHeaderish = v => {
-      const x = String(v||'').trim().toLowerCase();
-      return x === 'fighter' || x === 'wins' || x === 'losses' || x === 'draws' || x === 'earnings' || x === 'gym' || x === 'win %' || x === 'win%';
+        <!-- Right -->
+        <div class="roster">
+          <h4>Roster</h4>
+          <div id="mFighters" class="fighters"><div class="card">No fighters found.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer year -->
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+  </script>
+
+  <!-- Data + Modal logic -->
+  <script>
+    // ====== Configs & helpers ======
+    const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
+    const GID_FIGHTER_TRACKER = '1277877160';
+    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID_FIGHTER_TRACKER}`;
+
+    const GYMS_CFG_URL = 'assets/data/gyms.json'; // your array file
+
+    const slugify = s => String(s||'')
+      .toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+
+    const money = n => {
+      const num = parseFloat(String(n).replace(/[^0-9.-]/g,''))||0;
+      return '$' + Math.round(num).toLocaleString();
     };
-    const num$ = v => {
-      if (v == null || v === '') return 0;
-      const n = Number(v);
-      if (Number.isFinite(n)) return n;
-      const m = parseFloat(String(v).replace(/[^0-9.\-]/g,''));
-      return Number.isFinite(m) ? m : 0;
-    };
-    const fmt$ = n => `$${Math.round(n).toLocaleString()}`;
+
+    const headshotPath = name => `assets/images/fighters/headshots/${slugify(name)}.png`;
 
     function parseGViz(text){
-      const start=text.indexOf('{'), end=text.lastIndexOf('}');
-      const json=JSON.parse(text.slice(start,end+1));
-      const cols=json.table.cols;
+      const start = text.indexOf('{');
+      const end   = text.lastIndexOf('}');
+      const json  = JSON.parse(text.slice(start, end + 1));
 
-      // Build label->index map (skip boolean/checkbox column "FALSE")
       const map = {};
-      cols.forEach((c,i)=>{
-        const label = (c && (c.label || c.id) || '').trim();
-        if (!label) return;
-        if (c && c.type === 'boolean') return;
-        map[label.toLowerCase()] = i;
+      json.table.cols.forEach((c,i)=>{
+        const label = (c && (c.label || c.id) || '').trim().toLowerCase();
+        if (label) map[label] = i;
       });
 
-      // Hard-map by your exact headers
       const idx = {
-        fighter: map['fighter'],
-        wins:    map['wins'],
-        losses:  map['losses'],
-        draws:   map['draws'],
-        earn:    map['earnings'],
-        gym:     map['gym'],
+        fighter: map['fighter'] ?? 1,
+        wins:    map['wins'] ?? 2,
+        losses:  map['losses'] ?? 3,
+        draws:   map['draws'] ?? 4,
+        earnings: map['earnings'] ?? 7,
+        gym:     map['gym'] ?? 10,
       };
-
-      // Fallbacks based on known order if any are missing
-      if (idx.fighter == null) idx.fighter = 1;
-      if (idx.wins    == null) idx.wins    = 2;
-      if (idx.losses  == null) idx.losses  = 3;
-      if (idx.draws   == null) idx.draws   = 4;
-      if (idx.earn    == null) idx.earn    = 7;
-      if (idx.gym     == null) idx.gym     = 10;
 
       const get = (row, i) => {
         if (i == null || i < 0) return '';
@@ -99,119 +229,212 @@
         return (c.f != null ? c.f : c.v) ?? '';
       };
 
-      const out = [];
+      const rows = [];
       for (const r of (json.table.rows || [])){
-        const fighter = get(r, idx.fighter);
-        const gymRaw  = get(r, idx.gym);
-        const wins    = get(r, idx.wins);
-        const losses  = get(r, idx.losses);
-        const draws   = get(r, idx.draws);
-        const earn    = get(r, idx.earn);
+        const name = String(get(r, idx.fighter) || '').trim();
+        const gym  = String(get(r, idx.gym) || '').trim();
+        if (!name) continue;
 
-        if (!fighter && !gymRaw) continue;
-        if (isHeaderish(fighter) || isHeaderish(gymRaw)) continue;
-
-        out.push({
-          fighter: String(fighter).trim(),
-          gym: cleanGym(gymRaw || 'Independent'),
-          wins: String(wins || '0').trim(),
-          losses: String(losses || '0').trim(),
-          draws: String(draws || '0').trim(),
-          earnings: earn
+        rows.push({
+          name,
+          gym,
+          wins:    Number(String(get(r, idx.wins   )||'0').replace(/[^0-9.-]/g,''))||0,
+          losses:  Number(String(get(r, idx.losses)||'0').replace(/[^0-9.-]/g,''))||0,
+          draws:   Number(String(get(r, idx.draws  )||'0').replace(/[^0-9.-]/g,''))||0,
+          earnings:String(get(r, idx.earnings)||'0')
         });
       }
-      return out;
+      return rows;
     }
 
-    function render(groups){
-      const gyms = Object.keys(groups)
-        .sort((a,b)=> groups[b].fighters.length - groups[a].fighters.length || a.localeCompare(b));
+    async function fetchText(url){ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error(r.status); return r.text(); }
+    async function fetchJSON(url){ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error(r.status); return r.json(); }
 
-      grid.innerHTML = gyms.map(key=>{
-        const g = groups[key];
-        const total = g.fighters.reduce((s,f)=> s + num$(f.earnings), 0);
+    // Case/space tolerant compare
+    const norm = s => String(s||'').replace(/\s+/g,' ').trim().toLowerCase();
 
-        const list = g.fighters.map(f=>{
-          return `<li>${f.fighter} — ${f.wins}-${f.losses}-${f.draws} · ${fmt$(num$(f.earnings))}</li>`;
-        }).join('');
+    // Merge gyms.json with sheet data
+    function buildGyms(gymsCfg, fighters){
+      // Build fast index of fighters per (normalized) gym
+      const byGym = new Map();
+      for (const f of fighters){
+        const key = norm(f.gym);
+        if (!key || key === 'independent') continue;
+        if (!byGym.has(key)) byGym.set(key, []);
+        byGym.get(key).push(f);
+      }
 
-        return `<article class="card">
-          <div class="gym-header" data-acc>
-            <div>
-              <h3 style="margin:0">${g.displayName}</h3>
-              <div class="meta" style="margin-top:.25rem">${fmt$(total)} total</div>
-            </div>
-            <span class="chip">${g.fighters.length} fighter${g.fighters.length===1?'':'s'}</span>
-          </div>
-          <div class="roster prose" hidden>
-            <ul style="margin-left:1rem">${list}</ul>
-          </div>
-        </article>`;
-      }).join('') || '<div class="card">No gyms found.</div>';
+      // Map cfg array → enriched objects
+      return (gymsCfg.gyms || []).map(g => {
+        const displayName = g.name || g.slug || 'Gym';
+        const key = norm(displayName);
+        const rosterRows = byGym.get(key) || [];
+
+        const totals = rosterRows.reduce((acc, f) => {
+          const earnNum = parseFloat(String(f.earnings).replace(/[^0-9.-]/g,''))||0;
+          acc.wins += f.wins; acc.losses += f.losses; acc.draws += f.draws; acc.earn += earnNum;
+          return acc;
+        }, {wins:0,losses:0,draws:0,earn:0});
+
+        const roster = rosterRows.map(r => ({
+          name: r.name,
+          record: `${r.wins}-${r.losses}-${r.draws}`,
+          earnings: money(r.earnings),
+          headshot: headshotPath(r.name)
+        }));
+
+        return {
+          name: displayName,
+          slug: g.slug || slugify(displayName),
+          logo: g.logo,
+          managerName: g.manager?.name || '',
+          managerImg: g.manager?.image || '',
+          bio: g.bio || '',
+          totals, roster
+        };
+      }).sort((a,b)=> (b.roster.length - a.roster.length) || a.name.localeCompare(b.name));
     }
 
-    // Accordion
-    document.addEventListener('click', (e)=>{
-      const acc = e.target.closest('[data-acc]');
-      if (!acc) return;
-      const roster = acc.parentElement.querySelector('.roster');
-      roster.hidden = !roster.hidden;
-    });
+    // ====== Render Grid ======
+    function renderGrid(gyms){
+      const grid = document.getElementById('gymsGrid');
+      if (!gyms.length){
+        grid.innerHTML = '<div class="card">No gyms found.</div>';
+        return;
+      }
+      grid.innerHTML = gyms.map((g,i)=>`
+        <article class="gym-card" data-gym="${i}" title="Open ${g.name}">
+          <img class="gym-logo" src="${g.logo}" alt="${g.name} logo" onerror="this.style.opacity=.25">
+          <div class="gym-name">${g.name}</div>
+          <div class="gym-meta">${g.roster.length} fighter${g.roster.length===1?'':'s'}</div>
+        </article>
+      `).join('');
 
-    async function boot(){
-      try{
-        const res = await fetch(url, {cache:'no-store'});
-        const text = await res.text();
-        const rows = parseGViz(text);
+      grid.addEventListener('click', e=>{
+        const card = e.target.closest('.gym-card');
+        if (!card) return;
+        const idx = +card.getAttribute('data-gym');
+        openModal(gyms[idx]);
+      }, { passive:true });
+    }
 
-        // Group by normalized gym key, SKIP Independent/blank gyms
-        const groups = {};
-        for (const r of rows){
-          const display = (r.gym || '').trim();
-          const key = display.replace(/\s+/g,' ').toLowerCase();
-          if (!display) continue;                 // skip empty
-          if (key === 'independent') continue;    // skip Independent
-          if (!groups[key]) groups[key] = { displayName: display, fighters: [] };
-          groups[key].fighters.push(r);
+    // ====== Modal ======
+    const modal = document.getElementById('gymModal');
+    const closeBtn = modal.querySelector('.close-btn');
+
+    function openModal(g){
+      if (!g) return;
+      document.getElementById('gymTitle').textContent = g.name;
+
+      const mLogo = document.getElementById('mLogo');
+      mLogo.src = g.logo; mLogo.alt = g.name + ' logo';
+
+      document.getElementById('mWins').textContent    = g.totals.wins;
+      document.getElementById('mLosses').textContent  = g.totals.losses;
+      document.getElementById('mDraws').textContent   = g.totals.draws;
+      document.getElementById('mEarnings').textContent= money(g.totals.earn);
+
+      // Manager
+      const mWrap = document.getElementById('mManager');
+      const mImg  = document.getElementById('mManagerImg');
+      const mName = document.getElementById('mManagerName');
+      if (g.managerImg || g.managerName){
+        mWrap.style.display = '';
+        if (g.managerImg) {
+          mImg.src = g.managerImg;
+          mImg.alt = (g.managerName || 'Manager') + ' portrait';
+          mImg.onerror = () => { mImg.style.display='none'; };
+        } else {
+          mImg.style.display = 'none';
         }
-        render(groups);
-      } catch(e){
-        grid.innerHTML = '<div class="card">Failed to load gyms.</div>';
-        console.error('gyms parse error', e);
+        mName.textContent = g.managerName || 'Manager';
+      } else {
+        mWrap.style.display = 'none';
       }
+
+      // Bio
+      const bioEl = document.getElementById('mBio');
+      if (g.bio){
+        bioEl.style.display = '';
+        bioEl.innerHTML = g.bio;
+      } else {
+        bioEl.style.display = 'none';
+        bioEl.textContent = '';
+      }
+
+      // Roster
+      const rosterEl = document.getElementById('mFighters');
+      rosterEl.innerHTML = g.roster.length
+        ? g.roster.map(f=>`
+            <div class="fighter">
+              <img src="${f.headshot}" alt="${f.name} headshot" onerror="this.style.opacity=.25">
+              <div>
+                <div class="name">${f.name}</div>
+                <div class="sub">${f.record} · ${f.earnings}</div>
+              </div>
+            </div>
+          `).join('')
+        : '<div class="card">No fighters found.</div>';
+
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow='hidden';
     }
-    boot();
-  })();
-</script>
 
-<!-- Load shared navbar (absolute path so it works everywhere) -->
-<script>
-  fetch("/Iron-Crown-Combat/navbar.html")
-    .then(r => r.text())
-    .then(html => {
-      const mount = document.getElementById("navbar");
-      if (mount) mount.innerHTML = html;
+    function closeModal(){
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden','true');
+      document.body.style.overflow='';
+    }
 
-      // Mobile menu toggle
-      const btn = document.getElementById("menuBtn");
-      const menu = document.getElementById("primaryMenu");
-      if (btn && menu){
-        btn.addEventListener("click", () => {
-          const open = menu.classList.toggle("open");
-          btn.setAttribute("aria-expanded", open ? "true" : "false");
-        });
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); }, { passive:true });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // ====== Boot ======
+    (async function(){
+      try{
+        const [text, gymsCfg] = await Promise.all([
+          fetchText(GVIZ_URL),
+          fetchJSON(GYMS_CFG_URL)
+        ]);
+        const fighterRows = parseGViz(text);
+        const gyms = buildGyms(gymsCfg, fighterRows);
+        renderGrid(gyms);
+      } catch (err){
+        console.error(err);
+        document.getElementById('gymsGrid').innerHTML = '<div class="card">Failed to load gyms.</div>';
       }
+    })();
+  </script>
 
-      // Auto-highlight current page
-      const path = location.pathname;
-      document.querySelectorAll("#primaryMenu a.item").forEach(a => {
-        try {
-          const hrefPath = new URL(a.href, location.origin).pathname;
-          if (hrefPath === path) a.classList.add("active");
-        } catch(e){}
+  <!-- Load shared navbar -->
+  <script>
+    fetch("/Iron-Crown-Combat/navbar.html")
+      .then(r => r.text())
+      .then(html => {
+        const mount = document.getElementById("navbar");
+        if (mount) mount.innerHTML = html;
+
+        // Mobile menu toggle
+        const btn = document.getElementById("menuBtn");
+        const menu = document.getElementById("primaryMenu");
+        if (btn && menu){
+          btn.addEventListener("click", () => {
+            const open = menu.classList.toggle("open");
+            btn.setAttribute("aria-expanded", open ? "true" : "false");
+          });
+        }
+
+        // Auto-highlight current page
+        const path = location.pathname;
+        document.querySelectorAll("#primaryMenu a.item").forEach(a => {
+          try {
+            const hrefPath = new URL(a.href, location.origin).pathname;
+            if (hrefPath === path) a.classList.add("active");
+          } catch(e){}
+        });
       });
-    });
-</script>
-
+  </script>
 </body>
 </html>
