@@ -184,22 +184,13 @@
 
   <!-- Data + Modal logic -->
   <script>
-    // Fallbacks for images
-function imageWithFallback(src, fallback, alt=''){
-  const img = new Image();
-  img.alt = alt;
-  img.src = src;
-  img.onerror = () => { img.onerror=null; img.src = fallback; };
-  return img;
-}
-const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
-
     // ====== Configs & helpers ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_FIGHTER_TRACKER = '1277877160';
     const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID_FIGHTER_TRACKER}`;
 
-    const GYMS_CFG_URL = 'assets/data/gyms.json'; // your array file
+    const GYMS_CFG_URL = 'assets/data/gyms.json'; // array file
+    const PLACEHOLDER_LOGO = 'assets/images/gyms/_placeholder.png'; // optional (create if you want)
 
     const slugify = s => String(s||'')
       .toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
@@ -211,6 +202,19 @@ const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
     };
 
     const headshotPath = name => `assets/images/fighters/headshots/${slugify(name)}.png`;
+    const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
+
+    // Canonical key: strip punctuation, common suffixes, and spaces
+    function canon(s){
+      return String(s||'')
+        .toLowerCase()
+        .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')   // accents
+        .replace(/&/g,'and')
+        .replace(/['’`"]/g,'')                              // quotes
+        .replace(/\b(gym|mma|sports|bar|the)\b/g, '')       // drop generic words
+        .replace(/[^a-z0-9]+/g,'')                          // squash non-alnum
+        .trim();
+    }
 
     function parseGViz(text){
       const start = text.indexOf('{');
@@ -224,12 +228,12 @@ const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
       });
 
       const idx = {
-        fighter: map['fighter'] ?? 1,
-        wins:    map['wins'] ?? 2,
-        losses:  map['losses'] ?? 3,
-        draws:   map['draws'] ?? 4,
+        fighter:  map['fighter']  ?? 1,
+        wins:     map['wins']     ?? 2,
+        losses:   map['losses']   ?? 3,
+        draws:    map['draws']    ?? 4,
         earnings: map['earnings'] ?? 7,
-        gym:     map['gym'] ?? 10,
+        gym:      map['gym']      ?? 10,
       };
 
       const get = (row, i) => {
@@ -260,25 +264,39 @@ const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
     async function fetchText(url){ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error(r.status); return r.text(); }
     async function fetchJSON(url){ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error(r.status); return r.json(); }
 
-    // Case/space tolerant compare
-    const norm = s => String(s||'').replace(/\s+/g,' ').trim().toLowerCase();
-
-    // Merge gyms.json with sheet data
-    function buildGyms(gymsCfg, fighters){
-      // Build fast index of fighters per (normalized) gym
-      const byGym = new Map();
+    // Build a fast index of sheet fighters by canonical gym
+    function indexFightersByGym(fighters){
+      const map = new Map();
       for (const f of fighters){
-        const key = norm(f.gym);
+        const key = canon(f.gym);
         if (!key || key === 'independent') continue;
-        if (!byGym.has(key)) byGym.set(key, []);
-        byGym.get(key).push(f);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(f);
+      }
+      return map;
+    }
+
+    // Convert gyms.json → enriched gyms, using aliases + canon
+    function buildGyms(gymsCfg, fighters){
+      const byGym = indexFightersByGym(fighters);
+
+      function firstNonEmpty(arr){
+        for (const s of arr){
+          const k = canon(s);
+          if (k && byGym.has(k)) return byGym.get(k);
+        }
+        return [];
       }
 
-      // Map cfg array → enriched objects
       return (gymsCfg.gyms || []).map(g => {
         const displayName = g.name || g.slug || 'Gym';
-        const key = norm(displayName);
-        const rosterRows = byGym.get(key) || [];
+        const slug = g.slug || slugify(displayName);
+
+        // Build alias pool: display name, slug-as-words, plus provided aliases
+        const aliasPool = [displayName, slug.replace(/-/g,' ')]
+          .concat(Array.isArray(g.aliases) ? g.aliases : []);
+
+        const rosterRows = firstNonEmpty(aliasPool);
 
         const totals = rosterRows.reduce((acc, f) => {
           const earnNum = parseFloat(String(f.earnings).replace(/[^0-9.-]/g,''))||0;
@@ -295,8 +313,8 @@ const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
 
         return {
           name: displayName,
-          slug: g.slug || slugify(displayName),
-          logo: g.logo,
+          slug,
+          logo: g.logo || gymLogoPath(slug),
           managerName: g.manager?.name || '',
           managerImg: g.manager?.image || '',
           bio: g.bio || '',
@@ -311,14 +329,13 @@ const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
       if (!gyms.length){
         grid.innerHTML = '<div class="card">No gyms found.</div>';
         return;
-      <img class="gym-logo"
-     src="${g.logo || gymLogoPath(g.slug)}"
-     alt="${g.name} logo"
-     onerror="this.onerror=null;this.src='${gymLogoPath(g.slug)}';this.style.opacity=1;">}
-
+      }
       grid.innerHTML = gyms.map((g,i)=>`
         <article class="gym-card" data-gym="${i}" title="Open ${g.name}">
-          <img class="gym-logo" src="${g.logo}" alt="${g.name} logo" onerror="this.style.opacity=.25">
+          <img class="gym-logo"
+               src="${g.logo}"
+               alt="${g.name} logo"
+               onerror="this.onerror=null;this.src='${gymLogoPath(g.slug)}';this.style.opacity=1;">
           <div class="gym-name">${g.name}</div>
           <div class="gym-meta">${g.roster.length} fighter${g.roster.length===1?'':'s'}</div>
         </article>
@@ -342,6 +359,7 @@ const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
 
       const mLogo = document.getElementById('mLogo');
       mLogo.src = g.logo; mLogo.alt = g.name + ' logo';
+      mLogo.onerror = () => { mLogo.onerror=null; mLogo.src = gymLogoPath(g.slug); };
 
       document.getElementById('mWins').textContent    = g.totals.wins;
       document.getElementById('mLosses').textContent  = g.totals.losses;
