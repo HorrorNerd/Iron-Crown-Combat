@@ -184,6 +184,16 @@
 
   <!-- Data + Modal logic -->
   <script>
+    // Fallbacks for images
+function imageWithFallback(src, fallback, alt=''){
+  const img = new Image();
+  img.alt = alt;
+  img.src = src;
+  img.onerror = () => { img.onerror=null; img.src = fallback; };
+  return img;
+}
+const gymLogoPath = slug => `assets/images/gyms/${slug}.png`;
+
     // ====== Configs & helpers ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_FIGHTER_TRACKER = '1277877160';
