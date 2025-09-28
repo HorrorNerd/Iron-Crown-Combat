@@ -38,34 +38,22 @@
       max-width:1200px; margin:0 auto; padding: 1.25rem 1rem 1rem;
       display:grid; gap:1rem; grid-template-columns: 1.3fr 1fr; align-items:center;
     }
-    .hero-left{
-      display:grid; gap:.7rem;
-    }
+    .hero-left{ display:grid; gap:.7rem; }
     .eyebrow{ color: var(--muted); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:.85rem; }
     .hero h1{ margin:.1rem 0; font-size: clamp(1.4rem, 3vw, 2rem); color: var(--gold); letter-spacing:.02em; }
     .hero .date{ color: var(--muted); }
     .hero-actions{ display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.2rem; }
     .hero .btn.gold{ border-color: var(--gold2); }
 
-    .countdown{
-      display:flex; gap:.5rem; flex-wrap:wrap; align-items:center;
-    }
-    .cd-item{
-      min-width:80px; text-align:center;
-      background: var(--bg-2);
-      border:1px solid var(--border);
-      border-radius:10px; padding:.5rem .6rem;
-    }
+    .countdown{ display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+    .cd-item{ min-width:80px; text-align:center; background: var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:.5rem .6rem; }
     .cd-num{ font-size:1.3rem; font-weight:900; }
     .cd-lbl{ font-size:.8rem; color:var(--muted); }
 
     .poster{
-      justify-self:center;
-      width:100%; max-width:440px; aspect-ratio: 3/4;
-      border-radius:14px; overflow:hidden;
-      border:1px solid var(--border); background:#0b0c10;
-      display:flex; align-items:center; justify-content:center;
-      box-shadow: var(--shadow);
+      justify-self:center; width:100%; max-width:440px; aspect-ratio: 3/4;
+      border-radius:14px; overflow:hidden; border:1px solid var(--border); background:#0b0c10;
+      display:flex; align-items:center; justify-content:center; box-shadow: var(--shadow);
     }
     .poster img{ width:100%; height:100%; object-fit:cover; display:block; }
     .poster .ph{ color:var(--muted); padding:1rem; text-align:center; }
@@ -76,16 +64,10 @@
     }
 
     /* ===== Main Event Spotlight ===== */
-    .spotlight{
-      max-width:1200px; margin: 1rem auto; padding: 0 1rem 1rem;
-    }
+    .spotlight{ max-width:1200px; margin: 1rem auto; padding: 0 1rem 1rem; }
     .spotlight .card{ overflow:hidden; }
-    .me-grid{
-      display:grid; grid-template-columns: 1fr auto 1fr; gap:1rem; align-items:center;
-    }
-    .me-side{
-      display:grid; gap:.5rem; align-content:center; justify-items:center;
-    }
+    .me-grid{ display:grid; grid-template-columns: 1fr auto 1fr; gap:1rem; align-items:center; }
+    .me-side{ display:grid; gap:.5rem; align-content:center; justify-items:center; }
     .me-head{
       width:100%; max-width:360px; aspect-ratio:1/1; border-radius:14px; overflow:hidden;
       border:1px solid var(--border); background:#0b0c10; box-shadow: var(--shadow);
@@ -93,17 +75,14 @@
     }
     .me-head img{ width:100%; height:100%; object-fit:cover; display:block; }
     .me-name{
-      position:absolute; left:0; right:0; bottom:0;
-      padding:.6rem .8rem; text-align:center; color:#fff; font-weight:900;
-      background: linear-gradient(180deg, transparent, rgba(0,0,0,.85) 50%);
-      text-shadow: 0 2px 12px rgba(0,0,0,.8);
+      position:absolute; left:0; right:0; bottom:0; padding:.6rem .8rem; text-align:center; color:#fff; font-weight:900;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.85) 50%); text-shadow: 0 2px 12px rgba(0,0,0,.8);
     }
     .me-vs{
       font-weight:900; font-size: clamp(1.4rem, 4vw, 2rem);
       padding:.5rem .9rem; border:1px solid var(--border); border-radius:999px;
       background: radial-gradient(ellipse at center, rgba(255,215,0,.2), rgba(224,177,90,.08) 55%, transparent 80%);
-      color: var(--gold);
-      text-shadow: 0 1px 10px rgba(255,215,0,.2);
+      color: var(--gold); text-shadow: 0 1px 10px rgba(255,215,0,.2);
     }
     .me-meta{ text-align:center; color: var(--muted); margin-top:.4rem; }
 
@@ -117,8 +96,7 @@
       border:1px solid var(--border); background: var(--bg-2); border-radius:10px; padding:.4rem .6rem;
     }
     .filters input{
-      background:transparent; border:0; outline:0; color:var(--text);
-      min-width:220px;
+      background:transparent; border:0; outline:0; color:var(--text); min-width:220px;
     }
 
     /* ===== Past Events Grid ===== */
@@ -126,10 +104,7 @@
       max-width:1200px; margin: 0 auto 1.5rem; padding: 0 1rem;
       display:grid; gap:1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
-    .ev-card{
-      background: var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden;
-      box-shadow: var(--shadow); display:grid; grid-template-rows:auto 1fr auto;
-    }
+    .ev-card{ background: var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow: var(--shadow); display:grid; grid-template-rows:auto 1fr auto; }
     .ev-cover{ aspect-ratio: 16/9; background:#0b0c10; }
     .ev-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
     .ev-body{ padding:.8rem; display:grid; gap:.35rem; }
@@ -137,17 +112,9 @@
     .ev-date{ color:var(--muted); font-size:.92rem; }
     .ev-meta{ color:var(--muted); font-size:.9rem; }
     .ev-actions{ display:flex; gap:.5rem; padding:.8rem; border-top:1px solid var(--border); }
-    .chip{
-      display:inline-flex; align-items:center; gap:.35rem;
-      border:1px solid var(--border); padding:.2rem .55rem; border-radius:999px; background:var(--bg);
-      font-size:.86rem;
-    }
 
-    /* ===== Fight list styles (reused) ===== */
-    .fight-grid{
-      display:flex; flex-direction:column; gap:.7rem;
-      padding:.6rem 0 0;
-    }
+    /* ===== Fight list ===== */
+    .fight-grid{ display:flex; flex-direction:column; gap:.7rem; padding:.6rem 0 0; }
     .fight{
       display:grid; grid-template-columns: 1fr auto 1fr; gap:.7rem; align-items:center;
       background: var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:.75rem;
@@ -157,8 +124,7 @@
     .headshot img{ width:100%; height:100%; object-fit:cover; display:block; }
     .name-overlay{
       position:absolute; left:0; right:0; bottom:0; padding:.5rem .7rem; text-align:center; color:#fff; font-weight:800;
-      background: linear-gradient(180deg, transparent, rgba(0,0,0,.9) 45%);
-      text-shadow: 0 2px 10px rgba(0,0,0,.9);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.9) 45%); text-shadow: 0 2px 10px rgba(0,0,0,.9);
     }
     .vs{
       display:flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%;
@@ -224,9 +190,7 @@
 
   <!-- Filters -->
   <section class="filters">
-    <div class="field">
-      🔎 <input id="search" type="search" placeholder="Filter past events by fighter or title…">
-    </div>
+    <div class="field">🔎 <input id="search" type="search" placeholder="Filter past events by fighter or title…"></div>
     <div class="meta" id="resultCount"></div>
   </section>
 
@@ -242,10 +206,10 @@
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
 
-    // ====== CONFIG (single-tab setup) ======
+    // ====== CONFIG ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
-    const GID_EVENTS_ALL = '676906080'; // one tab with everything
-    const VODS_URL = 'assets/data/vods.json'; // optional: { "Crucible 01": "https://youtube...", ... }
+    const GID_EVENTS_ALL = '676906080';
+    const VODS_URL = 'assets/data/vods.json'; // optional
 
     const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
 
@@ -276,19 +240,17 @@
 
     const headshotPath = (name) => `assets/images/fighters/headshots/${slugify(name)}.png`;
     const posterGuess = (name, dateStr) => {
-      // Try a few common patterns; let <img onerror> handle failures.
-      // 1) assets/images/events/<slug>.jpg
       const base1 = `assets/images/events/${slugify(name)}`;
-      // 2) assets/images/events/${name}_${date}
       const base2 = `assets/images/events/${slugify(name)}-${dateStr}`;
-      return [`${base1}.jpg`,`${base1}.png`,`${base1}.webp`,`${base2}.jpg`,`${base2}.png`][0]; // first; others as progressive attempts are heavy; rely on one guess
+      return `${base1}.jpg`; // primary guess (we swap to .png onerror in eventCard)
     };
 
     function parseEventTitle(s){
       const m = /^(.+?)\s*\(\s*(\d{2})-(\d{2})-(\d{4})\s*\)\s*$/.exec(s || '');
       if(!m) return { name: s?.trim() || 'Event', date: null, dateStr: '' };
       const [, rawName, mm, dd, yyyy] = m;
-      const date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`); // default 8pm local for countdown
+      // default 8pm local for countdown; adjust if you have a stricter time
+      const date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
       return { name: rawName.trim(), date, dateStr: `${yyyy}-${mm}-${dd}` };
     }
 
@@ -296,11 +258,9 @@
       return d ? d.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' }) : '';
     }
 
-    // ===== Loaders =====
     async function fetchCSV(gid){ const r = await fetch(csvUrl(gid), {cache:'no-store'}); if(!r.ok) throw new Error('CSV '+gid); return parseCSV(await r.text()); }
     async function fetchJSON(url){ try{ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) return null; return await r.json(); } catch { return null; } }
 
-    // Build structured events
     async function loadEvents(){
       const rows = await fetchCSV(GID_EVENTS_ALL);
       const map = new Map(); // key: name||dateStr
@@ -335,7 +295,6 @@
       return events;
     }
 
-    // ===== Rendering =====
     function setHero(up){
       const t = document.getElementById('heroTitle');
       const d = document.getElementById('heroDate');
@@ -420,19 +379,43 @@
       return Math.round(avg * 10)/10;
     }
 
-    function bonusSummary(fights){
-      const list = fights.map(f => f.bonus).filter(Boolean);
-      if (!list.length) return '';
-      const counts = {};
-      list.forEach(b => { const k=b.toLowerCase(); counts[k]=(counts[k]||0)+1; });
-      const order = ['fight of the night','ko of the night','submission of the night','performance bonus'];
-      const keys = Object.keys(counts).sort((a,b)=> (order.indexOf(a)+1 || 999) - (order.indexOf(b)+1 || 999));
-      return keys.map(k => `${k} ×${counts[k]}`).join(' · ');
+    // NEW: list who won each award instead of counts
+    function awardsDetail(fights){
+      const out = { fotn: [], ko: [], sub: [] };
+
+      fights.forEach(f => {
+        const bonus = (f.bonus || '').toLowerCase();
+        if (!bonus) return;
+
+        // Normalize strings from sheet
+        const isFOTN = /fight\s*of\s*the\s*night/i.test(bonus);
+        const isKO   = /\bko\b|\bknockout\b/i.test(bonus);
+        const isSUB  = /submission\s*of\s*the\s*night|\bsub\b/i.test(bonus);
+
+        if (isFOTN) out.fotn.push(`${f.a} vs ${f.b}`);
+        if (isKO) {
+          // Prefer the actual winner name; fall back to either side if winner not recorded
+          let w = f.winner;
+          if (!w) w = f.a || f.b || '';
+          out.ko.push(w);
+        }
+        if (isSUB) {
+          let w = f.winner;
+          if (!w) w = f.a || f.b || '';
+          out.sub.push(w);
+        }
+      });
+
+      const parts = [];
+      if (out.fotn.length) parts.push(`FOTN: ${out.fotn.join(', ')}`);
+      if (out.ko.length)   parts.push(`KO: ${out.ko.join(', ')}`);
+      if (out.sub.length)  parts.push(`SUB: ${out.sub.join(', ')}`);
+      return parts.join(' · ');
     }
 
     function eventCard(ev, vodUrl){
       const avg = averageRating(ev.fights);
-      const bonuses = bonusSummary(ev.fights);
+      const awards = awardsDetail(ev.fights);
       const cover = `assets/images/events/${slugify(ev.name)}.jpg`;
       const coverFallback = `assets/images/events/${slugify(ev.name)}.png`;
       return `
@@ -444,12 +427,12 @@
             <div class="ev-title">${ev.name}</div>
             <div class="ev-date">${toDateStr(ev.date)}</div>
             <div class="ev-meta">
-              ${ev.fights.length} fights${avg ? ` · Avg ★${avg}`:''}${bonuses?` · ${bonuses}`:''}
+              ${ev.fights.length} fights${avg ? ` · Avg ★${avg}`:''}${awards?` · ${awards}`:''}
             </div>
           </div>
           <div class="ev-actions">
             ${vodUrl ? `<a class="btn" href="${vodUrl}" target="_blank" rel="noopener">▶ Watch Replay</a>` : ''}
-            <span class="chip">Card</span>
+            <span class="btn">Card</span>
           </div>
         </article>
       `;
@@ -461,24 +444,25 @@
         host.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center">No past events yet.</div>`;
         return;
       }
-      // Most recent first
       host.innerHTML = past.slice().sort((a,b)=> b.date - a.date).map(ev=>{
-        const key = ev.name; // use full name; adjust if your vods.json uses abbreviations
+        const key = ev.name;
         const vod = (vods && (vods[key] || vods[slugify(key)])) || '';
         return eventCard(ev, vod);
       }).join('');
       document.getElementById('resultCount').textContent = `${past.length} past event${past.length===1?'':'s'}`;
     }
 
-    function wireFilter(allPast, vods){
+    function wireFilter(allPast){
       const input = document.getElementById('search');
       const host = document.getElementById('archive');
       function apply(){
         const q = input.value.trim().toLowerCase();
         const cards = host.querySelectorAll('.ev-card');
-        if (!q){ cards.forEach(c=>c.style.display=''); document.getElementById('resultCount').textContent = `${allPast.length} past events`; return; }
-
-        // filter by title OR any fighter name match
+        if (!q){
+          cards.forEach(c=>c.style.display='');
+          document.getElementById('resultCount').textContent = `${allPast.length} past events`;
+          return;
+        }
         const filtered = [];
         allPast.forEach((ev, i)=>{
           const inTitle = ev.name.toLowerCase().includes(q);
@@ -496,15 +480,19 @@
     (async function(){
       try{
         const [events, vods] = await Promise.all([loadEvents(), fetchJSON(VODS_URL)]);
-        // Upcoming and Past split
-        const today = new Date(); today.setHours(0,0,0,0);
-        const upcoming = events.find(e => e.date >= today) || null;
-        const past = events.filter(e => e.date < today);
+        // --- Upcoming: pick the earliest future event by date ---
+        const now = new Date();
+        now.setSeconds(0,0);
+        const future = events.filter(e => e.date && e.date >= now).sort((a,b)=> a.date - b.date);
+        const upcoming = future[0] || null;
+
+        // Past = everything strictly before now (not today at 00:00 — actual current time)
+        const past = events.filter(e => e.date && e.date < now);
 
         setHero(upcoming);
         renderSpotlight(upcoming);
         renderArchive(past, vods || {});
-        wireFilter(past, vods || {});
+        wireFilter(past);
       }catch(err){
         console.error(err);
         document.getElementById('heroTitle').textContent = 'Failed to load events';
