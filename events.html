@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Iron Crown Combat — Events</title>
 
-  <meta name="description" content="Official Iron Crown Combat events, cards, and results." />
+  <!-- Favicon -->
+  <link rel="icon" href="assets/img/favicon.png">
+  <link rel="shortcut icon" href="assets/img/favicon.png">
+
+  <meta name="description" content="Official Iron Crown Combat events, cards, countdowns, and results." />
   <meta property="og:title" content="Iron Crown Combat — Events" />
-  <meta property="og:description" content="Upcoming shows, past cards, and results." />
+  <meta property="og:description" content="Upcoming shows, countdown, cards, and results." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="assets/img/og-cover.png" />
   <meta name="theme-color" content="#0f1115" />
 
-  <link rel="icon" href="assets/img/favicon.png" />
   <link rel="preload" href="assets/css/main.css" as="style" />
   <link rel="stylesheet" href="assets/css/main.css" />
 
@@ -25,191 +28,210 @@
     }
     body { background: var(--bg); color: var(--text); margin: 0; }
 
-    .pagehead { text-align:center; padding: 1rem 1rem .5rem;}
-    .pagehead h1 { margin: .25rem 0; color: var(--gold); }
-
-    /* Featured: upcoming + most recent */
-    .featured-wrap{
-      max-width:1200px; margin:0 auto 1.25rem; padding: 0 1rem;
-      display:grid; gap:1rem; grid-template-columns: 1fr;
-    }
-    @media (min-width: 1100px){ .featured-wrap{ grid-template-columns: 1fr 1fr; } }
-
-    .event-block{
-      background: var(--surface);
-      border:1px solid var(--border);
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow: var(--shadow);
-    }
-    .event-head{
-      background: linear-gradient(135deg, rgba(224,177,90,.15), rgba(255,215,0,.05));
-      padding: .9rem 1rem .75rem;
+    /* ===== Hero / Upcoming Banner ===== */
+    .hero-wrap{
+      position:relative; overflow:hidden;
       border-bottom:1px solid var(--border);
-      text-align:center;
+      background: radial-gradient(1200px 500px at 50% -10%, rgba(224,177,90,.18), transparent 60%), #0d0f14;
     }
-    .event-name{
-      font-weight:800; letter-spacing:.2px; color: var(--gold);
-      margin:0; line-height:1.1; font-size: clamp(1.05rem, 2.1vw, 1.35rem);
-      text-transform:uppercase;
+    .hero{
+      max-width:1200px; margin:0 auto; padding: 1.25rem 1rem 1rem;
+      display:grid; gap:1rem; grid-template-columns: 1.3fr 1fr; align-items:center;
     }
-    .event-date{ margin:.25rem 0 0; color: var(--muted); font-size:.95rem; }
+    .hero-left{
+      display:grid; gap:.7rem;
+    }
+    .eyebrow{ color: var(--muted); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:.85rem; }
+    .hero h1{ margin:.1rem 0; font-size: clamp(1.4rem, 3vw, 2rem); color: var(--gold); letter-spacing:.02em; }
+    .hero .date{ color: var(--muted); }
+    .hero-actions{ display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.2rem; }
+    .hero .btn.gold{ border-color: var(--gold2); }
 
-    /* ===== Single-column fight list with bigger thumbs ===== */
-    .fight-grid{
-      display:flex;
-      flex-direction:column;
-      gap:1rem;
-      padding:1rem;
+    .countdown{
+      display:flex; gap:.5rem; flex-wrap:wrap; align-items:center;
     }
-    .fight{
-      display:grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items:center;
-      gap:1rem;
+    .cd-item{
+      min-width:80px; text-align:center;
       background: var(--bg-2);
       border:1px solid var(--border);
-      border-radius:14px;
-      padding:1rem;
-      min-height:220px;
+      border-radius:10px; padding:.5rem .6rem;
+    }
+    .cd-num{ font-size:1.3rem; font-weight:900; }
+    .cd-lbl{ font-size:.8rem; color:var(--muted); }
+
+    .poster{
+      justify-self:center;
+      width:100%; max-width:440px; aspect-ratio: 3/4;
+      border-radius:14px; overflow:hidden;
+      border:1px solid var(--border); background:#0b0c10;
+      display:flex; align-items:center; justify-content:center;
       box-shadow: var(--shadow);
-      position:relative;
-      overflow:hidden;
     }
-    .headshot{
-      position:relative;
-      height:220px; /* bigger thumbnails */
-      border-radius:10px;
-      overflow:hidden;
-      border:1px solid var(--border);
-      background:#0b0c10;
-      display:flex; align-items:flex-end; justify-content:center;
+    .poster img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .poster .ph{ color:var(--muted); padding:1rem; text-align:center; }
+
+    @media (max-width: 980px){
+      .hero{ grid-template-columns: 1fr; }
+      .poster{ max-width:520px; }
     }
+
+    /* ===== Main Event Spotlight ===== */
+    .spotlight{
+      max-width:1200px; margin: 1rem auto; padding: 0 1rem 1rem;
+    }
+    .spotlight .card{ overflow:hidden; }
+    .me-grid{
+      display:grid; grid-template-columns: 1fr auto 1fr; gap:1rem; align-items:center;
+    }
+    .me-side{
+      display:grid; gap:.5rem; align-content:center; justify-items:center;
+    }
+    .me-head{
+      width:100%; max-width:360px; aspect-ratio:1/1; border-radius:14px; overflow:hidden;
+      border:1px solid var(--border); background:#0b0c10; box-shadow: var(--shadow);
+      display:flex; align-items:flex-end; justify-content:center; position:relative;
+    }
+    .me-head img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .me-name{
+      position:absolute; left:0; right:0; bottom:0;
+      padding:.6rem .8rem; text-align:center; color:#fff; font-weight:900;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.85) 50%);
+      text-shadow: 0 2px 12px rgba(0,0,0,.8);
+    }
+    .me-vs{
+      font-weight:900; font-size: clamp(1.4rem, 4vw, 2rem);
+      padding:.5rem .9rem; border:1px solid var(--border); border-radius:999px;
+      background: radial-gradient(ellipse at center, rgba(255,215,0,.2), rgba(224,177,90,.08) 55%, transparent 80%);
+      color: var(--gold);
+      text-shadow: 0 1px 10px rgba(255,215,0,.2);
+    }
+    .me-meta{ text-align:center; color: var(--muted); margin-top:.4rem; }
+
+    /* ===== Search / Filters ===== */
+    .filters{
+      max-width:1200px; margin: 0.25rem auto 0; padding: 0 1rem 0.6rem;
+      display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    }
+    .filters .field{
+      display:flex; gap:.4rem; align-items:center;
+      border:1px solid var(--border); background: var(--bg-2); border-radius:10px; padding:.4rem .6rem;
+    }
+    .filters input{
+      background:transparent; border:0; outline:0; color:var(--text);
+      min-width:220px;
+    }
+
+    /* ===== Past Events Grid ===== */
+    .events-grid{
+      max-width:1200px; margin: 0 auto 1.5rem; padding: 0 1rem;
+      display:grid; gap:1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .ev-card{
+      background: var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden;
+      box-shadow: var(--shadow); display:grid; grid-template-rows:auto 1fr auto;
+    }
+    .ev-cover{ aspect-ratio: 16/9; background:#0b0c10; }
+    .ev-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .ev-body{ padding:.8rem; display:grid; gap:.35rem; }
+    .ev-title{ font-weight:800; color: var(--gold); }
+    .ev-date{ color:var(--muted); font-size:.92rem; }
+    .ev-meta{ color:var(--muted); font-size:.9rem; }
+    .ev-actions{ display:flex; gap:.5rem; padding:.8rem; border-top:1px solid var(--border); }
+    .chip{
+      display:inline-flex; align-items:center; gap:.35rem;
+      border:1px solid var(--border); padding:.2rem .55rem; border-radius:999px; background:var(--bg);
+      font-size:.86rem;
+    }
+
+    /* ===== Fight list styles (reused) ===== */
+    .fight-grid{
+      display:flex; flex-direction:column; gap:.7rem;
+      padding:.6rem 0 0;
+    }
+    .fight{
+      display:grid; grid-template-columns: 1fr auto 1fr; gap:.7rem; align-items:center;
+      background: var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:.75rem;
+      min-height:170px; position:relative; overflow:hidden;
+    }
+    .headshot{ position:relative; height:170px; border-radius:10px; overflow:hidden; border:1px solid var(--border); background:#0b0c10; display:flex; align-items:flex-end; justify-content:center; }
     .headshot img{ width:100%; height:100%; object-fit:cover; display:block; }
     .name-overlay{
-      position:absolute; left:0; right:0; bottom:0;
-      padding:.6rem .8rem;
-      background:linear-gradient(180deg,transparent,rgba(0,0,0,.75) 40%,rgba(0,0,0,.92));
-      color:#fff; font-weight:800; text-align:center;
-      font-size:1.05rem; text-shadow:0 2px 8px rgba(0,0,0,.9);
-      letter-spacing:.2px;
+      position:absolute; left:0; right:0; bottom:0; padding:.5rem .7rem; text-align:center; color:#fff; font-weight:800;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.9) 45%);
+      text-shadow: 0 2px 10px rgba(0,0,0,.9);
     }
     .vs{
-      display:flex; align-items:center; justify-content:center;
-      width: 72px; height:72px; border-radius: 50%;
-      border:1px solid var(--border);
-      background: radial-gradient(ellipse at center, rgba(255,215,0,.22), rgba(224,177,90,.1) 60%, transparent 100%);
-      color: var(--gold);
-      font-weight:900; font-size: 1.25rem; text-shadow:0 1px 10px rgba(255,215,0,.3);
-      box-shadow: inset 0 0 20px rgba(255,215,0,.1);
-      user-select:none;
+      display:flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%;
+      border:1px solid var(--border); color: var(--gold); font-weight:900; box-shadow: inset 0 0 20px rgba(255,215,0,.15);
+      background: radial-gradient(ellipse at center, rgba(255,215,0,.2), rgba(224,177,90,.08) 60%, transparent 100%);
     }
+    .name-overlay.winner{ color:#5cff9d; text-shadow: 0 0 8px rgba(92,255,157,.65), 0 2px 8px rgba(0,0,0,.9); }
 
-    /* Archive accordion */
-    .accordion{ max-width:1200px; margin: 1rem auto 2rem; padding: 0 1rem; }
-    .acc-item{ border:1px solid var(--border); border-radius:14px; overflow:hidden; background:var(--surface); margin:.6rem 0; box-shadow: var(--shadow); }
-    .acc-btn{
-      width:100%; text-align:left; padding:.9rem 1rem;
-      background:linear-gradient(135deg, rgba(224,177,90,.15), rgba(255,215,0,.05));
-      color:var(--gold); font-weight:800; letter-spacing:.25px;
-      border:0; border-bottom:1px solid var(--border); cursor:pointer;
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .acc-btn small{ color: var(--muted); font-weight:600; }
-    .acc-body{ display:none; }
-    .acc-body.open{ display:block; }
-    .acc-inner{ padding: 1rem; }
-
-    .muted{ color: var(--muted); }
-    .empty{ padding:1rem; text-align:center; color:var(--muted); }
-
-    /* ribbons (winner/bonus/rating) */
-    .ribbon{
-      display:inline-block; padding:.2rem .45rem; border-radius:.4rem;
-      font-size:.75rem; font-weight:800; letter-spacing:.2px;
-      border:1px solid var(--border); background:rgba(0,0,0,.35); color:#fff;
-    }
-    .ribbon.win{ background:rgba(0,180,90,.18); border-color:rgba(0,180,90,.35); }
-    .ribbon.bonus{ background:rgba(255,215,0,.14); border-color:rgba(255,215,0,.35); color:var(--gold); }
-    .ribbon.rating{ background:rgba(135,206,250,.14); border-color:rgba(135,206,250,.35); }
-
-    /* ===== Winner visibility upgrades ===== */
-    .fight.win-left  .headshot:first-child,
-    .fight.win-right .headshot:last-child{
-      outline:3px solid rgba(0, 190, 100, .9);
-      box-shadow:0 0 0 3px rgba(0, 190, 100, .28), 0 10px 30px rgba(0,0,0,.45);
-    }
-    .fight.win-left  .headshot:first-child::after,
-    .fight.win-right .headshot:last-child::after{
-      content:"✓";
-      position:absolute; top:.5rem; left:.5rem;
-      width:26px; height:26px; border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      font-weight:900; font-size:.9rem;
-      color:#fff; background:rgba(0, 190, 100, .9);
-      box-shadow:0 2px 8px rgba(0,0,0,.5);
-    }
-
-    .badge-wrap{ position:absolute; left:1rem; top:.75rem; display:flex; gap:.45rem; flex-wrap:wrap; z-index:2; }
-    .badge{
-      display:inline-block; padding:.28rem .55rem; border-radius:.55rem;
-      font-size:.8rem; font-weight:800; letter-spacing:.2px;
-      border:1px solid var(--border); background:rgba(0,0,0,.5); color:#fff;
-      box-shadow:0 2px 10px rgba(0,0,0,.35);
-    }
-    .badge.win   { background:rgba(0,180,90,.18);  border-color:rgba(0,180,90,.45); }
-    .badge.bonus { background:rgba(255,215,0,.18); border-color:rgba(255,215,0,.45); color:var(--gold); }
-    .badge.rate  { background:rgba(120,180,255,.18); border-color:rgba(120,180,255,.45); }
-
-    .result-bar{
-      position:absolute; left:50%; bottom:.6rem; transform:translateX(-50%);
-      padding:.5rem .9rem; border-radius:.7rem;
-      font-weight:900; letter-spacing:.3px;
-      background:linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.65));
-      border:1px solid var(--border);
-      color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.7);
-      box-shadow:0 6px 24px rgba(0,0,0,.35);
-    }
-    .result-bar strong{ color:#8ff3b5; }
-
-    .badge.draw { background:rgba(160,160,160,.22); border-color:rgba(160,160,160,.45); }
-    .name-overlay.winner {
-      color: #5cff9d;
-      text-shadow: 0 0 8px rgba(92, 255, 157, .65), 0 2px 8px rgba(0,0,0,.9);
+    @media (max-width: 680px){
+      .fight{ grid-template-columns: 1fr; min-height:unset; }
+      .headshot{ height:220px; }
+      .vs{ margin:.2rem auto; }
+      .me-grid{ grid-template-columns: 1fr; }
+      .me-head{ max-width:520px; aspect-ratio: 4/3; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Shared navbar placeholder; populated by navbar.html -->
+  <!-- Shared navbar mount -->
   <div id="navbar"></div>
 
-  <div class="pagehead">
-    <h1>Events</h1>
-    <p class="muted">Upcoming, latest, and the full archive.</p>
-  </div>
-
-  <!-- Featured: Upcoming + Last -->
-  <section id="featured" class="featured-wrap">
-    <div class="event-block" id="upcomingBlock">
-      <div class="event-head">
-        <h2 class="event-name" id="upName">Upcoming Event</h2>
-        <div class="event-date" id="upDate">—</div>
+  <!-- HERO (Upcoming) -->
+  <section class="hero-wrap">
+    <div class="hero" id="hero">
+      <div class="hero-left">
+        <div class="eyebrow">Next Crucible</div>
+        <h1 id="heroTitle">Loading upcoming event…</h1>
+        <div class="date" id="heroDate"></div>
+        <div class="countdown" id="countdown" aria-live="polite" style="display:none">
+          <div class="cd-item"><div class="cd-num" id="d">0</div><div class="cd-lbl">Days</div></div>
+          <div class="cd-item"><div class="cd-num" id="h">0</div><div class="cd-lbl">Hours</div></div>
+          <div class="cd-item"><div class="cd-num" id="m">0</div><div class="cd-lbl">Min</div></div>
+          <div class="cd-item"><div class="cd-num" id="s">0</div><div class="cd-lbl">Sec</div></div>
+        </div>
+        <div class="hero-actions">
+          <a class="btn gold" href="https://www.twitch.tv/swttngaming?sr=a" target="_blank" rel="noopener">Watch Live on Twitch</a>
+          <a class="btn" href="#archive">See Past Events</a>
+        </div>
       </div>
-      <div class="fight-grid" id="upFights"><div class="empty">Loading…</div></div>
-    </div>
-
-    <div class="event-block" id="recentBlock">
-      <div class="event-head">
-        <h2 class="event-name" id="lastName">Most Recent Event</h2>
-        <div class="event-date" id="lastDate">—</div>
+      <div class="poster">
+        <img id="heroPoster" alt="Event poster" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Poster coming soon'}))">
       </div>
-      <div class="fight-grid" id="lastFights"><div class="empty">Loading…</div></div>
     </div>
   </section>
 
-  <!-- Archive / Accordion -->
-  <section class="accordion" id="archive"></section>
+  <!-- Spotlight (Main Event) -->
+  <section class="spotlight">
+    <div class="card" id="spotlightCard" style="display:none;">
+      <div class="me-grid">
+        <div class="me-side">
+          <div class="me-head"><img id="meAImg" alt=""><div id="meAName" class="me-name">—</div></div>
+        </div>
+        <div class="me-vs">VS</div>
+        <div class="me-side">
+          <div class="me-head"><img id="meBImg" alt=""><div id="meBName" class="me-name">—</div></div>
+        </div>
+      </div>
+      <div class="me-meta" id="meMeta">—</div>
+      <div class="fight-grid" id="upFightList" style="padding:1rem 1rem 1.2rem;"></div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="filters">
+    <div class="field">
+      🔎 <input id="search" type="search" placeholder="Filter past events by fighter or title…">
+    </div>
+    <div class="meta" id="resultCount"></div>
+  </section>
+
+  <!-- Past Events Grid -->
+  <section id="archive" class="events-grid"></section>
 
   <footer class="footer">
     <div class="container cols">
@@ -218,14 +240,16 @@
   </footer>
 
   <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
     // ====== CONFIG (single-tab setup) ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
-    const GID_EVENTS_ALL = '676906080'; // your one tab with everything
+    const GID_EVENTS_ALL = '676906080'; // one tab with everything
+    const VODS_URL = 'assets/data/vods.json'; // optional: { "Crucible 01": "https://youtube...", ... }
 
-    const headshotPath = (name) => `assets/images/fighters/headshots/${slugify(name)}.png`;
-
-    // CSV helpers
     const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+
+    // ===== Helpers =====
     function parseCSV(text){
       const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length);
       if(!lines.length) return [];
@@ -245,26 +269,38 @@
         const o={}; headers.forEach((h,i)=>o[h]=(r[i]||'').trim()); return o;
       });
     }
-    const slugify = s => s.toLowerCase()
+
+    const slugify = s => (s||'').toLowerCase()
       .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
       .replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
 
-    async function fetchCSV(gid){
-      const res = await fetch(csvUrl(gid), { cache:'no-store' });
-      if(!res.ok) throw new Error(`CSV ${gid} ${res.status}`);
-      return parseCSV(await res.text());
-    }
+    const headshotPath = (name) => `assets/images/fighters/headshots/${slugify(name)}.png`;
+    const posterGuess = (name, dateStr) => {
+      // Try a few common patterns; let <img onerror> handle failures.
+      // 1) assets/images/events/<slug>.jpg
+      const base1 = `assets/images/events/${slugify(name)}`;
+      // 2) assets/images/events/${name}_${date}
+      const base2 = `assets/images/events/${slugify(name)}-${dateStr}`;
+      return [`${base1}.jpg`,`${base1}.png`,`${base1}.webp`,`${base2}.jpg`,`${base2}.png`][0]; // first; others as progressive attempts are heavy; rely on one guess
+    };
 
-    // Parse "Crucible 01(05-26-2025)"
     function parseEventTitle(s){
       const m = /^(.+?)\s*\(\s*(\d{2})-(\d{2})-(\d{4})\s*\)\s*$/.exec(s || '');
       if(!m) return { name: s?.trim() || 'Event', date: null, dateStr: '' };
       const [, rawName, mm, dd, yyyy] = m;
-      const date = new Date(`${yyyy}-${mm}-${dd}T12:00:00`);
+      const date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`); // default 8pm local for countdown
       return { name: rawName.trim(), date, dateStr: `${yyyy}-${mm}-${dd}` };
     }
 
-    // Load + model
+    function toDateStr(d) {
+      return d ? d.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' }) : '';
+    }
+
+    // ===== Loaders =====
+    async function fetchCSV(gid){ const r = await fetch(csvUrl(gid), {cache:'no-store'}); if(!r.ok) throw new Error('CSV '+gid); return parseCSV(await r.text()); }
+    async function fetchJSON(url){ try{ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) return null; return await r.json(); } catch { return null; } }
+
+    // Build structured events
     async function loadEvents(){
       const rows = await fetchCSV(GID_EVENTS_ALL);
       const map = new Map(); // key: name||dateStr
@@ -272,10 +308,8 @@
       for (const r of rows){
         const evt = (r['Event'] || '').trim();
         if(!evt) continue;
-
         const { name, date, dateStr } = parseEventTitle(evt);
         if(!name) continue;
-
         const key = `${name}||${dateStr}`;
         if(!map.has(key)) map.set(key, { name, date, dateStr, fights: [] });
 
@@ -287,8 +321,8 @@
             a: a || 'TBA',
             b: b || 'TBA',
             winner: (r['Winner']||'').trim(),
-            bonus: (r['bonus type']||'').trim(),
-            rating: (r['Match Rating']||'').trim()
+            bonus: (r['bonus type']||r['Bonus']||'').trim(),
+            rating: (r['Match Rating']||r['Rating']||'').trim()
           });
         }
       }
@@ -301,20 +335,61 @@
       return events;
     }
 
-    // Render
+    // ===== Rendering =====
+    function setHero(up){
+      const t = document.getElementById('heroTitle');
+      const d = document.getElementById('heroDate');
+      const p = document.getElementById('heroPoster');
+      if (!up){
+        t.textContent = 'No upcoming event scheduled';
+        d.textContent = '';
+        p.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Stay tuned for the next card'}));
+        document.getElementById('countdown').style.display='none';
+        return;
+      }
+      t.textContent = up.name;
+      d.textContent = toDateStr(up.date);
+      p.src = posterGuess(up.name, up.dateStr);
+
+      // Countdown
+      const cd = document.getElementById('countdown');
+      cd.style.display = '';
+      const dEl = document.getElementById('d');
+      const hEl = document.getElementById('h');
+      const mEl = document.getElementById('m');
+      const sEl = document.getElementById('s');
+
+      function tick(){
+        const now = new Date();
+        const diff = up.date - now;
+        if (diff <= 0){
+          dEl.textContent = '0'; hEl.textContent = '0'; mEl.textContent = '0'; sEl.textContent = '0';
+          return;
+        }
+        const sec = Math.floor(diff/1000);
+        const days = Math.floor(sec/86400);
+        const hours = Math.floor((sec%86400)/3600);
+        const mins = Math.floor((sec%3600)/60);
+        const secs = sec%60;
+        dEl.textContent = days;
+        hEl.textContent = String(hours).padStart(2,'0');
+        mEl.textContent = String(mins).padStart(2,'0');
+        sEl.textContent = String(secs).padStart(2,'0');
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
     function fightRow(f){
       const winnerA = f.winner && f.winner === f.a;
       const winnerB = f.winner && f.winner === f.b;
-
       return `
         <div class="fight">
           <div class="headshot">
             <img src="${headshotPath(f.a)}" alt="${f.a}" onerror="this.style.opacity=.25">
             <div class="name-overlay ${winnerA ? 'winner' : ''}">${f.a}</div>
           </div>
-
           <div class="vs">VS</div>
-
           <div class="headshot">
             <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
             <div class="name-overlay ${winnerB ? 'winner' : ''}">${f.b}</div>
@@ -323,93 +398,121 @@
       `;
     }
 
-    function fillEvent(nameId, dateId, fightsId, ev){
-      document.getElementById(nameId).textContent = ev.name;
-      document.getElementById(dateId).textContent =
-        ev.date.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
-      document.getElementById(fightsId).innerHTML =
-        ev.fights.length ? ev.fights.map(fightRow).join('') : `<div class="empty">Card TBA</div>`;
+    function renderSpotlight(up){
+      const card = document.getElementById('spotlightCard');
+      if (!up || !up.fights.length){ card.style.display='none'; return; }
+      card.style.display='';
+      // Assume last fight on the sheet order is Main Event
+      const main = up.fights[up.fights.length - 1];
+      document.getElementById('meAImg').src = headshotPath(main.a);
+      document.getElementById('meBImg').src = headshotPath(main.b);
+      document.getElementById('meAName').textContent = main.a;
+      document.getElementById('meBName').textContent = main.b;
+      document.getElementById('meMeta').textContent = 'Three rounds · Five minutes · No judges · Ring only';
+      // Also list full card underneath
+      document.getElementById('upFightList').innerHTML = up.fights.map(fightRow).join('');
     }
 
-    function renderFeatured(events){
-      const today = new Date(); today.setHours(0,0,0,0);
-      const upcoming = events.find(e => e.date >= today);
-      const last = events.filter(e => e.date < today).slice(-1)[0] || null;
-
-      if (upcoming){
-        fillEvent('upName','upDate','upFights', upcoming);
-      } else {
-        document.getElementById('upName').textContent = 'No Upcoming Event';
-        document.getElementById('upDate').textContent = '';
-        document.getElementById('upFights').innerHTML = `<div class="empty">Stay tuned for the next show.</div>`;
-      }
-
-      if (last){
-        fillEvent('lastName','lastDate','lastFights', last);
-      } else {
-        document.getElementById('lastName').textContent = 'No Recent Event';
-        document.getElementById('lastDate').textContent = '';
-        document.getElementById('lastFights').innerHTML = `<div class="empty">Once an event runs, it will appear here.</div>`;
-      }
+    function averageRating(fights){
+      const nums = fights.map(f => parseFloat(String(f.rating).replace(/[^0-9.]/g,''))).filter(n => !isNaN(n));
+      if (!nums.length) return null;
+      const avg = nums.reduce((a,b)=>a+b,0)/nums.length;
+      return Math.round(avg * 10)/10;
     }
 
-    function renderArchive(events){
-      const container = document.getElementById('archive');
-      const today = new Date(); today.setHours(0,0,0,0);
-      const past = events.filter(e => e.date < today).sort((a,b)=> b.date - a.date);
+    function bonusSummary(fights){
+      const list = fights.map(f => f.bonus).filter(Boolean);
+      if (!list.length) return '';
+      const counts = {};
+      list.forEach(b => { const k=b.toLowerCase(); counts[k]=(counts[k]||0)+1; });
+      const order = ['fight of the night','ko of the night','submission of the night','performance bonus'];
+      const keys = Object.keys(counts).sort((a,b)=> (order.indexOf(a)+1 || 999) - (order.indexOf(b)+1 || 999));
+      return keys.map(k => `${k} ×${counts[k]}`).join(' · ');
+    }
 
-      if (!past.length){
-        container.innerHTML = `<div class="empty">No past events yet.</div>`;
-        return;
-      }
-
-      container.innerHTML = past.map(ev=>{
-        const fights = ev.fights.length ? ev.fights.map(fightRow).join('') : `<div class="empty">Card not available</div>`;
-        const accId = `acc-${(ev.name + '-' + ev.dateStr).replace(/[^a-z0-9]+/gi,'-').toLowerCase()}`;
-        const dStr = ev.date.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
-        return `
-          <div class="acc-item" id="${accId}">
-            <button class="acc-btn" data-target="${accId}-body" aria-expanded="false" aria-controls="${accId}-body">
-              <span>${ev.name}</span>
-              <small>${dStr}</small>
-            </button>
-            <div class="acc-body" id="${accId}-body">
-              <div class="acc-inner">
-                <div class="fight-grid">${fights}</div>
-              </div>
+    function eventCard(ev, vodUrl){
+      const avg = averageRating(ev.fights);
+      const bonuses = bonusSummary(ev.fights);
+      const cover = `assets/images/events/${slugify(ev.name)}.jpg`;
+      const coverFallback = `assets/images/events/${slugify(ev.name)}.png`;
+      return `
+        <article class="ev-card" data-title="${ev.name.toLowerCase()}">
+          <div class="ev-cover">
+            <img src="${cover}" alt="${ev.name} cover" onerror="this.onerror=null;this.src='${coverFallback}'">
+          </div>
+          <div class="ev-body">
+            <div class="ev-title">${ev.name}</div>
+            <div class="ev-date">${toDateStr(ev.date)}</div>
+            <div class="ev-meta">
+              ${ev.fights.length} fights${avg ? ` · Avg ★${avg}`:''}${bonuses?` · ${bonuses}`:''}
             </div>
           </div>
-        `;
-      }).join('');
+          <div class="ev-actions">
+            ${vodUrl ? `<a class="btn" href="${vodUrl}" target="_blank" rel="noopener">▶ Watch Replay</a>` : ''}
+            <span class="chip">Card</span>
+          </div>
+        </article>
+      `;
+    }
 
-      container.addEventListener('click', (e)=>{
-        const btn = e.target.closest('.acc-btn');
-        if(!btn) return;
-        const target = document.getElementById(btn.getAttribute('data-target'));
-        if(!target) return;
-        const open = target.classList.toggle('open');
-        btn.setAttribute('aria-expanded', String(open));
-      }, { passive: true });
+    function renderArchive(past, vods){
+      const host = document.getElementById('archive');
+      if (!past.length){
+        host.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center">No past events yet.</div>`;
+        return;
+      }
+      // Most recent first
+      host.innerHTML = past.slice().sort((a,b)=> b.date - a.date).map(ev=>{
+        const key = ev.name; // use full name; adjust if your vods.json uses abbreviations
+        const vod = (vods && (vods[key] || vods[slugify(key)])) || '';
+        return eventCard(ev, vod);
+      }).join('');
+      document.getElementById('resultCount').textContent = `${past.length} past event${past.length===1?'':'s'}`;
+    }
+
+    function wireFilter(allPast, vods){
+      const input = document.getElementById('search');
+      const host = document.getElementById('archive');
+      function apply(){
+        const q = input.value.trim().toLowerCase();
+        const cards = host.querySelectorAll('.ev-card');
+        if (!q){ cards.forEach(c=>c.style.display=''); document.getElementById('resultCount').textContent = `${allPast.length} past events`; return; }
+
+        // filter by title OR any fighter name match
+        const filtered = [];
+        allPast.forEach((ev, i)=>{
+          const inTitle = ev.name.toLowerCase().includes(q);
+          const inRoster = ev.fights.some(f => (f.a && f.a.toLowerCase().includes(q)) || (f.b && f.b.toLowerCase().includes(q)));
+          const card = cards[i];
+          const show = inTitle || inRoster;
+          card.style.display = show ? '' : 'none';
+          if (show) filtered.push(ev);
+        });
+        document.getElementById('resultCount').textContent = `${filtered.length} result${filtered.length===1?'':'s'}`;
+      }
+      input.addEventListener('input', apply);
     }
 
     (async function(){
       try{
-        const events = await loadEvents();
-        renderFeatured(events);
-        renderArchive(events);
+        const [events, vods] = await Promise.all([loadEvents(), fetchJSON(VODS_URL)]);
+        // Upcoming and Past split
+        const today = new Date(); today.setHours(0,0,0,0);
+        const upcoming = events.find(e => e.date >= today) || null;
+        const past = events.filter(e => e.date < today);
+
+        setHero(upcoming);
+        renderSpotlight(upcoming);
+        renderArchive(past, vods || {});
+        wireFilter(past, vods || {});
       }catch(err){
         console.error(err);
-        document.getElementById('featured').insertAdjacentHTML('afterend',
-          `<div class="empty" style="max-width:1200px;margin:1rem auto;padding:0 1rem;">
-             Failed to load events. Confirm the sheet is public and the tab has columns:
-             <b>Event</b>, <b>Fighter A</b>, <b>Fighter B</b> (e.g., Event "Crucible 01(05-26-2025)").
-           </div>`);
+        document.getElementById('heroTitle').textContent = 'Failed to load events';
       }
-      document.getElementById('yr').textContent = new Date().getFullYear();
     })();
   </script>
 
-  <!-- Load shared navbar (absolute path so it works everywhere) -->
+  <!-- Load shared navbar (with Home at start and big logo) -->
   <script>
     fetch("/Iron-Crown-Combat/navbar.html")
       .then(r => r.text())
