@@ -85,20 +85,46 @@
     .ev-meta{ color:var(--muted); font-size:.9rem; }
     .ev-actions{ display:flex; gap:.5rem; padding:.8rem; border-top:1px solid var(--border); }
 
-    /* ===== Modal ===== */
-    .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; align-items:center; justify-content:center; padding:12px; z-index:60; }
+    /* ===== Modal (scrollable) ===== */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.75);
+      display:none; align-items:center; justify-content:center; padding:12px; z-index:60;
+    }
     .modal-backdrop.show{ display:flex; }
-    .modal{ background:var(--bg-2); border:1px solid var(--border); border-radius:16px; max-width:1100px; width:100%; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.6); }
-    .modal header{ display:flex; align-items:center; justify-content:space-between; padding:.8rem 1rem; border-bottom:1px solid var(--border); }
+    .modal{
+      background:var(--bg-2); border:1px solid var(--border); border-radius:16px;
+      max-width:1100px; width:100%; max-height:92vh;
+      display:flex; flex-direction:column; overflow:hidden;
+      box-shadow:0 30px 80px rgba(0,0,0,.6);
+    }
+    .modal header{
+      flex:0 0 auto;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.8rem 1rem; border-bottom:1px solid var(--border);
+      background:var(--surface);
+      position:sticky; top:0; z-index:1;
+    }
     .modal header h3{ margin:0; }
-    .modal .wrap{ display:grid; grid-template-columns: 380px 1fr; gap:1rem; padding:1rem; }
+    .modal .wrap{
+      flex:1 1 auto;
+      overflow:auto;                   /* SCROLLS HERE */
+      display:grid; grid-template-columns: 380px 1fr; gap:1rem; padding:1rem;
+    }
     .modal .poster{ max-width:none; }
-    .modal .poster img{ border-radius:12px; border:1px solid var(--border); }
-    .modal .right{ display:grid; gap:1rem; }
-    .modal .writeup{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1rem; text-align:center; }
-    .modal .writeup .prose{ text-align:left; max-width:65ch; margin:0 auto; }
+    .modal .poster img{ border-radius:12px; border:1px solid var(--border); width:100%; height:auto; display:block; }
+    .modal .right{ display:grid; gap:1rem; align-content:start; }
+    .modal .writeup{
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:1rem; text-align:center;
+    }
+    .modal .writeup .prose{
+      text-align:left; max-width:70ch; margin:0 auto; line-height:1.6;
+    }
     .modal .fight-grid{ padding:0; }
-    .modal .close{ border:1px solid var(--border); background:var(--bg); color:var(--text); border-radius:10px; padding:.45rem .7rem; cursor:pointer; }
+    .modal .close{
+      border:1px solid var(--border); background:var(--bg); color:var(--text);
+      border-radius:10px; padding:.45rem .7rem; cursor:pointer;
+    }
     @media (max-width: 900px){
       .modal .wrap{ grid-template-columns: 1fr; }
     }
@@ -276,7 +302,7 @@
         }
       }
       const name = raw.replace(/\s*\([^)]+\)\s*$/,'').trim() || 'Event';
-      return { name, date, dateStr };
+      return { name, date, dateStr, raw };
     }
 
     function toDateStr(d) {
@@ -292,11 +318,12 @@
       for (const r of rows){
         const evt = (r['Event'] || '').trim();
         if(!evt) continue;
-        const { name, date, dateStr } = parseEventTitle(evt);
+        const parsed = parseEventTitle(evt);
+        const { name, date, dateStr } = parsed;
         if(!name || !(date instanceof Date) || isNaN(date)) continue;
 
         const key = `${name}||${dateStr}`;
-        if(!map.has(key)) map.set(key, { name, date, dateStr, fights: [] });
+        if(!map.has(key)) map.set(key, { name, date, dateStr, raw: evt, fights: [] });
 
         const a = (r['Fighter A'] || '').trim();
         const b = (r['Fighter B'] || '').trim();
@@ -428,7 +455,33 @@
       input.addEventListener('input', apply);
     }
 
-    function wireModal(events, eventsJson){
+    // Format plain text into paragraphs (blank lines => <p>, single newlines => <br>)
+    function pFormat(article){
+      if (!article) return '';
+      const s = String(article);
+      if (/<\/?(p|br|ul|ol|li|strong|em|h\d)/i.test(s)) return s; // already HTML
+      return s.split(/\n\s*\n/).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+    }
+
+    // Find write-up with multiple key strategies
+    function getWriteup(ev, eventsJson){
+      if (!eventsJson) return '';
+      const exact = eventsJson[ev.name];
+      if (exact && exact.writeup) return exact.writeup;
+
+      const num = eventNumber(ev.name);          // "01"
+      if (num && eventsJson[num] && eventsJson[num].writeup) return eventsJson[num].writeup;
+
+      const slug = slugify(ev.name);             // "crucible-01"
+      if (eventsJson[slug] && eventsJson[slug].writeup) return eventsJson[slug].writeup;
+
+      // Some people key with the full sheet title "Crucible 01(05-26-2025)"
+      if (eventsJson[ev.raw] && eventsJson[ev.raw].writeup) return eventsJson[ev.raw].writeup;
+
+      return '';
+    }
+
+    function wireModal(allEvents, eventsJson){
       const backdrop = document.getElementById('evBackdrop');
       const posterEl = document.getElementById('evPoster');
       const titleEl  = document.getElementById('evTitle');
@@ -443,9 +496,8 @@
         posterEl.alt = `${ev.name} poster`;
         if (p.onerr) posterEl.setAttribute('onerror', p.onerr);
 
-        const key = ev.name.trim();
-        const w = eventsJson && eventsJson[key] && eventsJson[key].writeup;
-        writeEl.innerHTML = w ? w : `<p>No write-up for this event yet.</p>`;
+        const rawWrite = getWriteup(ev, eventsJson);
+        writeEl.innerHTML = rawWrite ? pFormat(rawWrite) : `<p>No write-up for this event yet.</p>`;
 
         cardGrid.innerHTML = ev.fights.map(fightRow).join('');
 
@@ -468,7 +520,7 @@
           const card = openBtn.closest('.ev-card');
           if (!card) return;
           const key = card.getAttribute('data-key');
-          const ev = events.find(x => `${x.name}||${x.dateStr}` === key);
+          const ev = allEvents.find(x => `${x.name}||${x.dateStr}` === key);
           if (ev) open(ev);
         }
       });
@@ -558,7 +610,7 @@
     })();
   </script>
 
-  <!-- Load shared navbar (with Home at start and big logo) -->
+  <!-- Load shared navbar -->
   <script>
     fetch("/Iron-Crown-Combat/navbar.html")
       .then(r => r.text())
