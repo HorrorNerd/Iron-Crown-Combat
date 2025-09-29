@@ -107,7 +107,7 @@
     .modal header h3{ margin:0; }
     .modal .wrap{
       flex:1 1 auto;
-      overflow:auto;                   /* SCROLLS HERE */
+      overflow:auto;
       display:grid; grid-template-columns: 380px 1fr; gap:1rem; padding:1rem;
     }
     .modal .poster{ max-width:none; }
@@ -246,36 +246,13 @@
 
     const headshotPath = (name) => `assets/images/fighters/headshots/${slugify(name)}.png`;
 
-    // Pull number like "Crucible 01" -> "01"
     function eventNumber(name){
       const m = String(name||'').match(/(\d{1,3})$/);
       if(!m) return null;
       return String(m[1]).padStart(2,'0');
     }
 
-    // Poster/Thumb guessers (prefer number-based folders)
-    function posterGuess(name){
-      const num = eventNumber(name);
-      if (num){
-        const src = `assets/images/posters/${num}.png`;
-        return { src, onerr: `this.onerror=null;this.src='assets/images/events/${slugify(name)}.jpg'; this.onerror=null;` };
-      }
-      const base = `assets/images/events/${slugify(name)}`;
-      return { src: `${base}.jpg`, onerr: `this.onerror=null;this.src='${base}.png'` };
-    }
-    function thumbGuess(name){
-      const num = eventNumber(name);
-      if (num){
-        return {
-          src: `assets/images/thumbs/${num}.jpg`,
-          onerr: `this.onerror=null;this.src='assets/images/thumbs/${num}.png'`
-        };
-      }
-      const base = `assets/images/events/${slugify(name)}`;
-      return { src: `${base}.jpg`, onerr: `this.onerror=null;this.src='${base}.png'` };
-    }
-
-    // Robust date parsing from Event title
+    // Robust date parsing
     function parseEventTitle(s){
       const raw = (s||'').trim();
       const mParens = /\(([^)]+)\)/.exec(raw);
@@ -310,43 +287,47 @@
     }
 
     async function fetchCSV(gid){ const r = await fetch(csvUrl(gid), {cache:'no-store'}); if(!r.ok) throw new Error('CSV '+gid); return parseCSV(await r.text()); }
+    async function fetchJSON(url){ try{ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) return null; return await r.json(); } catch { return null; } }
 
-    async function loadEvents(){
-      const rows = await fetchCSV(GID_EVENTS_ALL);
-      const map = new Map(); // key: name||dateStr
-      let order = 0;
-      for (const r of rows){
-        const evt = (r['Event'] || '').trim();
-        if(!evt) continue;
-        const parsed = parseEventTitle(evt);
-        const { name, date, dateStr } = parsed;
-        if(!name || !(date instanceof Date) || isNaN(date)) continue;
+    // Build a lookup map from your events.json (array format)
+    function buildMetaIndex(json){
+      const idx = new Map();
+      const arr = (json && Array.isArray(json.events)) ? json.events : [];
+      for (const it of arr){
+        const id = (it.id||'').trim();
+        const name = (it.name||'').trim();
+        const slug = slugify(name);
+        const num = eventNumber(name);
+        const add = key => { if (key) idx.set(key, it); };
 
-        const key = `${name}||${dateStr}`;
-        if(!map.has(key)) map.set(key, { name, date, dateStr, raw: evt, fights: [] });
-
-        const a = (r['Fighter A'] || '').trim();
-        const b = (r['Fighter B'] || '').trim();
-        if (a || b){
-          map.get(key).fights.push({
-            order: ++order,
-            a: a || 'TBA',
-            b: b || 'TBA',
-            winner: (r['Winner']||'').trim(),
-            bonus: (r['bonus type']||r['Bonus']||'').trim(),
-            rating: (r['Match Rating']||r['Rating']||'').trim()
-          });
-        }
+        add(id);          // "crucible-01"
+        add(name);        // "Crucible 01"
+        add(slug);        // "crucible-01"
+        add(num);         // "01"
       }
-
-      const events = Array.from(map.values())
-        .map(e => ({...e, fights: e.fights.sort((x,y)=>x.order - y.order)}))
-        .sort((a,b)=> a.date - b.date);
-
-      return events;
+      return idx;
     }
 
-    // ===== UI builders =====
+    // Find meta by several keys
+    function findMeta(idx, ev){
+      if (!idx) return null;
+      const keys = [
+        ev.name,                  // "Crucible 01"
+        slugify(ev.name),         // "crucible-01"
+        eventNumber(ev.name),     // "01"
+        ev.raw                    // "Crucible 01(05-26-2025)" if you ever key by raw
+      ];
+      for (const k of keys){ if (k && idx.has(k)) return idx.get(k); }
+      return null;
+    }
+
+    function pFormat(article){
+      if (!article) return '';
+      const s = String(article);
+      if (/<\/?(p|br|ul|ol|li|strong|em|h\d)/i.test(s)) return s;
+      return s.split(/\n\s*\n/).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+    }
+
     function fightRow(f){
       const winnerA = f.winner && f.winner === f.a;
       const winnerB = f.winner && f.winner === f.b;
@@ -391,16 +372,31 @@
       return parts.join(' · ');
     }
 
-    function eventCard(ev, vodUrl){
+    function eventCard(ev, vodUrl, metaIdx){
       const avg = averageRating(ev.fights);
       const awards = awardsDetail(ev.fights);
-      const t = thumbGuess(ev.name);
-      const key = `${ev.name}||${ev.dateStr}`;
+      const meta = findMeta(metaIdx, ev);
 
+      // Thumb source priority: events.json thumb -> number-based guess -> slug-based guess
+      let thumbSrc = meta && meta.thumb ? meta.thumb : null;
+      let thumbOnErr = '';
+      if (!thumbSrc){
+        const num = eventNumber(ev.name);
+        if (num){
+          thumbSrc = `assets/images/thumbs/${num}.jpg`;
+          thumbOnErr = `this.onerror=null;this.src='assets/images/thumbs/${num}.png'`;
+        } else {
+          const base = `assets/images/events/${slugify(ev.name)}`;
+          thumbSrc = `${base}.jpg`;
+          thumbOnErr = `this.onerror=null;this.src='${base}.png'`;
+        }
+      }
+
+      const key = `${ev.name}||${ev.dateStr}`;
       return `
         <article class="ev-card" data-key="${key}">
           <div class="ev-cover" data-open-modal>
-            <img src="${t.src}" alt="${ev.name} cover" onerror="${t.onerr}">
+            <img src="${thumbSrc}" alt="${ev.name} cover" ${thumbOnErr ? `onerror="${thumbOnErr}"` : ''}>
           </div>
           <div class="ev-body" data-open-modal>
             <div class="ev-title">${ev.name}</div>
@@ -417,7 +413,7 @@
       `;
     }
 
-    function renderArchive(past, vods){
+    function renderArchive(past, vods, metaIdx){
       const host = document.getElementById('archive');
       if (!past.length){
         host.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center">No past events yet.</div>`;
@@ -425,7 +421,7 @@
       }
       host.innerHTML = past.slice().sort((a,b)=> b.date - a.date).map(ev=>{
         const vod = (vods && (vods[ev.name] || vods[slugify(ev.name)])) || '';
-        return eventCard(ev, vod);
+        return eventCard(ev, vod, metaIdx);
       }).join('');
       document.getElementById('resultCount').textContent = `${past.length} past event${past.length===1?'':'s'}`;
     }
@@ -455,48 +451,38 @@
       input.addEventListener('input', apply);
     }
 
-    // Format plain text into paragraphs (blank lines => <p>, single newlines => <br>)
-    function pFormat(article){
-      if (!article) return '';
-      const s = String(article);
-      if (/<\/?(p|br|ul|ol|li|strong|em|h\d)/i.test(s)) return s; // already HTML
-      return s.split(/\n\s*\n/).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
-    }
-
-    // Find write-up with multiple key strategies
-    function getWriteup(ev, eventsJson){
-      if (!eventsJson) return '';
-      const exact = eventsJson[ev.name];
-      if (exact && exact.writeup) return exact.writeup;
-
-      const num = eventNumber(ev.name);          // "01"
-      if (num && eventsJson[num] && eventsJson[num].writeup) return eventsJson[num].writeup;
-
-      const slug = slugify(ev.name);             // "crucible-01"
-      if (eventsJson[slug] && eventsJson[slug].writeup) return eventsJson[slug].writeup;
-
-      // Some people key with the full sheet title "Crucible 01(05-26-2025)"
-      if (eventsJson[ev.raw] && eventsJson[ev.raw].writeup) return eventsJson[ev.raw].writeup;
-
-      return '';
-    }
-
-    function wireModal(allEvents, eventsJson){
+    function wireModal(allEvents, metaIdx){
       const backdrop = document.getElementById('evBackdrop');
       const posterEl = document.getElementById('evPoster');
       const titleEl  = document.getElementById('evTitle');
       const writeEl  = document.getElementById('evWriteup');
       const cardGrid = document.getElementById('evCardGrid');
 
+      function posterFor(ev){
+        const meta = findMeta(metaIdx, ev);
+        if (meta && meta.poster) return { src: meta.poster, onerr: '' };
+
+        const num = eventNumber(ev.name);
+        if (num){
+          return { src: `assets/images/posters/${num}.png`, onerr: `this.onerror=null;this.src='assets/images/events/${slugify(ev.name)}.jpg'` };
+        }
+        const base = `assets/images/events/${slugify(ev.name)}`;
+        return { src: `${base}.jpg`, onerr: `this.onerror=null;this.src='${base}.png'` };
+      }
+
+      function writeupFor(ev){
+        const meta = findMeta(metaIdx, ev);
+        return meta && meta.writeup ? meta.writeup : '';
+      }
+
       function open(ev){
         titleEl.textContent = ev.name + ' — ' + toDateStr(ev.date);
 
-        const p = posterGuess(ev.name);
-        posterEl.src = p.src;
-        posterEl.alt = `${ev.name} poster`;
-        if (p.onerr) posterEl.setAttribute('onerror', p.onerr);
+        const p = posterFor(ev);
+        posterEl.src = p.src; posterEl.alt = `${ev.name} poster`;
+        if (p.onerr) posterEl.setAttribute('onerror', p.onerr); else posterEl.removeAttribute('onerror');
 
-        const rawWrite = getWriteup(ev, eventsJson);
+        const rawWrite = writeupFor(ev);
         writeEl.innerHTML = rawWrite ? pFormat(rawWrite) : `<p>No write-up for this event yet.</p>`;
 
         cardGrid.innerHTML = ev.fights.map(fightRow).join('');
@@ -527,7 +513,7 @@
       document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') close(); });
     }
 
-    function setHero(up){
+    function setHero(up, metaIdx){
       const t = document.getElementById('heroTitle');
       const d = document.getElementById('heroDate');
       const p = document.getElementById('heroPoster');
@@ -541,9 +527,21 @@
       t.textContent = up.name;
       d.textContent = toDateStr(up.date);
 
-      const {src,onerr} = posterGuess(up.name);
-      p.src = src;
-      if (onerr) p.setAttribute('onerror', onerr);
+      const meta = findMeta(metaIdx, up);
+      if (meta && meta.poster){
+        p.src = meta.poster;
+        p.removeAttribute('onerror');
+      } else {
+        const num = eventNumber(up.name);
+        if (num){
+          p.src = `assets/images/posters/${num}.png`;
+          p.setAttribute('onerror', `this.onerror=null;this.src='assets/images/events/${slugify(up.name)}.jpg'`);
+        } else {
+          const base = `assets/images/events/${slugify(up.name)}`;
+          p.src = `${base}.jpg`;
+          p.setAttribute('onerror', `this.onerror=null;this.src='${base}.png'`);
+        }
+      }
 
       // Countdown
       const cd = document.getElementById('countdown');
@@ -574,21 +572,54 @@
       setInterval(tick, 1000);
     }
 
+    async function loadEvents(){
+      const rows = await fetchCSV(GID_EVENTS_ALL);
+      const map = new Map();
+      let order = 0;
+      for (const r of rows){
+        const evt = (r['Event'] || '').trim();
+        if(!evt) continue;
+        const parsed = parseEventTitle(evt);
+        const { name, date, dateStr } = parsed;
+        if(!name || !(date instanceof Date) || isNaN(date)) continue;
+
+        const key = `${name}||${dateStr}`;
+        if(!map.has(key)) map.set(key, { name, date, dateStr, raw: evt, fights: [] });
+
+        const a = (r['Fighter A'] || '').trim();
+        const b = (r['Fighter B'] || '').trim();
+        if (a || b){
+          map.get(key).fights.push({
+            order: ++order,
+            a: a || 'TBA',
+            b: b || 'TBA',
+            winner: (r['Winner']||'').trim(),
+            bonus: (r['bonus type']||r['Bonus']||'').trim(),
+            rating: (r['Match Rating']||r['Rating']||'').trim()
+          });
+        }
+      }
+      const events = Array.from(map.values())
+        .map(e => ({...e, fights: e.fights.sort((x,y)=>x.order - y.order)}))
+        .sort((a,b)=> a.date - b.date);
+      return events;
+    }
+
     (async function(){
       try{
-        const [events, vods, eventsJson] = await Promise.all([
+        const [events, vods, metaJson] = await Promise.all([
           loadEvents(),
-          fetch('assets/data/vods.json').then(r=>r.ok?r.json():({})).catch(()=>({})),
-          fetch('assets/data/events.json').then(r=>r.ok?r.json():({})).catch(()=>({}))
+          fetchJSON('assets/data/vods.json'),
+          fetchJSON('assets/data/events.json')
         ]);
+        const metaIdx = buildMetaIndex(metaJson || { events: [] });
 
         const now = new Date(); now.setSeconds(0,0);
         const future = events.filter(e => e.date && e.date >= now).sort((a,b)=> a.date - b.date);
         const upcoming = future[0] || null;
         const past = events.filter(e => e.date && e.date < now);
 
-        setHero(upcoming);
-        // Spotlight (main event is last fight listed)
+        setHero(upcoming, metaIdx);
         if (upcoming && upcoming.fights.length){
           document.getElementById('spotlightCard').style.display='';
           const main = upcoming.fights[upcoming.fights.length-1];
@@ -600,9 +631,9 @@
           document.getElementById('upFightList').innerHTML = upcoming.fights.map(fightRow).join('');
         }
 
-        renderArchive(past, vods || {});
+        renderArchive(past, vods || {}, metaIdx);
         wireFilter(past);
-        wireModal(events, eventsJson);
+        wireModal(events, metaIdx);
       }catch(err){
         console.error(err);
         document.getElementById('heroTitle').textContent = 'Failed to load events';
@@ -618,7 +649,6 @@
         const mount = document.getElementById("navbar");
         if (mount) mount.innerHTML = html;
 
-        // Mobile menu toggle
         const btn = document.getElementById("menuBtn");
         const menu = document.getElementById("primaryMenu");
         if (btn && menu){
@@ -628,7 +658,6 @@
           });
         }
 
-        // Active link
         const path = location.pathname.replace(/\/+$/,'');
         document.querySelectorAll("#primaryMenu a.item").forEach(a => {
           try {
