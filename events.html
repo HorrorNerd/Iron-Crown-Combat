@@ -18,149 +18,63 @@
 
   <style>
     :root{
-      --gold:#ffd700; --gold2:#e0b15a;
-      --bg:#0e0f13; --bg-2:#15171c; --surface:#13161b;
-      --border:#2a2f39; --muted:#b9c0cf; --text:#e7ebf0;
-      --shadow:0 16px 48px rgba(0,0,0,.35);
+      --gold:#ffd700; --bg:#0e0f13; --bg-2:#15171c; --surface:#13161b;
+      --border:#2a2f39; --muted:#b9c0cf; --text:#e7ebf0; --shadow:0 16px 48px rgba(0,0,0,.35);
     }
     body { background: var(--bg); color: var(--text); margin: 0; }
+
+    /* ensure logo-only nav looks consistent even if main.css differs */
+    .header{position:sticky;top:0;z-index:20;background:rgba(20,22,23,.96);border-bottom:1px solid var(--border);backdrop-filter:saturate(1.1) blur(5px);}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;}
+    .logo img.site-logo{height:40px;width:auto;display:block;border-radius:6px;border:1px solid var(--border)}
+    .menu{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+    .menu a{display:inline-flex;align-items:center;justify-content:center;padding:.45rem .7rem;border-radius:10px;border:1px solid transparent;color:var(--text);text-decoration:none}
+    .menu a[aria-current="page"], .menu a:hover{border-color:#e0b15a;}
 
     .pagehead { text-align:center; padding: 1rem 1rem .5rem;}
     .pagehead h1 { margin: .25rem 0; color: var(--gold); }
 
-    /* Featured: upcoming + most recent */
-    .featured-wrap{
-      max-width:1200px; margin:0 auto 1.25rem; padding: 0 1rem;
-      display:grid; gap:1rem; grid-template-columns: 1fr;
-    }
-    @media (min-width: 1100px){ .featured-wrap{ grid-template-columns: 1fr 1fr; } }
+    .featured-wrap{max-width:1200px;margin:0 auto 1.25rem;padding:0 1rem;display:grid;gap:1rem;grid-template-columns:1fr;}
+    @media (min-width:1100px){.featured-wrap{grid-template-columns:1fr 1fr;}}
 
-    .event-block{
-      background: var(--surface);
-      border:1px solid var(--border);
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow: var(--shadow);
-    }
-    .event-head{
-      background: linear-gradient(135deg, rgba(224,177,90,.15), rgba(255,215,0,.05));
-      padding: .9rem 1rem .75rem;
-      border-bottom:1px solid var(--border);
-      text-align:center;
-    }
-    .event-name{
-      font-weight:800; letter-spacing:.2px; color: var(--gold);
-      margin:0; line-height:1.1; font-size: clamp(1.05rem, 2.1vw, 1.35rem);
-      text-transform:uppercase;
-    }
-    .event-date{ margin:.25rem 0 0; color: var(--muted); font-size:.95rem; }
+    .event-block{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+    .event-head{background:linear-gradient(135deg, rgba(224,177,90,.15), rgba(255,215,0,.05));padding:.9rem 1rem .75rem;border-bottom:1px solid var(--border);text-align:center}
+    .event-name{font-weight:800;letter-spacing:.2px;color:var(--gold);margin:0;line-height:1.1;font-size:clamp(1.05rem,2.1vw,1.35rem);text-transform:uppercase}
+    .event-date{margin:.25rem 0 0;color:var(--muted);font-size:.95rem}
 
-    /* Poster slots */
-    .event-poster{
-      width:100%;
-      max-height:360px;
-      object-fit:cover;
-      border-top:1px solid var(--border);
-      border-bottom:1px solid var(--border);
-      display:none;
-    }
-    .archive-poster{
-      width:100%;
-      max-height:280px;
-      object-fit:cover;
-      border:1px solid var(--border);
-      border-radius:12px;
-      display:block;
-      margin:.8rem 0;
-    }
+    /* Posters */
+    .event-poster{width:100%;max-height:360px;object-fit:cover;border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:none}
+    .archive-poster{width:100%;max-height:280px;object-fit:cover;border:1px solid var(--border);border-radius:12px;display:block;margin:.8rem 0}
 
-    /* ===== Single-column fight list with bigger thumbs ===== */
-    .fight-grid{
-      display:flex;
-      flex-direction:column;
-      gap:1rem;
-      padding:1rem;
-    }
-    .fight{
-      display:grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items:center;
-      gap:1rem;
-      background: var(--bg-2);
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:1rem;
-      min-height:220px;
-      box-shadow: var(--shadow);
-      position:relative;
-      overflow:hidden;
-    }
-    .headshot{
-      position:relative;
-      height:220px;
-      border-radius:10px;
-      overflow:hidden;
-      border:1px solid var(--border);
-      background:#0b0c10;
-      display:flex; align-items:flex-end; justify-content:center;
-    }
-    .headshot img{ width:100%; height:100%; object-fit:cover; display:block; }
-    .name-overlay{
-      position:absolute; left:0; right:0; bottom:0;
-      padding:.6rem .8rem;
-      background:linear-gradient(180deg,transparent,rgba(0,0,0,.75) 40%,rgba(0,0,0,.92));
-      color:#fff; font-weight:800; text-align:center;
-      font-size:1.05rem; text-shadow:0 2px 8px rgba(0,0,0,.9);
-      letter-spacing:.2px;
-    }
-    .vs{
-      display:flex; align-items:center; justify-content:center;
-      width: 72px; height:72px; border-radius: 50%;
-      border:1px solid var(--border);
-      background: radial-gradient(ellipse at center, rgba(255,215,0,.22), rgba(224,177,90,.1) 60%, transparent 100%);
-      color: var(--gold);
-      font-weight:900; font-size: 1.25rem; text-shadow:0 1px 10px rgba(255,215,0,.3);
-      box-shadow: inset 0 0 20px rgba(255,215,0,.1);
-      user-select:none;
-    }
+    /* fight list */
+    .fight-grid{display:flex;flex-direction:column;gap:1rem;padding:1rem}
+    .fight{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem;background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem;min-height:220px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .headshot{position:relative;height:220px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#0b0c10;display:flex;align-items:flex-end;justify-content:center}
+    .headshot img{width:100%;height:100%;object-fit:cover;display:block}
+    .name-overlay{position:absolute;left:0;right:0;bottom:0;padding:.6rem .8rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.75) 40%,rgba(0,0,0,.92));color:#fff;font-weight:800;text-align:center;font-size:1.05rem;text-shadow:0 2px 8px rgba(0,0,0,.9);letter-spacing:.2px}
+    .vs{display:flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:50%;border:1px solid var(--border);background:radial-gradient(ellipse at center, rgba(255,215,0,.22), rgba(224,177,90,.1) 60%, transparent 100%);color:var(--gold);font-weight:900;font-size:1.25rem;user-select:none}
+    .name-overlay.winner{color:#5cff9d;text-shadow:0 0 8px rgba(92,255,157,.65),0 2px 8px rgba(0,0,0,.9)}
+    .fight.win-left .headshot:first-child,.fight.win-right .headshot:last-child{outline:3px solid rgba(0,190,100,.9);box-shadow:0 0 0 3px rgba(0,190,100,.28),0 10px 30px rgba(0,0,0,.45)}
+    .fight.win-left .headshot:first-child::after,.fight.win-right .headshot:last-child::after{content:"✓";position:absolute;top:.5rem;left:.5rem;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;color:#fff;background:rgba(0,190,100,.9);box-shadow:0 2px 8px rgba(0,0,0,.5)}
 
-    /* Archive accordion */
-    .accordion{ max-width:1200px; margin: 1rem auto 2rem; padding: 0 1rem; }
-    .acc-item{ border:1px solid var(--border); border-radius:14px; overflow:hidden; background:var(--surface); margin:.6rem 0; box-shadow: var(--shadow); }
-    .acc-btn{
-      width:100%; text-align:left; padding:.9rem 1rem;
-      background:linear-gradient(135deg, rgba(224,177,90,.15), rgba(255,215,0,.05));
-      color:var(--gold); font-weight:800; letter-spacing:.25px;
-      border:0; border-bottom:1px solid var(--border); cursor:pointer;
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .acc-btn small{ color: var(--muted); font-weight:600; }
-    .acc-body{ display:none; }
-    .acc-body.open{ display:block; }
-    .acc-inner{ padding: 1rem; }
-
-    .muted{ color: var(--muted); }
-    .empty{ padding:1rem; text-align:center; color:var(--muted); }
-
-    /* ribbons (winner/bonus/rating) & winner highlights */
-    .name-overlay.winner { color:#5cff9d; text-shadow: 0 0 8px rgba(92,255,157,.65), 0 2px 8px rgba(0,0,0,.9); }
-    .fight.win-left  .headshot:first-child{ outline:3px solid rgba(0,190,100,.9); box-shadow:0 0 0 3px rgba(0,190,100,.28), 0 10px 30px rgba(0,0,0,.45); }
-    .fight.win-right .headshot:last-child{  outline:3px solid rgba(0,190,100,.9); box-shadow:0 0 0 3px rgba(0,190,100,.28), 0 10px 30px rgba(0,0,0,.45); }
-    .fight.win-left  .headshot:first-child::after,
-    .fight.win-right .headshot:last-child::after{
-      content:"✓"; position:absolute; top:.5rem; left:.5rem; width:26px; height:26px; border-radius:50%;
-      display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem;
-      color:#fff; background:rgba(0, 190, 100, .9); box-shadow:0 2px 8px rgba(0,0,0,.5);
-    }
+    /* archive accordion */
+    .accordion{max-width:1200px;margin:1rem auto 2rem;padding:0 1rem}
+    .acc-item{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface);margin:.6rem 0;box-shadow:var(--shadow)}
+    .acc-btn{width:100%;text-align:left;padding:.9rem 1rem;background:linear-gradient(135deg, rgba(224,177,90,.15), rgba(255,215,0,.05));color:var(--gold);font-weight:800;letter-spacing:.25px;border:0;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+    .acc-btn small{color:var(--muted);font-weight:600}
+    .acc-body{display:none}
+    .acc-body.open{display:block}
+    .acc-inner{padding:1rem}
+    .muted{color:var(--muted)}
+    .empty{padding:1rem;text-align:center;color:var(--muted)}
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header class="header">
-    <div class="container nav" data-nav>
+    <div class="container nav">
+      <!-- logo only -->
       <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
-        <img src="assets/img/favicon.png" alt="ICC" width="28" height="28" style="border-radius:6px;border:1px solid var(--border)" />
-        <span>Iron Crown Combat</span>
+        <img class="site-logo" src="assets/images/logos/icc-logo.png" alt="ICC" />
       </a>
       <nav class="menu" aria-label="Primary">
         <a href="index.html">Home</a>
@@ -181,17 +95,13 @@
     <p class="muted">Upcoming, latest, and the full archive.</p>
   </div>
 
-  <!-- Featured: Upcoming + Last -->
   <section id="featured" class="featured-wrap">
     <div class="event-block" id="upcomingBlock">
       <div class="event-head">
         <h2 class="event-name" id="upName">Upcoming Event</h2>
         <div class="event-date" id="upDate">—</div>
       </div>
-
-      <!-- Poster slot -->
       <img id="upPoster" class="event-poster" alt="Event poster" loading="lazy" />
-
       <div class="fight-grid" id="upFights"><div class="empty">Loading…</div></div>
     </div>
 
@@ -200,15 +110,11 @@
         <h2 class="event-name" id="lastName">Most Recent Event</h2>
         <div class="event-date" id="lastDate">—</div>
       </div>
-
-      <!-- Poster slot -->
       <img id="lastPoster" class="event-poster" alt="Event poster" loading="lazy" />
-
       <div class="fight-grid" id="lastFights"><div class="empty">Loading…</div></div>
     </div>
   </section>
 
-  <!-- Archive / Accordion -->
   <section class="accordion" id="archive"></section>
 
   <footer class="footer">
@@ -218,14 +124,14 @@
   </footer>
 
   <script>
-    // ====== CONFIG (single-tab setup) ======
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    // ====== CONFIG ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
-    const GID_EVENTS_ALL = '676906080'; // one tab with everything
+    const GID_EVENTS_ALL = '676906080';
 
-    const headshotPath = (name) => `assets/images/fighters/headshots/${slugify(name)}.png`;
-
-    // CSV helpers
     const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+
     function parseCSV(text){
       const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length);
       if(!lines.length) return [];
@@ -243,9 +149,12 @@
       const headers = rows[0].map(h=>h.trim());
       return rows.slice(1).map(r=>{ const o={}; headers.forEach((h,i)=>o[h]=(r[i]||'').trim()); return o; });
     }
+
     const slugify = s => s.toLowerCase()
       .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
       .replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+
+    function headshotPath(name){ return `assets/images/fighters/headshots/${slugify(name)}.png`; }
 
     async function fetchCSV(gid){
       const res = await fetch(csvUrl(gid), { cache:'no-store' });
@@ -253,16 +162,16 @@
       return parseCSV(await res.text());
     }
 
-    // Parse "Crucible 01(05-26-2025)"
+    // Parse "Crucible 18(09-14-2025)" — keep the stable parser that worked earlier
     function parseEventTitle(s){
-      const m = /^(.+?)\s*\(\s*([^)]+)\s*\)\s*$/.exec(s || '');
+      const m = /^(.+?)\s*\(\s*(\d{2})-(\d{2})-(\d{4})\s*\)\s*$/.exec(s || '');
       if(!m) return { name: s?.trim() || 'Event', date: null, dateStr: '' };
-      const [, rawName, rawDate] = m;
-      const date = new Date(rawDate);
-      return { name: rawName.trim(), date, dateStr: isNaN(date) ? '' : date.toISOString().slice(0,10) };
+      const [, rawName, mm, dd, yyyy] = m;
+      const date = new Date(`${yyyy}-${mm}-${dd}T12:00:00`); // noon to avoid TZ rollover
+      return { name: rawName.trim(), date, dateStr: `${yyyy}-${mm}-${dd}` };
     }
 
-    // ===== Posters =====
+    // Posters
     function eventNumberFromName(name){
       const m = /crucible\s*(\d+)/i.exec(name || '');
       return m ? m[1] : null;
@@ -271,29 +180,27 @@
       const num = eventNumberFromName(ev.name);
       return num ? `assets/images/poster/${num}.png` : null;
     }
-    function setPoster(imgId, src){
-      const el = document.getElementById(imgId);
-      if (!el) return;
-      if (!src){ el.style.display='none'; el.removeAttribute('src'); return; }
+    function setPoster(id, src){
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(!src){ el.style.display='none'; el.removeAttribute('src'); return; }
       el.src = src;
       el.style.display = '';
-      el.loading = 'lazy';
+      el.onload = () => { el.style.display = ''; };
       el.onerror = () => { el.style.display='none'; };
     }
 
-    // Load + model
     async function loadEvents(){
       const rows = await fetchCSV(GID_EVENTS_ALL);
-      // Headers: Tournament | Event | Fighter A | Fighter B | Winner | Match Rating | bonus type
-      const map = new Map();
-
+      const map = new Map(); // key: name||dateStr
       let order = 0;
+
       for (const r of rows){
         const evt = (r['Event'] || '').trim();
         if(!evt) continue;
 
         const { name, date, dateStr } = parseEventTitle(evt);
-        if(!name) continue;
+        if(!name || !(date instanceof Date) || isNaN(date)) continue;
 
         const key = `${name}||${dateStr}`;
         if(!map.has(key)) map.set(key, { name, date, dateStr, fights: [] });
@@ -312,19 +219,14 @@
         }
       }
 
-      const events = Array.from(map.values())
-        .filter(e => e.name && e.date instanceof Date && !isNaN(e.date))
+      return Array.from(map.values())
         .map(e => ({...e, fights: e.fights.sort((x,y)=>x.order - y.order)}))
         .sort((a,b)=> a.date - b.date);
-
-      return events;
     }
 
-    // Render one fight row
     function fightRow(f){
       const winnerA = f.winner && f.winner === f.a;
       const winnerB = f.winner && f.winner === f.b;
-
       return `
         <div class="fight ${winnerA ? 'win-left' : ''} ${winnerB ? 'win-right' : ''}">
           <div class="headshot">
@@ -336,11 +238,9 @@
             <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
             <div class="name-overlay ${winnerB ? 'winner' : ''}">${f.b}</div>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
-    // Fill a featured block
     function fillEvent(nameId, dateId, fightsId, ev, posterId){
       document.getElementById(nameId).textContent = ev.name;
       document.getElementById(dateId).textContent =
@@ -348,14 +248,12 @@
       document.getElementById(fightsId).innerHTML =
         ev.fights.length ? ev.fights.map(fightRow).join('') : `<div class="empty">Card TBA</div>`;
 
-      // poster
-      const poster = posterPathForEvent(ev);
-      setPoster(posterId, poster);
+      setPoster(posterId, posterPathForEvent(ev));
     }
 
     function renderFeatured(events){
       const today = new Date(); today.setHours(0,0,0,0);
-      const upcoming = events.find(e => e.date >= today);
+      const upcoming = events.find(e => e.date >= today) || null;
       const last = events.filter(e => e.date < today).slice(-1)[0] || null;
 
       if (upcoming){
@@ -410,7 +308,6 @@
         `;
       }).join('');
 
-      // accordion toggle
       container.addEventListener('click', (e)=>{
         const btn = e.target.closest('.acc-btn');
         if(!btn) return;
@@ -431,10 +328,9 @@
         document.getElementById('featured').insertAdjacentHTML('afterend',
           `<div class="empty" style="max-width:1200px;margin:1rem auto;padding:0 1rem;">
              Failed to load events. Confirm the sheet is public and the tab has columns:
-             <b>Event</b>, <b>Fighter A</b>, <b>Fighter B</b> (e.g., Event "Crucible 01(05-26-2025)"). Also ensure posters live at <code>assets/images/poster/&lt;number&gt;.png</code>.
+             <b>Event</b>, <b>Fighter A</b>, <b>Fighter B</b> (e.g., Event "Crucible 18(09-14-2025)"). Also ensure posters live at <code>assets/images/poster/&lt;number&gt;.png</code>.
            </div>`);
       }
-      document.getElementById('yr').textContent = new Date().getFullYear();
     })();
   </script>
 </body>
