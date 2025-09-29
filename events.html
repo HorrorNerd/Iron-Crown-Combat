@@ -176,7 +176,6 @@
     // ====== CONFIG ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_EVENTS_ALL = '676906080';
-    const VODS_URL = 'assets/data/vods.json'; // optional
 
     const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
 
@@ -213,23 +212,22 @@
       const mParens = /\(([^)]+)\)/.exec(raw);
       let date = null, dateStr = '';
       if (mParens){
-        const inside = mParens[1].trim();
-        const parts = inside.replace(/[,]/g,'').trim();
-        if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(parts)){
-          const [mm,dd,yyyy] = parts.split(/[-/]/);
+        const inside = mParens[1].trim().replace(/[,]/g,'');
+        if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(inside)){
+          const [mm,dd,yyyy] = inside.split(/[-/]/);
           date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
           dateStr = `${yyyy}-${mm}-${dd}`;
-        } else if (/^\d{4}-\d{2}-\d{2}$/.test(parts)){
-          const [yyyy,mm,dd] = parts.split('-');
+        } else if (/^\d{4}-\d{2}-\d{2}$/.test(inside)){
+          const [yyyy,mm,dd] = inside.split('-');
           date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
           dateStr = `${yyyy}-${mm}-${dd}`;
         } else {
-          const tryDate = new Date(parts + ' 20:00:00');
-          if (!isNaN(tryDate)) {
+          const tryDate = new Date(inside + ' 20:00:00');
+          if (!isNaN(tryDate)){
             date = tryDate;
-            const yyyy = tryDate.getFullYear();
-            const mm = String(tryDate.getMonth()+1).padStart(2,'0');
-            const dd = String(tryDate.getDate()).padStart(2,'0');
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth()+1).padStart(2,'0');
+            const dd = String(date.getDate()).padStart(2,'0');
             dateStr = `${yyyy}-${mm}-${dd}`;
           }
         }
@@ -237,11 +235,11 @@
       if (!date){
         const mNums = /(\d{4})[-/](\d{2})[-/](\d{2})|(\d{2})[-/](\d{2})[-/](\d{4})/.exec(raw);
         if (mNums){
-          if (mNums[1]){ // YYYY-MM-DD
+          if (mNums[1]){
             const [yyyy,mm,dd]=[mNums[1],mNums[2],mNums[3]];
             date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
             dateStr = `${yyyy}-${mm}-${dd}`;
-          } else { // MM-DD-YYYY
+          } else {
             const [mm,dd,yyyy]=[mNums[4],mNums[5],mNums[6]];
             date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
             dateStr = `${yyyy}-${mm}-${dd}`;
@@ -257,7 +255,6 @@
     }
 
     async function fetchCSV(gid){ const r = await fetch(csvUrl(gid), {cache:'no-store'}); if(!r.ok) throw new Error('CSV '+gid); return parseCSV(await r.text()); }
-    async function fetchJSON(url){ try{ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) return null; return await r.json(); } catch { return null; } }
 
     async function loadEvents(){
       const rows = await fetchCSV(GID_EVENTS_ALL);
@@ -293,24 +290,52 @@
       return events;
     }
 
-    /* ===== Posters & Thumbs =====
-       We extract the Crucible number from the event name.
-       Posters:  assets/images/posters/<N>.png
-       Thumbs:   assets/images/thumbs/<N>.png
-    */
+    // ===== Shared image fallback =====
+    window.__imgFallback = function(img){
+      const list = (img.getAttribute('data-fallback') || '').split('|').filter(Boolean);
+      if (!list.length){
+        img.onerror = null;
+        img.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Image coming soon'}));
+        return;
+      }
+      const next = list.shift();
+      img.setAttribute('data-fallback', list.join('|'));
+      img.src = next;
+    };
+    function imgHTMLWithFallback(srcs, alt){
+      const [first, ...rest] = srcs;
+      const fallback = rest.join('|');
+      return `<img src="${first}" alt="${alt}" data-fallback="${fallback}" onerror="window.__imgFallback && __imgFallback(this)">`;
+    }
+
+    // ===== Poster/Thumb candidates =====
     function eventNumber(name){
       const m = /crucible\s*(\d+)/i.exec(name || '');
       return m ? m[1] : null;
     }
-    function posterPath(ev){
-      const n = eventNumber(ev.name);
-      return n ? `assets/images/posters/${n}.png` : null;
+    function numVariants(nStr){
+      const noZero = String(parseInt(nStr, 10)); // "01" -> "1"
+      // Keep given string first (preserves your sheet number like "01")
+      return Array.from(new Set([nStr, noZero]));
     }
-    function thumbPath(ev){
-      const n = eventNumber(ev.name);
-      return n ? `assets/images/thumbs/${n}.png` : null;
+    function posterCandidates(name){
+      const n = eventNumber(name);
+      if (!n) return [];
+      const vars = numVariants(n);
+      const pngs = vars.map(v => `assets/images/posters/${v}.png`);
+      const jpgs = vars.map(v => `assets/images/posters/${v}.jpg`);
+      return [...pngs, ...jpgs];
+    }
+    function thumbCandidates(name){
+      const n = eventNumber(name);
+      if (!n) return [];
+      const vars = numVariants(n);
+      const pngs = vars.map(v => `assets/images/thumbs/${v}.png`);
+      const jpgs = vars.map(v => `assets/images/thumbs/${v}.jpg`);
+      return [...pngs, ...jpgs];
     }
 
+    // ===== Hero / Spotlight =====
     function setHero(up){
       const t = document.getElementById('heroTitle');
       const d = document.getElementById('heroDate');
@@ -325,28 +350,28 @@
       t.textContent = up.name;
       d.textContent = toDateStr(up.date);
 
-      const poster = posterPath(up);
-      if (poster){
-        p.src = poster;
-      }else{
+      const candidates = posterCandidates(up.name);
+      if (candidates.length){
+        const html = imgHTMLWithFallback(candidates, 'Event poster');
+        const wrap = document.createElement('div'); wrap.innerHTML = html;
+        const newImg = wrap.firstChild;
+        p.replaceWith(newImg);
+        newImg.id = 'heroPoster';
+      } else {
         p.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Poster coming soon'}));
       }
 
-      // Countdown
+      // countdown
       const cd = document.getElementById('countdown');
       cd.style.display = '';
       const dEl = document.getElementById('d');
       const hEl = document.getElementById('h');
       const mEl = document.getElementById('m');
       const sEl = document.getElementById('s');
-
       function tick(){
         const now = new Date();
         const diff = up.date - now;
-        if (diff <= 0){
-          dEl.textContent = '0'; hEl.textContent = '0'; mEl.textContent = '0'; sEl.textContent = '0';
-          return;
-        }
+        if (diff <= 0){ dEl.textContent=hEl.textContent=mEl.textContent=sEl.textContent='0'; return; }
         const sec = Math.floor(diff/1000);
         const days = Math.floor(sec/86400);
         const hours = Math.floor((sec%86400)/3600);
@@ -357,8 +382,7 @@
         mEl.textContent = String(mins).padStart(2,'0');
         sEl.textContent = String(secs).padStart(2,'0');
       }
-      tick();
-      setInterval(tick, 1000);
+      tick(); setInterval(tick, 1000);
     }
 
     function fightRow(f){
@@ -383,7 +407,6 @@
       const card = document.getElementById('spotlightCard');
       if (!up || !up.fights.length){ card.style.display='none'; return; }
       card.style.display='';
-      // Assume last fight on the sheet order is Main Event
       const main = up.fights[up.fights.length - 1];
       document.getElementById('meAImg').src = headshotPath(main.a);
       document.getElementById('meBImg').src = headshotPath(main.b);
@@ -424,20 +447,21 @@
       const avg = averageRating(ev.fights);
       const awards = awardsDetail(ev.fights);
 
-      // Thumb with fallback to poster
-      const thumb = thumbPath(ev);
-      const poster = posterPath(ev);
+      // prefer thumbnail, then poster, then placeholder
+      const thumbList  = thumbCandidates(ev.name);
+      const posterList = posterCandidates(ev.name);
+      const imgList    = [...thumbList, ...posterList];
 
-      const imgHTML = thumb
-        ? `<img src="${thumb}" alt="${ev.name} cover" onerror="this.onerror=null; this.src='${poster || ''}'">`
-        : (poster ? `<img src="${poster}" alt="${ev.name} cover">` : '');
+      const imgHTML = imgList.length
+        ? imgHTMLWithFallback(imgList, `${ev.name} cover`)
+        : '';
 
       const key = `${ev.name}||${ev.dateStr}`;
 
       return `
         <article class="ev-card" data-key="${key}" tabindex="0">
           <div class="ev-cover">
-            ${imgHTML}
+            ${imgHTML || '<div class="ph" style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)">No image</div>'}
           </div>
           <div class="ev-body">
             <div class="ev-title">${ev.name}</div>
@@ -508,7 +532,6 @@
         const card = e.target.closest('.ev-card');
         if (!card) return;
 
-        // If clicked the explicit button or anywhere on card body/cover, toggle details
         if (e.target.matches('[data-card-toggle]') || e.target.closest('.ev-body') || e.target.closest('.ev-cover')) {
           const key = card.getAttribute('data-key');
           const ev = events.find(x => `${x.name}||${x.dateStr}` === key);
@@ -523,7 +546,6 @@
         }
       });
 
-      // Keyboard: Enter toggles when card focused
       host.addEventListener('keydown', (e)=>{
         if (e.key === 'Enter'){
           const card = e.target.closest('.ev-card');
@@ -536,19 +558,17 @@
 
     (async function(){
       try{
-        const [events, vods] = await Promise.all([loadEvents(), fetchJSON('assets/data/vods.json')]);
+        const events = await loadEvents();
 
-        // Upcoming: earliest future event by actual current time
-        const now = new Date();
-        now.setSeconds(0,0);
+        // upcoming = earliest future event from *now*
+        const now = new Date(); now.setSeconds(0,0);
         const future = events.filter(e => e.date && e.date >= now).sort((a,b)=> a.date - b.date);
         const upcoming = future[0] || null;
-
         const past = events.filter(e => e.date && e.date < now);
 
         setHero(upcoming);
         renderSpotlight(upcoming);
-        renderArchive(past, vods || {});
+        renderArchive(past, {}); // (add a VODs map later if you like)
         wireFilter(past);
         wireCardToggles(events);
       }catch(err){
