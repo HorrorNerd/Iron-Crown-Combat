@@ -210,23 +210,20 @@
     // Robust date parsing from Event title
     function parseEventTitle(s){
       const raw = (s||'').trim();
-      // Try to extract a (...) block
       const mParens = /\(([^)]+)\)/.exec(raw);
       let date = null, dateStr = '';
       if (mParens){
         const inside = mParens[1].trim();
-        // Accept MM-DD-YYYY, MM/DD/YYYY, YYYY-MM-DD, Month DD, YYYY
         const parts = inside.replace(/[,]/g,'').trim();
-        if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(parts)){ // 09-30-2025 or 09/30/2025
+        if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(parts)){
           const [mm,dd,yyyy] = parts.split(/[-/]/);
           date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
           dateStr = `${yyyy}-${mm}-${dd}`;
-        } else if (/^\d{4}-\d{2}-\d{2}$/.test(parts)){ // 2025-09-30
+        } else if (/^\d{4}-\d{2}-\d{2}$/.test(parts)){
           const [yyyy,mm,dd] = parts.split('-');
           date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
           dateStr = `${yyyy}-${mm}-${dd}`;
         } else {
-          // Try Date.parse for things like "September 30 2025"
           const tryDate = new Date(parts + ' 20:00:00');
           if (!isNaN(tryDate)) {
             date = tryDate;
@@ -237,7 +234,6 @@
           }
         }
       }
-      // If still no date, try to find digits anywhere
       if (!date){
         const mNums = /(\d{4})[-/](\d{2})[-/](\d{2})|(\d{2})[-/](\d{2})[-/](\d{4})/.exec(raw);
         if (mNums){
@@ -297,9 +293,22 @@
       return events;
     }
 
-    function posterGuess(name){
-      const base = `assets/images/events/${slugify(name)}`;
-      return { primary: `${base}.jpg`, fallback: `${base}.png` };
+    /* ===== Posters & Thumbs =====
+       We extract the Crucible number from the event name.
+       Posters:  assets/images/posters/<N>.png
+       Thumbs:   assets/images/thumbs/<N>.png
+    */
+    function eventNumber(name){
+      const m = /crucible\s*(\d+)/i.exec(name || '');
+      return m ? m[1] : null;
+    }
+    function posterPath(ev){
+      const n = eventNumber(ev.name);
+      return n ? `assets/images/posters/${n}.png` : null;
+    }
+    function thumbPath(ev){
+      const n = eventNumber(ev.name);
+      return n ? `assets/images/thumbs/${n}.png` : null;
     }
 
     function setHero(up){
@@ -315,8 +324,13 @@
       }
       t.textContent = up.name;
       d.textContent = toDateStr(up.date);
-      const {primary} = posterGuess(up.name);
-      p.src = primary;
+
+      const poster = posterPath(up);
+      if (poster){
+        p.src = poster;
+      }else{
+        p.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Poster coming soon'}));
+      }
 
       // Countdown
       const cd = document.getElementById('countdown');
@@ -376,7 +390,6 @@
       document.getElementById('meAName').textContent = main.a;
       document.getElementById('meBName').textContent = main.b;
       document.getElementById('meMeta').textContent = 'Three rounds · Five minutes · No judges · Ring only';
-      // Also list full card underneath
       document.getElementById('upFightList').innerHTML = up.fights.map(fightRow).join('');
     }
 
@@ -410,15 +423,21 @@
     function eventCard(ev, vodUrl){
       const avg = averageRating(ev.fights);
       const awards = awardsDetail(ev.fights);
-      const base = `assets/images/events/${slugify(ev.name)}`;
-      const cover = `${base}.jpg`;
-      const coverFallback = `${base}.png`;
+
+      // Thumb with fallback to poster
+      const thumb = thumbPath(ev);
+      const poster = posterPath(ev);
+
+      const imgHTML = thumb
+        ? `<img src="${thumb}" alt="${ev.name} cover" onerror="this.onerror=null; this.src='${poster || ''}'">`
+        : (poster ? `<img src="${poster}" alt="${ev.name} cover">` : '');
+
       const key = `${ev.name}||${ev.dateStr}`;
 
       return `
         <article class="ev-card" data-key="${key}" tabindex="0">
           <div class="ev-cover">
-            <img src="${cover}" alt="${ev.name} cover" onerror="this.onerror=null;this.src='${coverFallback}'">
+            ${imgHTML}
           </div>
           <div class="ev-body">
             <div class="ev-title">${ev.name}</div>
@@ -489,7 +508,7 @@
         const card = e.target.closest('.ev-card');
         if (!card) return;
 
-        // If clicked the explicit button or anywhere on card body, toggle details
+        // If clicked the explicit button or anywhere on card body/cover, toggle details
         if (e.target.matches('[data-card-toggle]') || e.target.closest('.ev-body') || e.target.closest('.ev-cover')) {
           const key = card.getAttribute('data-key');
           const ev = events.find(x => `${x.name}||${x.dateStr}` === key);
