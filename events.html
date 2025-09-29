@@ -23,7 +23,7 @@
     }
     body { background: var(--bg); color: var(--text); margin: 0; }
 
-    /* NAV (logo only) */
+    /* NAV */
     .header{position:sticky;top:0;z-index:20;background:rgba(20,22,23,.96);border-bottom:1px solid var(--border);backdrop-filter:saturate(1.1) blur(5px);}
     .nav{display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;}
     .logo img.site-logo{height:40px;width:auto;display:block;border-radius:6px;border:1px solid var(--border)}
@@ -34,13 +34,13 @@
     .pagehead { text-align:center; padding: 1rem 1rem .5rem;}
     .pagehead h1 { margin: .25rem 0; color: var(--gold); }
 
-    /* Toolbar w/ search */
+    /* Toolbar */
     .toolbar{max-width:1200px;margin:.25rem auto 1rem;padding:0 1rem;display:flex;gap:.6rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
     .search{display:flex;gap:.5rem;align-items:center;border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:.45rem .6rem;min-width:260px}
     .search input{all:unset;color:var(--text);width:240px}
     .chip{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--border);padding:.25rem .55rem;border-radius:999px;font-size:.9rem;background:var(--bg-2)}
 
-    /* Featured (Upcoming + Recent) */
+    /* Featured */
     .featured-wrap{max-width:1200px;margin:0 auto 1.25rem;padding:0 1rem;display:grid;gap:1rem;grid-template-columns:1fr}
     @media (min-width:1100px){.featured-wrap{grid-template-columns:1fr 1fr}}
 
@@ -52,17 +52,7 @@
     .event-meta{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;padding:.8rem 1rem}
     .event-meta .stat{border:1px solid var(--border);background:var(--bg-2);border-radius:10px;padding:.45rem .6rem}
 
-    /* Fight list (featured + modal) */
-    .fight-grid{display:flex;flex-direction:column;gap:1rem;padding:1rem}
-    .fight{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem;background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem;min-height:220px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-    .headshot{position:relative;height:220px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#0b0c10;display:flex;align-items:flex-end;justify-content:center}
-    .headshot img{width:100%;height:100%;object-fit:cover;display:block}
-    .name-overlay{position:absolute;left:0;right:0;bottom:0;padding:.6rem .8rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.75) 40%,rgba(0,0,0,.92));color:#fff;font-weight:800;text-align:center;font-size:1.05rem;text-shadow:0 2px 8px rgba(0,0,0,.9);letter-spacing:.2px}
-    .vs{display:flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:50%;border:1px solid var(--border);background:radial-gradient(ellipse at center, rgba(255,215,0,.22), rgba(224,177,90,.1) 60%, transparent 100%);color:var(--gold);font-weight:900;font-size:1.25rem;user-select:none}
-    .name-overlay.winner{color:#5cff9d;text-shadow:0 0 8px rgba(92,255,157,.65),0 2px 8px rgba(0,0,0,.9)}
-    .fight.win-left .headshot:first-child,.fight.win-right .headshot:last-child{outline:3px solid rgba(0,190,100,.9);box-shadow:0 0 0 3px rgba(0,190,100,.28),0 10px 30px rgba(0,0,0,.45)}
-
-    /* Archive grid */
+    /* Archive */
     .grid-wrap{max-width:1200px;margin:0 auto 2rem;padding:0 1rem}
     .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
     .card-ev{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer}
@@ -86,10 +76,8 @@
 <body>
   <header class="header">
     <div class="container nav">
-      <a class="logo" href="index.html" aria-label="Iron Crown Combat home">
-        <img class="site-logo" src="assets/images/logos/icc-logo.png" alt="ICC" />
-      </a>
-      <nav class="menu" aria-label="Primary">
+      <a class="logo" href="index.html"><img class="site-logo" src="assets/images/logos/icc-logo.png" alt="ICC" /></a>
+      <nav class="menu">
         <a href="index.html">Home</a>
         <a href="events.html" aria-current="page">Events</a>
         <a href="rankings.html">Rankings</a>
@@ -110,7 +98,7 @@
 
   <div class="toolbar">
     <div class="search">
-      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
       <input id="search" type="search" placeholder="Search events or fighters…" />
     </div>
     <span class="chip" id="countChip">0 events</span>
@@ -123,10 +111,8 @@
         <h2 class="event-name" id="upName">Upcoming Event</h2>
         <div class="event-date" id="upDate">—</div>
       </div>
-      <img id="upPoster" class="event-poster" alt="Event poster" loading="lazy" />
-      <div class="event-meta" id="upMeta">
-        <!-- Stats (matches count + awards map) -->
-      </div>
+      <img id="upPoster" class="event-poster" alt="Poster" />
+      <div class="event-meta" id="upMeta"></div>
       <div class="fight-grid" id="upFights"><div class="empty">Loading…</div></div>
     </div>
 
@@ -135,25 +121,23 @@
         <h2 class="event-name" id="lastName">Most Recent Event</h2>
         <div class="event-date" id="lastDate">—</div>
       </div>
-      <img id="lastPoster" class="event-poster" alt="Event poster" loading="lazy" />
+      <img id="lastPoster" class="event-poster" alt="Poster" />
       <div class="event-meta" id="lastMeta"></div>
       <div class="fight-grid" id="lastFights"><div class="empty">Loading…</div></div>
     </div>
   </section>
 
-  <!-- Archive cards -->
+  <!-- Archive -->
   <div class="grid-wrap">
-    <div id="cards" class="cards">
-      <div class="card-ev"><div class="body">Loading archive…</div></div>
-    </div>
+    <div id="cards" class="cards"></div>
   </div>
 
   <!-- Modal -->
   <div class="modal-backdrop" id="evModal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="evTitle">
+    <div class="modal">
       <header>
         <h2 id="evTitle">Event</h2>
-        <button class="close-btn" onclick="closeModal()" aria-label="Close">✕</button>
+        <button class="close-btn" onclick="closeModal()">✕</button>
       </header>
       <img id="evPoster" class="poster" alt="">
       <div class="content">
@@ -163,271 +147,86 @@
     </div>
   </div>
 
-  <footer class="footer">
-    <div class="container cols">
-      <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
-    </div>
-  </footer>
+  <footer class="footer"><div class="container cols"><small>© <span id="yr"></span> Iron Crown Combat</small></div></footer>
 
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
 
-    // ====== CONFIG ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_EVENTS_ALL = '676906080';
     const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
 
     function parseCSV(text){
-      const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length);
-      if(!lines.length) return [];
-      const rows = lines.map(line=>{
-        const out=[]; let cur='',q=false;
-        for(let i=0;i<line.length;i++){
-          const c=line[i], n=line[i+1];
-          if(c==='"'&&n==='"'){cur+='"'; i++; continue;}
-          if(c==='"'){q=!q; continue;}
-          if(c===','&&!q){ out.push(cur); cur=''; continue; }
-          cur+=c;
-        }
-        out.push(cur); return out;
+      const lines = text.split('\n').filter(l=>l.trim());
+      const headers = lines.shift().split(',').map(h=>h.trim());
+      return lines.map(line=>{
+        const vals=line.split(','); const o={}; headers.forEach((h,i)=>o[h]=vals[i]?vals[i].trim():''); return o;
       });
-      const headers = rows[0].map(h=>h.trim());
-      return rows.slice(1).map(r=>{ const o={}; headers.forEach((h,i)=>o[h]=(r[i]||'').trim()); return o; });
     }
 
-    const slugify = s => s.toLowerCase()
-      .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
-
-    const headshotPath = name => `assets/images/fighters/headshots/${slugify(name)}.png`;
-    const posterFor = ev => {
-      const m = /crucible\s*(\d+)/i.exec(ev.name || '');
-      return m ? `assets/images/poster/${m[1]}.png` : null;
-    };
-
-    async function fetchCSV(gid){
-      const res = await fetch(csvUrl(gid), { cache:'no-store' });
-      if(!res.ok) throw new Error(`CSV ${gid} ${res.status}`);
-      return parseCSV(await res.text());
-    }
+    const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+    const posterFor = ev => {const m=/crucible\s*(\d+)/i.exec(ev.name||'');return m?`assets/images/posters/${m[1]}.png`:null;}
+    const thumbFor = ev => {const m=/crucible\s*(\d+)/i.exec(ev.name||'');return m?`assets/images/thumbs/${m[1]}.png`:null;}
 
     function parseEventTitle(s){
-      const m = /^(.+?)\s*\(\s*(\d{2})-(\d{2})-(\d{4})\s*\)\s*$/.exec(s || '');
-      if(!m) return { name: s?.trim() || 'Event', date: null, dateStr: '' };
-      const [, rawName, mm, dd, yyyy] = m;
-      const date = new Date(`${yyyy}-${mm}-${dd}T12:00:00`);
-      return { name: rawName.trim(), date, dateStr: `${yyyy}-${mm}-${dd}` };
+      const m = /^(.+?)\((\d{2})-(\d{2})-(\d{4})\)$/.exec(s.trim());
+      if(!m) return {name:s.trim(),date:null};
+      const [, raw, mm,dd,yyyy]=m; return {name:raw.trim(),date:new Date(`${yyyy}-${mm}-${dd}`)};
     }
 
     function awardMapForEvent(fights){
-      // returns { 'Fight Of The Night': 'Name', 'KO Of The Night': 'Name', ... }
-      const map = {};
-      for(const f of fights){
-        const type = (f.bonus || '').trim();
-        const winner = (f.winner || '').trim();
-        if(!type || !winner || winner.toLowerCase()==='draw') continue;
-        // If multiple fights marked the same bonus, keep the highest rating
-        if(!map[type] || (+f.rating||0) > (map[type].rating||0)){
-          map[type] = { winner, rating: +f.rating||0 };
-        }
-      }
-      const out = {};
-      Object.keys(map).forEach(k => out[k] = map[k].winner);
-      return out;
+      const map={}; fights.forEach(f=>{if(f.bonus&&f.winner){map[f.bonus]=f.winner;}}); return map;
     }
 
     function fightRow(f){
-      const winnerA = f.winner && f.winner === f.a;
-      const winnerB = f.winner && f.winner === f.b;
-      return `
-        <div class="fight ${winnerA ? 'win-left' : ''} ${winnerB ? 'win-right' : ''}">
-          <div class="headshot">
-            <img src="${headshotPath(f.a)}" alt="${f.a}" onerror="this.style.opacity=.25">
-            <div class="name-overlay ${winnerA ? 'winner' : ''}">${f.a}</div>
-          </div>
-          <div class="vs">VS</div>
-          <div class="headshot">
-            <img src="${headshotPath(f.b)}" alt="${f.b}" onerror="this.style.opacity=.25">
-            <div class="name-overlay ${winnerB ? 'winner' : ''}">${f.b}</div>
-          </div>
-        </div>`;
+      const wa=f.winner===f.a, wb=f.winner===f.b;
+      return `<div class="fight ${wa?'win-left':''} ${wb?'win-right':''}">
+        <div class="headshot"><img src="assets/images/fighters/headshots/${slugify(f.a)}.png"><div class="name-overlay ${wa?'winner':''}">${f.a}</div></div>
+        <div class="vs">VS</div>
+        <div class="headshot"><img src="assets/images/fighters/headshots/${slugify(f.b)}.png"><div class="name-overlay ${wb?'winner':''}">${f.b}</div></div>
+      </div>`;
     }
 
-    function statMeta(containerId, ev){
-      const meta = document.getElementById(containerId);
-      const awards = awardMapForEvent(ev.fights);
-      const parts = [
-        `<span class="stat"><strong>${ev.fights.length}</strong> matches</span>`
-      ];
-      for(const key of Object.keys(awards)){
-        parts.push(`<span class="stat">${key}: <strong>${awards[key]}</strong></span>`);
-      }
-      meta.innerHTML = parts.join('');
+    function statMeta(id,ev){
+      const meta=document.getElementById(id);const awards=awardMapForEvent(ev.fights);let html=`<span class="stat"><b>${ev.fights.length}</b> matches</span>`;
+      for(const k in awards){html+=`<span class="stat">${k}: <b>${awards[k]}</b></span>`;} meta.innerHTML=html;
     }
 
     async function loadEvents(){
-      const rows = await fetchCSV(GID_EVENTS_ALL);
-      const map = new Map(); // key: name||dateStr
-      let order = 0;
-
-      for (const r of rows){
-        const evt = (r['Event'] || '').trim();
-        if(!evt) continue;
-
-        const { name, date, dateStr } = parseEventTitle(evt);
-        if(!name || !(date instanceof Date) || isNaN(date)) continue;
-
-        const key = `${name}||${dateStr}`;
-        if(!map.has(key)) map.set(key, { name, date, dateStr, fights: [] });
-
-        const a = (r['Fighter A'] || '').trim();
-        const b = (r['Fighter B'] || '').trim();
-        if (a || b){
-          map.get(key).fights.push({
-            order: ++order,
-            a: a || 'TBA',
-            b: b || 'TBA',
-            winner: (r['Winner']||'').trim(),
-            bonus: (r['bonus type']||'').trim(),
-            rating: (r['Match Rating']||'').trim()
-          });
-        }
-      }
-
-      return Array.from(map.values())
-        .map(e => ({...e, fights: e.fights.sort((x,y)=>x.order - y.order)}))
-        .sort((a,b)=> a.date - b.date);
+      const res=await fetch(csvUrl(GID_EVENTS_ALL));const rows=parseCSV(await res.text());const map=new Map();
+      let order=0;
+      rows.forEach(r=>{
+        const {name,date}=parseEventTitle(r['Event']); if(!name||!date) return;
+        if(!map.has(name+date)) map.set(name+date,{name,date,fights:[]});
+        map.get(name+date).fights.push({a:r['Fighter A'],b:r['Fighter B'],winner:r['Winner'],bonus:r['bonus type']});
+      });
+      return Array.from(map.values()).sort((a,b)=>a.date-b.date);
     }
 
-    function setPoster(imgEl, src){
-      if(!imgEl) return;
-      if(!src){ imgEl.style.display='none'; imgEl.removeAttribute('src'); return; }
-      imgEl.src = src; imgEl.style.display = '';
-      imgEl.onerror = () => imgEl.style.display='none';
-    }
-
-    function fillEventFeature(prefix, ev){
-      document.getElementById(prefix+'Name').textContent = ev.name;
-      document.getElementById(prefix+'Date').textContent =
-        ev.date.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
-      document.getElementById(prefix+'Fights').innerHTML =
-        ev.fights.length ? ev.fights.map(fightRow).join('') : `<div class="empty">Card TBA</div>`;
-      statMeta(prefix+'Meta', ev);
-      setPoster(document.getElementById(prefix+'Poster'), posterFor(ev));
-    }
-
-    function renderFeatured(events){
-      const today = new Date(); today.setHours(0,0,0,0);
-      const upcoming = events.find(e => e.date >= today) || null;
-      const last = events.filter(e => e.date < today).slice(-1)[0] || null;
-
-      if (upcoming){
-        fillEventFeature('up', upcoming);
-      } else {
-        document.getElementById('upName').textContent = 'No Upcoming Event';
-        document.getElementById('upDate').textContent = '';
-        document.getElementById('upFights').innerHTML = `<div class="empty">Stay tuned for the next show.</div>`;
-        document.getElementById('upMeta').innerHTML = '';
-        setPoster(document.getElementById('upPoster'), null);
-      }
-
-      if (last){
-        fillEventFeature('last', last);
-      } else {
-        document.getElementById('lastName').textContent = 'No Recent Event';
-        document.getElementById('lastDate').textContent = '';
-        document.getElementById('lastFights').innerHTML = `<div class="empty">Once an event runs, it will appear here.</div>`;
-        document.getElementById('lastMeta').innerHTML = '';
-        setPoster(document.getElementById('lastPoster'), null);
-      }
-    }
-
-    // Archive cards + search + modal
-    const cardsEl = document.getElementById('cards');
-    const searchEl = document.getElementById('search');
-    const countChip = document.getElementById('countChip');
-
-    function makeCard(ev, idx){
-      const poster = posterFor(ev);
-      const awards = awardMapForEvent(ev.fights);
-      const dStr = ev.date.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
-      const awardsLine = Object.keys(awards).map(k => `${k.split(' ')[0]}: <b>${awards[k]}</b>`).join(' · ');
-      return `
-        <article class="card-ev" data-idx="${idx}">
-          ${poster ? `<img src="${poster}" alt="${ev.name} poster" loading="lazy" onerror="this.remove()">` : ''}
-          <div class="body">
-            <h3>${ev.name}</h3>
-            <div class="muted">${dStr}</div>
-            <div class="muted" style="margin-top:.35rem">${ev.fights.length} matches${awardsLine ? ' · '+awardsLine : ''}</div>
-          </div>
-        </article>
-      `;
-    }
-
-    function renderCards(list){
-      if(!list.length){ cardsEl.innerHTML = `<div class="empty">No matching events.</div>`; countChip.textContent = `0 events`; return; }
-      cardsEl.innerHTML = list.map((ev,i)=>makeCard(ev, ev._idx)).join('');
-      countChip.textContent = `${list.length} event${list.length===1?'':'s'}`;
-    }
+    function setPoster(el,src){if(!src){el.style.display='none';return;} el.src=src;el.style.display='';}
 
     function openModal(ev){
-      const m = document.getElementById('evModal');
-      document.getElementById('evTitle').textContent = ev.name;
-      setPoster(document.getElementById('evPoster'), posterFor(ev));
-      statMeta('evMeta', ev);
-      document.getElementById('evFights').innerHTML =
-        ev.fights.length ? ev.fights.map(fightRow).join('') : `<div class="empty">Card TBA</div>`;
-      m.classList.add('show'); m.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+      document.getElementById('evTitle').textContent=ev.name;
+      setPoster(document.getElementById('evPoster'),posterFor(ev));
+      statMeta('evMeta',ev);
+      document.getElementById('evFights').innerHTML=ev.fights.map(fightRow).join('');
+      const m=document.getElementById('evModal');m.classList.add('show');m.setAttribute('aria-hidden','false');
     }
-    function closeModal(){ const m = document.getElementById('evModal'); m.classList.remove('show'); m.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
-    window.closeModal = closeModal;
-    document.getElementById('evModal').addEventListener('click', e=>{ if(e.target.id==='evModal') closeModal(); });
-    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    function closeModal(){document.getElementById('evModal').classList.remove('show');}
 
-    (async function(){
-      try{
-        const events = await loadEvents();
-        // keep original order index to access from filtered results
-        events.forEach((e,i)=>e._idx=i);
+    (async()=>{
+      const events=await loadEvents(); const today=new Date(); today.setHours(0,0,0,0);
+      const upcoming=events.find(e=>e.date>=today); const last=events.filter(e=>e.date<today).slice(-1)[0];
+      if(upcoming){document.getElementById('upName').textContent=upcoming.name;document.getElementById('upDate').textContent=upcoming.date.toDateString();setPoster(document.getElementById('upPoster'),posterFor(upcoming));statMeta('upMeta',upcoming);document.getElementById('upFights').innerHTML=upcoming.fights.map(fightRow).join('');}
+      if(last){document.getElementById('lastName').textContent=last.name;document.getElementById('lastDate').textContent=last.date.toDateString();setPoster(document.getElementById('lastPoster'),posterFor(last));statMeta('lastMeta',last);document.getElementById('lastFights').innerHTML=last.fights.map(fightRow).join('');}
 
-        renderFeatured(events);
-
-        // initial archive = all past (newest first)
-        const today = new Date(); today.setHours(0,0,0,0);
-        const archive = events.filter(e=>e.date < today).sort((a,b)=> b.date - a.date);
-        renderCards(archive);
-
-        // click -> modal
-        cardsEl.addEventListener('click', e=>{
-          const art = e.target.closest('.card-ev'); if(!art) return;
-          const idx = +art.getAttribute('data-idx');
-          openModal(events[idx]);
-        });
-
-        // search by event name or fighter
-        function match(ev, q){
-          if(!q) return true;
-          const s = q.toLowerCase();
-          if(ev.name.toLowerCase().includes(s)) return true;
-          for(const f of ev.fights){
-            if((f.a||'').toLowerCase().includes(s) || (f.b||'').toLowerCase().includes(s)) return true;
-          }
-          return false;
-        }
-        searchEl.addEventListener('input', ()=>{
-          const q = searchEl.value.trim();
-          const list = archive.filter(ev=>match(ev,q));
-          renderCards(list);
-        });
-      }catch(err){
-        console.error(err);
-        document.getElementById('featured').insertAdjacentHTML('afterend',
-          `<div class="empty" style="max-width:1200px;margin:1rem auto;padding:0 1rem;">
-            Failed to load events. Ensure the sheet tab has columns
-            <b>Event</b>, <b>Fighter A</b>, <b>Fighter B</b>, <b>Winner</b>, <b>Match Rating</b>, <b>bonus type</b> (e.g. Event "Crucible 18(09-14-2025)").
-            Posters should live at <code>assets/images/poster/&lt;number&gt;.png</code>.
-          </div>`);
-      }
+      const archive=events.filter(e=>e.date<today).reverse();
+      const cards=document.getElementById('cards');cards.innerHTML=archive.map((ev,i)=>`
+        <article class="card-ev" onclick="openModal(events[${i}])">
+          ${thumbFor(ev)?`<img src="${thumbFor(ev)}" alt="thumb">`:''}
+          <div class="body"><h3>${ev.name}</h3><div class="muted">${ev.date.toDateString()}</div></div>
+        </article>`).join('');
+      window.events=archive; // store for modal open
     })();
   </script>
 </body>
