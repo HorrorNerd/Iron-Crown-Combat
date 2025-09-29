@@ -84,8 +84,10 @@
     .ev-date{ color:var(--muted); font-size:.92rem; }
     .ev-meta{ color:var(--muted); font-size:.9rem; }
     .ev-actions{ display:flex; gap:.5rem; padding:.8rem; border-top:1px solid var(--border); }
+    .ev-details{ display:none; padding: .75rem .9rem 1rem; border-top:1px dashed var(--border); }
+    .ev-details.open{ display:block; }
 
-    /* ===== Fights (used in modal too) ===== */
+    /* ===== Fights ===== */
     .fight-grid{ display:flex; flex-direction:column; gap:.7rem; }
     .fight{ display:grid; grid-template-columns: 1fr auto 1fr; gap:.7rem; align-items:center;
       background: var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:.75rem; min-height:170px; position:relative; overflow:hidden; }
@@ -97,6 +99,7 @@
       border:1px solid var(--border); color: var(--gold); font-weight:900; box-shadow: inset 0 0 20px rgba(255,215,0,.15);
       background: radial-gradient(ellipse at center, rgba(255,215,0,.2), rgba(224,177,90,.08) 60%, transparent 100%); }
     .name-overlay.winner{ color:#5cff9d; text-shadow: 0 0 8px rgba(92,255,157,.65), 0 2px 8px rgba(0,0,0,.9); }
+
     @media (max-width: 680px){
       .fight{ grid-template-columns: 1fr; min-height:unset; }
       .headshot{ height:220px; }
@@ -105,32 +108,33 @@
       .me-head{ max-width:520px; aspect-ratio: 4/3; }
     }
 
-    /* ===== Modal ===== */
-    .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:70; }
+    /* ===== Modal (poster + write-up + card) ===== */
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:60; padding: 1rem; }
     .modal-backdrop.show{ display:flex; }
     .modal{
-      background: var(--surface); border:1px solid var(--border); border-radius:16px;
-      width:min(1100px, 94vw); max-height:90vh; box-shadow:0 30px 80px rgba(0,0,0,.6);
-      display:grid; grid-template-rows:auto 1fr; overflow:hidden;
+      background: var(--surface);
+      border:1px solid var(--border);
+      border-radius:16px;
+      max-width:min(1100px, 94vw);
+      max-height:92vh;
+      overflow:auto;
+      box-shadow: var(--shadow);
+      display:grid; gap:0;
+      grid-template-columns: 420px 1fr;
     }
-    .modal header{ display:flex; align-items:center; justify-content:space-between; gap:.75rem;
-      padding:.8rem 1rem; border-bottom:1px solid var(--border); }
-    .modal header h3{ margin:0; font-size:1.2rem; color:var(--gold); }
-    .modal .close{ border:1px solid var(--border); background:var(--bg); color:var(--text); border-radius:10px; padding:.45rem .65rem; cursor:pointer; }
+    .modal header{ grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; padding:.8rem 1rem; border-bottom:1px solid var(--border); }
+    .modal .body{ display:grid; grid-template-columns: 420px 1fr; gap:0; }
+    .modal .poster-wrap{ padding:1rem; border-right:1px solid var(--border); background: var(--bg); }
+    .modal .poster-wrap img{ width:100%; height:auto; border-radius:12px; border:1px solid var(--border); display:block; }
+    .modal .content{ padding:1rem; display:grid; gap:.6rem; }
+    .modal .meta{ color:var(--muted); }
+    .modal .cardbox{ border:1px solid var(--border); border-radius:12px; padding:.8rem; background: var(--bg); }
+    .modal .close{ border:1px solid var(--border); background:transparent; color:var(--text); border-radius:10px; padding:.4rem .7rem; cursor:pointer; }
     .modal .close:hover{ border-color: var(--gold2); }
-    .modal .content{
-      overflow:auto; padding:1rem; display:grid; gap:1rem;
-      grid-template-columns: 340px 1fr;
-    }
-    .modal .poster{
-      width:100%; max-width:none; aspect-ratio:3/4; border-radius:12px; border:1px solid var(--border);
-    }
-    .modal .poster img{ width:100%; height:100%; object-fit:cover; }
-    .modal .writeup{ background:var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:.9rem; line-height:1.55; }
-    .modal .meta{ color:var(--muted); margin-top:.25rem; }
-    .modal .section{ display:grid; gap:.6rem; }
-    @media (max-width: 960px){
-      .modal .content{ grid-template-columns: 1fr; }
+    @media (max-width: 980px){
+      .modal{ grid-template-columns: 1fr; }
+      .modal .body{ grid-template-columns: 1fr; }
+      .modal .poster-wrap{ border-right:none; border-bottom:1px solid var(--border); }
     }
   </style>
 </head>
@@ -189,20 +193,24 @@
   <!-- Past Events Grid -->
   <section id="archive" class="events-grid"></section>
 
-  <!-- Modal -->
-  <div id="eventModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <!-- Modal (poster + writeup + card) -->
+  <div id="evModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="evTitle">
       <header>
-        <h3 id="modalTitle">Event</h3>
-        <button class="close" type="button" data-close>✕</button>
+        <h3 id="evTitle" style="margin:0">Event</h3>
+        <button class="close" data-close-modal aria-label="Close">✕</button>
       </header>
-      <div class="content">
-        <div class="poster"><img id="modalPoster" alt="Event poster"></div>
-        <div class="section">
-          <div class="meta" id="modalDate"></div>
-          <div id="modalWriteup" class="writeup">No write-up yet.</div>
-          <div id="modalMeta" class="meta"></div>
-          <div id="modalCard" class="fight-grid"></div>
+      <div class="body">
+        <div class="poster-wrap">
+          <img id="evPoster" alt="Event poster">
+        </div>
+        <div class="content">
+          <div id="evDate" class="meta">—</div>
+          <div id="evWriteup" class="prose">—</div>
+          <div class="cardbox">
+            <h4 style="margin:.1rem 0 .6rem">Full Card</h4>
+            <div id="evCard" class="fight-grid"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -220,7 +228,8 @@
     // ====== CONFIG ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_EVENTS_ALL = '676906080';
-    const EVENT_NOTES_URL = 'assets/data/event-notes.json'; // optional; see format below
+    const EVENTS_JSON = 'assets/data/events.json'; // <-- posters/thumbs/writeups live here
+    const VODS_URL = 'assets/data/vods.json'; // optional
 
     const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
 
@@ -251,27 +260,29 @@
 
     const headshotPath = (name) => `assets/images/fighters/headshots/${slugify(name)}.png`;
 
+    // Robust date parsing from Event title
     function parseEventTitle(s){
       const raw = (s||'').trim();
       const mParens = /\(([^)]+)\)/.exec(raw);
       let date = null, dateStr = '';
       if (mParens){
-        const inside = mParens[1].trim().replace(/[,]/g,'');
-        if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(inside)){
-          const [mm,dd,yyyy] = inside.split(/[-/]/);
+        const inside = mParens[1].trim();
+        const parts = inside.replace(/[,]/g,'').trim();
+        if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(parts)){ // 09-30-2025
+          const [mm,dd,yyyy] = parts.split(/[-/]/);
           date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
           dateStr = `${yyyy}-${mm}-${dd}`;
-        } else if (/^\d{4}-\d{2}-\d{2}$/.test(inside)){
-          const [yyyy,mm,dd] = inside.split('-');
+        } else if (/^\d{4}-\d{2}-\d{2}$/.test(parts)){ // 2025-09-30
+          const [yyyy,mm,dd] = parts.split('-');
           date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
           dateStr = `${yyyy}-${mm}-${dd}`;
         } else {
-          const tryDate = new Date(inside + ' 20:00:00');
-          if (!isNaN(tryDate)){
+          const tryDate = new Date(parts + ' 20:00:00');
+          if (!isNaN(tryDate)) {
             date = tryDate;
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth()+1).padStart(2,'0');
-            const dd = String(date.getDate()).padStart(2,'0');
+            const yyyy = tryDate.getFullYear();
+            const mm = String(tryDate.getMonth()+1).padStart(2,'0');
+            const dd = String(tryDate.getDate()).padStart(2,'0');
             dateStr = `${yyyy}-${mm}-${dd}`;
           }
         }
@@ -301,8 +312,21 @@
     async function fetchCSV(gid){ const r = await fetch(csvUrl(gid), {cache:'no-store'}); if(!r.ok) throw new Error('CSV '+gid); return parseCSV(await r.text()); }
     async function fetchJSON(url){ try{ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) return null; return await r.json(); } catch { return null; } }
 
+    // Merge events: sheet fights + JSON media/meta
     async function loadEvents(){
-      const rows = await fetchCSV(GID_EVENTS_ALL);
+      const [rows, meta] = await Promise.all([fetchCSV(GID_EVENTS_ALL), fetchJSON(EVENTS_JSON)]);
+      const byName = new Map(); // from JSON: name -> {poster, thumb, writeup}
+      if (meta && Array.isArray(meta.events)){
+        for (const e of meta.events){
+          if (!e || !e.name) continue;
+          byName.set(e.name.trim(), {
+            poster: e.poster || '',
+            thumb:  e.thumb  || '',
+            writeup: e.writeup || ''
+          });
+        }
+      }
+
       const map = new Map(); // key: name||dateStr
       let order = 0;
       for (const r of rows){
@@ -312,7 +336,10 @@
         if(!name || !(date instanceof Date) || isNaN(date)) continue;
 
         const key = `${name}||${dateStr}`;
-        if(!map.has(key)) map.set(key, { name, date, dateStr, fights: [] });
+        if(!map.has(key)) {
+          const media = byName.get(name) || {};
+          map.set(key, { name, date, dateStr, fights: [], media });
+        }
 
         const a = (r['Fighter A'] || '').trim();
         const b = (r['Fighter B'] || '').trim();
@@ -335,51 +362,22 @@
       return events;
     }
 
-    // ===== Shared image fallback =====
-    window.__imgFallback = function(img){
-      const list = (img.getAttribute('data-fallback') || '').split('|').filter(Boolean);
-      if (!list.length){
-        img.onerror = null;
-        img.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Image coming soon'}));
-        return;
-      }
-      const next = list.shift();
-      img.setAttribute('data-fallback', list.join('|'));
-      img.src = next;
-    };
-    function imgHTMLWithFallback(srcs, alt){
-      const [first, ...rest] = srcs;
-      const fallback = rest.join('|');
-      return `<img src="${first}" alt="${alt}" data-fallback="${fallback}" onerror="window.__imgFallback && __imgFallback(this)">`;
+    function fallbackPoster(name){
+      // If not in events.json, try generic location: assets/images/events/<slug>.jpg|png
+      const base = `assets/images/events/${slugify(name)}`;
+      return { primary: `${base}.jpg`, fallback: `${base}.png` };
+    }
+    function eventPoster(ev){
+      if (ev.media && ev.media.poster) return ev.media.poster;
+      const {primary} = fallbackPoster(ev.name);
+      return primary;
+    }
+    function eventThumb(ev){
+      if (ev.media && ev.media.thumb) return ev.media.thumb;
+      // thumb fallback: derive from events folder if you use it
+      return `assets/images/events/${slugify(ev.name)}.jpg`;
     }
 
-    // ===== Poster/Thumb candidates =====
-    function eventNumber(name){
-      const m = /crucible\s*(\d+)/i.exec(name || '');
-      return m ? m[1] : null;
-    }
-    function numVariants(nStr){
-      const noZero = String(parseInt(nStr, 10)); // "01" -> "1"
-      return Array.from(new Set([nStr, noZero]));
-    }
-    function posterCandidates(name){
-      const n = eventNumber(name);
-      if (!n) return [];
-      const vars = numVariants(n);
-      const pngs = vars.map(v => `assets/images/posters/${v}.png`);
-      const jpgs = vars.map(v => `assets/images/posters/${v}.jpg`);
-      return [...pngs, ...jpgs];
-    }
-    function thumbCandidates(name){
-      const n = eventNumber(name);
-      if (!n) return [];
-      const vars = numVariants(n);
-      const pngs = vars.map(v => `assets/images/thumbs/${v}.png`);
-      const jpgs = vars.map(v => `assets/images/thumbs/${v}.jpg`);
-      return [...pngs, ...jpgs];
-    }
-
-    // ===== HERO / SPOTLIGHT =====
     function setHero(up){
       const t = document.getElementById('heroTitle');
       const d = document.getElementById('heroDate');
@@ -387,35 +385,29 @@
       if (!up){
         t.textContent = 'No upcoming event scheduled';
         d.textContent = '';
-        p.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Stay tuned for the next card'}));
+        p.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Poster coming soon'}));
         document.getElementById('countdown').style.display='none';
         return;
       }
       t.textContent = up.name;
       d.textContent = toDateStr(up.date);
+      p.src = eventPoster(up);
 
-      const candidates = posterCandidates(up.name);
-      if (candidates.length){
-        const html = imgHTMLWithFallback(candidates, 'Event poster');
-        const wrap = document.createElement('div'); wrap.innerHTML = html;
-        const newImg = wrap.firstChild;
-        p.replaceWith(newImg);
-        newImg.id = 'heroPoster';
-      } else {
-        p.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Poster coming soon'}));
-      }
-
-      // countdown
+      // Countdown
       const cd = document.getElementById('countdown');
       cd.style.display = '';
       const dEl = document.getElementById('d');
       const hEl = document.getElementById('h');
       const mEl = document.getElementById('m');
       const sEl = document.getElementById('s');
+
       function tick(){
         const now = new Date();
         const diff = up.date - now;
-        if (diff <= 0){ dEl.textContent=hEl.textContent=mEl.textContent=sEl.textContent='0'; return; }
+        if (diff <= 0){
+          dEl.textContent = '0'; hEl.textContent = '0'; mEl.textContent = '0'; sEl.textContent = '0';
+          return;
+        }
         const sec = Math.floor(diff/1000);
         const days = Math.floor(sec/86400);
         const hours = Math.floor((sec%86400)/3600);
@@ -426,7 +418,8 @@
         mEl.textContent = String(mins).padStart(2,'0');
         sEl.textContent = String(secs).padStart(2,'0');
       }
-      tick(); setInterval(tick, 1000);
+      tick();
+      setInterval(tick, 1000);
     }
 
     function fightRow(f){
@@ -451,12 +444,13 @@
       const card = document.getElementById('spotlightCard');
       if (!up || !up.fights.length){ card.style.display='none'; return; }
       card.style.display='';
+      // Assume last fight on the sheet order is Main Event
       const main = up.fights[up.fights.length - 1];
       document.getElementById('meAImg').src = headshotPath(main.a);
       document.getElementById('meBImg').src = headshotPath(main.b);
       document.getElementById('meAName').textContent = main.a;
       document.getElementById('meBName').textContent = main.b;
-      document.getElementById('meMeta').textContent = 'Three rounds · Five minutes · No judges · Ring only';
+      document.getElementById('meMeta').textContent = 'Five rounds · Five minutes · No judges · Ring only';
       document.getElementById('upFightList').innerHTML = up.fights.map(fightRow).join('');
     }
 
@@ -486,32 +480,17 @@
       return parts.join(' · ');
     }
 
-    // ===== Notes (optional) =====
-    // event-notes.json example:
-    // {
-    //   "Crucible 01": "Debut show write-up...",
-    //   "crucible-18": "Slug-key also works..."
-    // }
-    function getNote(ev, notes){
-      if (!notes) return '';
-      return notes[ev.name] || notes[slugify(ev.name)] || '';
-    }
-
-    // ===== Archive grid =====
-    function eventCard(ev){
+    function eventCard(ev, vodUrl){
       const avg = averageRating(ev.fights);
       const awards = awardsDetail(ev.fights);
-      const thumbList  = thumbCandidates(ev.name);
-      const posterList = posterCandidates(ev.name);
-      const imgList    = [...thumbList, ...posterList];
-      const imgHTML = imgList.length
-        ? imgHTMLWithFallback(imgList, `${ev.name} cover`)
-        : '<div class="ph" style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)">No image</div>';
-
+      const thumb = eventThumb(ev);
       const key = `${ev.name}||${ev.dateStr}`;
+
       return `
         <article class="ev-card" data-key="${key}" tabindex="0">
-          <div class="ev-cover">${imgHTML}</div>
+          <div class="ev-cover">
+            <img src="${thumb}" alt="${ev.name} cover" onerror="this.style.opacity=.25">
+          </div>
           <div class="ev-body">
             <div class="ev-title">${ev.name}</div>
             <div class="ev-date">${toDateStr(ev.date)}</div>
@@ -520,19 +499,23 @@
             </div>
           </div>
           <div class="ev-actions">
-            <button class="btn" data-open-modal type="button">View Card</button>
+            ${vodUrl ? `<a class="btn" href="${vodUrl}" target="_blank" rel="noopener">▶ Watch Replay</a>` : ''}
+            <button class="btn" data-open-modal type="button">Details</button>
           </div>
         </article>
       `;
     }
 
-    function renderArchive(past, notes){
+    function renderArchive(past, vods){
       const host = document.getElementById('archive');
       if (!past.length){
         host.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center">No past events yet.</div>`;
         return;
       }
-      host.innerHTML = past.slice().sort((a,b)=> b.date - a.date).map(ev=> eventCard(ev)).join('');
+      host.innerHTML = past.slice().sort((a,b)=> b.date - a.date).map(ev=>{
+        const vod = (vods && (vods[ev.name] || vods[slugify(ev.name)])) || '';
+        return eventCard(ev, vod);
+      }).join('');
       document.getElementById('resultCount').textContent = `${past.length} past event${past.length===1?'':'s'}`;
     }
 
@@ -562,95 +545,52 @@
     }
 
     // ===== Modal wiring =====
-    const $modal = document.getElementById('eventModal');
-    const $mTitle = document.getElementById('modalTitle');
-    const $mDate  = document.getElementById('modalDate');
-    const $mPoster= document.getElementById('modalPoster');
-    const $mWrite = document.getElementById('modalWriteup');
-    const $mMeta  = document.getElementById('modalMeta');
-    const $mCard  = document.getElementById('modalCard');
+    function fightListHTML(ev){ return ev.fights.map(fightRow).join(''); }
 
-    function openModal(ev, notes){
-      $mTitle.textContent = ev.name;
-      $mDate.textContent  = toDateStr(ev.date);
+    function wireModal(events){
+      const modal = document.getElementById('evModal');
+      const titleEl = document.getElementById('evTitle');
+      const dateEl  = document.getElementById('evDate');
+      const writeEl = document.getElementById('evWriteup');
+      const posterEl= document.getElementById('evPoster');
+      const cardEl  = document.getElementById('evCard');
 
-      // Poster priority (poster -> thumb)
-      const imgList = [...posterCandidates(ev.name), ...thumbCandidates(ev.name)];
-      if (imgList.length){
-        $mPoster.setAttribute('data-fallback', imgList.slice(1).join('|'));
-        $mPoster.onerror = () => window.__imgFallback && __imgFallback($mPoster);
-        $mPoster.src = imgList[0];
-      } else {
-        $mPoster.onerror = null;
-        $mPoster.removeAttribute('data-fallback');
-        $mPoster.src = '';
-        $mPoster.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Poster coming soon'}));
+      function open(ev){
+        titleEl.textContent = ev.name;
+        dateEl.textContent = toDateStr(ev.date);
+        const writeup = ev.media && ev.media.writeup ? ev.media.writeup : '';
+        writeEl.innerHTML = writeup || '<p class="meta">No write-up available.</p>';
+        posterEl.src = eventPoster(ev);
+        cardEl.innerHTML = fightListHTML(ev);
+
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden','false');
+        document.body.style.overflow='hidden';
+      }
+      function close(){
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden','true');
+        document.body.style.overflow='';
       }
 
-      // Write-up
-      const note = getNote(ev, notes);
-      $mWrite.innerHTML = note
-        ? String(note).split(/\n\s*\n/).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('')
-        : 'No write-up yet.';
-
-      // Meta (awards/avg)
-      const avg = averageRating(ev.fights);
-      const awards = awardsDetail(ev.fights);
-      $mMeta.textContent = [
-        `${ev.fights.length} fights`,
-        avg ? `Avg ★${avg}` : '',
-        awards ? awards : ''
-      ].filter(Boolean).join(' · ');
-
-      // Card
-      $mCard.innerHTML = ev.fights.map(fightRow).join('');
-
-      // Show modal
-      $modal.classList.add('show');
-      $modal.setAttribute('aria-hidden','false');
-      document.body.style.overflow='hidden';
-    }
-
-    function closeModal(){
-      $modal.classList.remove('show');
-      $modal.setAttribute('aria-hidden','true');
-      document.body.style.overflow='';
-    }
-
-    function wireModalClicks(events, notes){
-      const host = document.getElementById('archive');
-
-      // Open when clicking cover/body or button
-      host.addEventListener('click', (e)=>{
-        const card = e.target.closest('.ev-card');
-        if (!card) return;
-        const wantsOpen = e.target.matches('[data-open-modal]') || e.target.closest('.ev-cover') || e.target.closest('.ev-body');
-        if (!wantsOpen) return;
-
-        const key = card.getAttribute('data-key');
-        const ev = events.find(x => `${x.name}||${x.dateStr}` === key);
-        if (ev) openModal(ev, notes || {});
-      });
-
-      // Keyboard open (Enter)
-      host.addEventListener('keydown', (e)=>{
-        if (e.key === 'Enter'){
+      document.addEventListener('click', (e)=>{
+        if (e.target.closest('[data-open-modal]')){
           const card = e.target.closest('.ev-card');
           if (!card) return;
           const key = card.getAttribute('data-key');
           const ev = events.find(x => `${x.name}||${x.dateStr}` === key);
-          if (ev) openModal(ev, notes || {});
+          if (ev) open(ev);
         }
+        if (e.target.closest('[data-close-modal]') || e.target === modal) close();
       });
-
-      // Close actions
-      $modal.addEventListener('click', (e)=>{ if (e.target === $modal || e.target.matches('[data-close]')) closeModal(); });
-      document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeModal(); });
+      document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') close(); });
     }
 
     (async function(){
       try{
-        const [events, notes] = await Promise.all([loadEvents(), fetchJSON(EVENT_NOTES_URL)]);
+        const [events, vods] = await Promise.all([loadEvents(), fetchJSON('assets/data/vods.json')]);
+
+        // Upcoming: earliest future event by actual current time
         const now = new Date(); now.setSeconds(0,0);
         const future = events.filter(e => e.date && e.date >= now).sort((a,b)=> a.date - b.date);
         const upcoming = future[0] || null;
@@ -658,9 +598,9 @@
 
         setHero(upcoming);
         renderSpotlight(upcoming);
-        renderArchive(past, notes || {});
+        renderArchive(past, vods || {});
         wireFilter(past);
-        wireModalClicks(events, notes || {});
+        wireModal(events);
       }catch(err){
         console.error(err);
         document.getElementById('heroTitle').textContent = 'Failed to load events';
@@ -668,7 +608,7 @@
     })();
   </script>
 
-  <!-- Load shared navbar (with Home at start and big logo) -->
+  <!-- Load shared navbar (with Home and big logo) -->
   <script>
     fetch("/Iron-Crown-Combat/navbar.html")
       .then(r => r.text())
@@ -676,7 +616,6 @@
         const mount = document.getElementById("navbar");
         if (mount) mount.innerHTML = html;
 
-        // Mobile menu toggle
         const btn = document.getElementById("menuBtn");
         const menu = document.getElementById("primaryMenu");
         if (btn && menu){
@@ -685,8 +624,6 @@
             btn.setAttribute("aria-expanded", open ? "true" : "false");
           });
         }
-
-        // Active link
         const path = location.pathname;
         document.querySelectorAll("#primaryMenu a.item").forEach(a => {
           try {
