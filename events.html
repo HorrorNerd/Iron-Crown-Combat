@@ -84,8 +84,6 @@
     .ev-date{ color:var(--muted); font-size:.92rem; }
     .ev-meta{ color:var(--muted); font-size:.9rem; }
     .ev-actions{ display:flex; gap:.5rem; padding:.8rem; border-top:1px solid var(--border); }
-    .ev-details{ display:none; padding: .75rem .9rem 1rem; border-top:1px dashed var(--border); }
-    .ev-details.open{ display:block; }
 
     /* ===== Fights ===== */
     .fight-grid{ display:flex; flex-direction:column; gap:.7rem; }
@@ -119,10 +117,8 @@
       max-height:92vh;
       overflow:auto;
       box-shadow: var(--shadow);
-      display:grid; gap:0;
-      grid-template-columns: 420px 1fr;
     }
-    .modal header{ grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; padding:.8rem 1rem; border-bottom:1px solid var(--border); }
+    .modal header{ display:flex; align-items:center; justify-content:space-between; padding:.8rem 1rem; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); z-index:2; }
     .modal .body{ display:grid; grid-template-columns: 420px 1fr; gap:0; }
     .modal .poster-wrap{ padding:1rem; border-right:1px solid var(--border); background: var(--bg); }
     .modal .poster-wrap img{ width:100%; height:auto; border-radius:12px; border:1px solid var(--border); display:block; }
@@ -132,7 +128,6 @@
     .modal .close{ border:1px solid var(--border); background:transparent; color:var(--text); border-radius:10px; padding:.4rem .7rem; cursor:pointer; }
     .modal .close:hover{ border-color: var(--gold2); }
     @media (max-width: 980px){
-      .modal{ grid-template-columns: 1fr; }
       .modal .body{ grid-template-columns: 1fr; }
       .modal .poster-wrap{ border-right:none; border-bottom:1px solid var(--border); }
     }
@@ -193,7 +188,7 @@
   <!-- Past Events Grid -->
   <section id="archive" class="events-grid"></section>
 
-  <!-- Modal (poster + writeup + card) -->
+  <!-- Modal (poster + write-up + card) -->
   <div id="evModal" class="modal-backdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="evTitle">
       <header>
@@ -228,8 +223,8 @@
     // ====== CONFIG ======
     const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
     const GID_EVENTS_ALL = '676906080';
-    const EVENTS_JSON = 'assets/data/events.json'; // <-- posters/thumbs/writeups live here
-    const VODS_URL = 'assets/data/vods.json'; // optional
+    const EVENTS_JSON = 'assets/data/events.json';
+    const VODS_URL = 'assets/data/vods.json';
 
     const csvUrl = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
 
@@ -260,7 +255,14 @@
 
     const headshotPath = (name) => `assets/images/fighters/headshots/${slugify(name)}.png`;
 
-    // Robust date parsing from Event title
+    // Extract Crucible number (e.g., "Crucible 01" -> "01")
+    function crucibleNum(name){
+      const m = /crucible\s*(\d+)/i.exec(name || '');
+      if (!m) return null;
+      const n = m[1];
+      return n.length === 1 ? '0'+n : n; // 1 -> 01
+    }
+
     function parseEventTitle(s){
       const raw = (s||'').trim();
       const mParens = /\(([^)]+)\)/.exec(raw);
@@ -268,11 +270,11 @@
       if (mParens){
         const inside = mParens[1].trim();
         const parts = inside.replace(/[,]/g,'').trim();
-        if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(parts)){ // 09-30-2025
+        if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(parts)){
           const [mm,dd,yyyy] = parts.split(/[-/]/);
           date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
           dateStr = `${yyyy}-${mm}-${dd}`;
-        } else if (/^\d{4}-\d{2}-\d{2}$/.test(parts)){ // 2025-09-30
+        } else if (/^\d{4}-\d{2}-\d{2}$/.test(parts)){
           const [yyyy,mm,dd] = parts.split('-');
           date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
           dateStr = `${yyyy}-${mm}-${dd}`;
@@ -312,20 +314,36 @@
     async function fetchCSV(gid){ const r = await fetch(csvUrl(gid), {cache:'no-store'}); if(!r.ok) throw new Error('CSV '+gid); return parseCSV(await r.text()); }
     async function fetchJSON(url){ try{ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) return null; return await r.json(); } catch { return null; } }
 
-    // Merge events: sheet fights + JSON media/meta
-    async function loadEvents(){
-      const [rows, meta] = await Promise.all([fetchCSV(GID_EVENTS_ALL), fetchJSON(EVENTS_JSON)]);
-      const byName = new Map(); // from JSON: name -> {poster, thumb, writeup}
+    function buildMetaIndex(meta){
+      const idx = new Map();
+      const norm = s => (s||'').trim();
+      const bySlug = s => slugify(s||'');
+      const byNum  = s => crucibleNum(s||'');
       if (meta && Array.isArray(meta.events)){
         for (const e of meta.events){
           if (!e || !e.name) continue;
-          byName.set(e.name.trim(), {
-            poster: e.poster || '',
-            thumb:  e.thumb  || '',
-            writeup: e.writeup || ''
-          });
+          const obj = { poster:e.poster||'', thumb:e.thumb||'', writeup:e.writeup||'' };
+          const exact = norm(e.name);
+          const slug  = bySlug(e.name);
+          const num   = byNum(e.name); // "01" or null
+          if (exact) idx.set(`name:${exact}`, obj);
+          if (slug)  idx.set(`slug:${slug}`,   obj);
+          if (num)   idx.set(`num:${num}`,     obj);
         }
       }
+      return idx;
+    }
+
+    function lookupMeta(index, name){
+      const exact = (name||'').trim();
+      const slug  = slugify(name||'');
+      const num   = crucibleNum(name||'');
+      return index.get(`name:${exact}`) || index.get(`slug:${slug}`) || (num && index.get(`num:${num}`)) || {};
+    }
+
+    async function loadEvents(){
+      const [rows, meta] = await Promise.all([fetchCSV(GID_EVENTS_ALL), fetchJSON(EVENTS_JSON)]);
+      const metaIndex = buildMetaIndex(meta||{});
 
       const map = new Map(); // key: name||dateStr
       let order = 0;
@@ -337,8 +355,7 @@
 
         const key = `${name}||${dateStr}`;
         if(!map.has(key)) {
-          const media = byName.get(name) || {};
-          map.set(key, { name, date, dateStr, fights: [], media });
+          map.set(key, { name, date, dateStr, fights: [], media: lookupMeta(metaIndex, name) });
         }
 
         const a = (r['Fighter A'] || '').trim();
@@ -362,20 +379,28 @@
       return events;
     }
 
-    function fallbackPoster(name){
-      // If not in events.json, try generic location: assets/images/events/<slug>.jpg|png
-      const base = `assets/images/events/${slugify(name)}`;
-      return { primary: `${base}.jpg`, fallback: `${base}.png` };
+    // Images: prefer events.json paths; else fall back to posters/thumbs folders by Crucible number
+    function posterFallbackByNumber(name){
+      const num = crucibleNum(name);
+      if (!num) return null;
+      // try .png then .jpg
+      return [`assets/images/posters/${num}.png`, `assets/images/posters/${num}.jpg`];
     }
+    function thumbFallbackByNumber(name){
+      const num = crucibleNum(name);
+      if (!num) return null;
+      return [`assets/images/thumbs/${num}.png`, `assets/images/thumbs/${num}.jpg`];
+    }
+
     function eventPoster(ev){
       if (ev.media && ev.media.poster) return ev.media.poster;
-      const {primary} = fallbackPoster(ev.name);
-      return primary;
+      const tries = posterFallbackByNumber(ev.name) || [];
+      return tries[0] || '';
     }
     function eventThumb(ev){
       if (ev.media && ev.media.thumb) return ev.media.thumb;
-      // thumb fallback: derive from events folder if you use it
-      return `assets/images/events/${slugify(ev.name)}.jpg`;
+      const tries = thumbFallbackByNumber(ev.name) || [];
+      return tries[0] || eventPoster(ev); // if no thumb, reuse poster
     }
 
     function setHero(up){
@@ -444,7 +469,6 @@
       const card = document.getElementById('spotlightCard');
       if (!up || !up.fights.length){ card.style.display='none'; return; }
       card.style.display='';
-      // Assume last fight on the sheet order is Main Event
       const main = up.fights[up.fights.length - 1];
       document.getElementById('meAImg').src = headshotPath(main.a);
       document.getElementById('meBImg').src = headshotPath(main.b);
@@ -545,7 +569,12 @@
     }
 
     // ===== Modal wiring =====
-    function fightListHTML(ev){ return ev.fights.map(fightRow).join(''); }
+    function fightListHTML(ev){
+      if (!ev.fights || !ev.fights.length) {
+        return `<div class="meta">No fights logged yet.</div>`;
+      }
+      return ev.fights.map(fightRow).join('');
+    }
 
     function wireModal(events){
       const modal = document.getElementById('evModal');
@@ -558,8 +587,10 @@
       function open(ev){
         titleEl.textContent = ev.name;
         dateEl.textContent = toDateStr(ev.date);
+
         const writeup = ev.media && ev.media.writeup ? ev.media.writeup : '';
         writeEl.innerHTML = writeup || '<p class="meta">No write-up available.</p>';
+
         posterEl.src = eventPoster(ev);
         cardEl.innerHTML = fightListHTML(ev);
 
@@ -588,9 +619,8 @@
 
     (async function(){
       try{
-        const [events, vods] = await Promise.all([loadEvents(), fetchJSON('assets/data/vods.json')]);
+        const [events, vods] = await Promise.all([loadEvents(), fetchJSON(VODS_URL)]);
 
-        // Upcoming: earliest future event by actual current time
         const now = new Date(); now.setSeconds(0,0);
         const future = events.filter(e => e.date && e.date >= now).sort((a,b)=> a.date - b.date);
         const upcoming = future[0] || null;
@@ -608,14 +638,13 @@
     })();
   </script>
 
-  <!-- Load shared navbar (with Home and big logo) -->
+  <!-- Load shared navbar -->
   <script>
     fetch("/Iron-Crown-Combat/navbar.html")
       .then(r => r.text())
       .then(html => {
         const mount = document.getElementById("navbar");
         if (mount) mount.innerHTML = html;
-
         const btn = document.getElementById("menuBtn");
         const menu = document.getElementById("primaryMenu");
         if (btn && menu){
