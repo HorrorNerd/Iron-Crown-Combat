@@ -84,28 +84,23 @@
     .ev-date{ color:var(--muted); font-size:.92rem; }
     .ev-meta{ color:var(--muted); font-size:.9rem; }
     .ev-actions{ display:flex; gap:.5rem; padding:.8rem; border-top:1px solid var(--border); }
-    .ev-details{ display:none; padding: .75rem .9rem 1rem; border-top:1px dashed var(--border); }
-    .ev-details.open{ display:block; }
 
-    /* ===== Fights ===== */
-    .fight-grid{ display:flex; flex-direction:column; gap:.7rem; }
-    .fight{ display:grid; grid-template-columns: 1fr auto 1fr; gap:.7rem; align-items:center;
-      background: var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:.75rem; min-height:170px; position:relative; overflow:hidden; }
-    .headshot{ position:relative; height:170px; border-radius:10px; overflow:hidden; border:1px solid var(--border); background:#0b0c10; display:flex; align-items:flex-end; justify-content:center; }
-    .headshot img{ width:100%; height:100%; object-fit:cover; display:block; }
-    .name-overlay{ position:absolute; left:0; right:0; bottom:0; padding:.5rem .7rem; text-align:center; color:#fff; font-weight:800;
-      background: linear-gradient(180deg, transparent, rgba(0,0,0,.9) 45%); text-shadow: 0 2px 10px rgba(0,0,0,.9); }
-    .vs{ display:flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%;
-      border:1px solid var(--border); color: var(--gold); font-weight:900; box-shadow: inset 0 0 20px rgba(255,215,0,.15);
-      background: radial-gradient(ellipse at center, rgba(255,215,0,.2), rgba(224,177,90,.08) 60%, transparent 100%); }
-    .name-overlay.winner{ color:#5cff9d; text-shadow: 0 0 8px rgba(92,255,157,.65), 0 2px 8px rgba(0,0,0,.9); }
-
-    @media (max-width: 680px){
-      .fight{ grid-template-columns: 1fr; min-height:unset; }
-      .headshot{ height:220px; }
-      .vs{ margin:.2rem auto; }
-      .me-grid{ grid-template-columns: 1fr; }
-      .me-head{ max-width:520px; aspect-ratio: 4/3; }
+    /* ===== Modal ===== */
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; align-items:center; justify-content:center; padding:12px; z-index:60; }
+    .modal-backdrop.show{ display:flex; }
+    .modal{ background:var(--bg-2); border:1px solid var(--border); border-radius:16px; max-width:1100px; width:100%; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.6); }
+    .modal header{ display:flex; align-items:center; justify-content:space-between; padding:.8rem 1rem; border-bottom:1px solid var(--border); }
+    .modal header h3{ margin:0; }
+    .modal .wrap{ display:grid; grid-template-columns: 380px 1fr; gap:1rem; padding:1rem; }
+    .modal .poster{ max-width:none; }
+    .modal .poster img{ border-radius:12px; border:1px solid var(--border); }
+    .modal .right{ display:grid; gap:1rem; }
+    .modal .writeup{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1rem; text-align:center; }
+    .modal .writeup .prose{ text-align:left; max-width:65ch; margin:0 auto; }
+    .modal .fight-grid{ padding:0; }
+    .modal .close{ border:1px solid var(--border); background:var(--bg); color:var(--text); border-radius:10px; padding:.45rem .7rem; cursor:pointer; }
+    @media (max-width: 900px){
+      .modal .wrap{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -164,6 +159,25 @@
   <!-- Past Events Grid -->
   <section id="archive" class="events-grid"></section>
 
+  <!-- Modal -->
+  <div class="modal-backdrop" id="evBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="evTitle">
+      <header>
+        <h3 id="evTitle">Event</h3>
+        <button class="close" data-close aria-label="Close">✕</button>
+      </header>
+      <div class="wrap">
+        <div class="poster"><img id="evPoster" alt=""></div>
+        <div class="right">
+          <div class="writeup">
+            <div id="evWriteup" class="prose">—</div>
+          </div>
+          <div class="fight-grid" id="evCardGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="container cols">
       <small>© <span id="yr"></span> Iron Crown Combat · A TNGaming production</small>
@@ -206,19 +220,33 @@
 
     const headshotPath = (name) => `assets/images/fighters/headshots/${slugify(name)}.png`;
 
-    // Extract "01" from "Crucible 01"
-    function eventNumberFromName(name){
-      const m = String(name||'').match(/crucible\s*(\d+)/i);
-      if (!m) return null;
-      const n = parseInt(m[1],10);
-      return Number.isFinite(n) ? String(n).padStart(2,'0') : null;
+    // Pull number like "Crucible 01" -> "01"
+    function eventNumber(name){
+      const m = String(name||'').match(/(\d{1,3})$/);
+      if(!m) return null;
+      return String(m[1]).padStart(2,'0');
     }
-    // Build src with fallbacks for extensions
-    function withFallbacks(baseNoExt){
-      const exts = ['png','jpg','jpeg','webp'];
-      const src = `${baseNoExt}.${exts[0]}`;
-      const onerr = exts.slice(1).map(ext => `this.onerror=null;this.src='${baseNoExt}.${ext}'`).join(';');
-      return {src, onerr};
+
+    // Poster/Thumb guessers (prefer number-based folders)
+    function posterGuess(name){
+      const num = eventNumber(name);
+      if (num){
+        const src = `assets/images/posters/${num}.png`;
+        return { src, onerr: `this.onerror=null;this.src='assets/images/events/${slugify(name)}.jpg'; this.onerror=null;` };
+      }
+      const base = `assets/images/events/${slugify(name)}`;
+      return { src: `${base}.jpg`, onerr: `this.onerror=null;this.src='${base}.png'` };
+    }
+    function thumbGuess(name){
+      const num = eventNumber(name);
+      if (num){
+        return {
+          src: `assets/images/thumbs/${num}.jpg`,
+          onerr: `this.onerror=null;this.src='assets/images/thumbs/${num}.png'`
+        };
+      }
+      const base = `assets/images/events/${slugify(name)}`;
+      return { src: `${base}.jpg`, onerr: `this.onerror=null;this.src='${base}.png'` };
     }
 
     // Robust date parsing from Event title
@@ -247,20 +275,6 @@
           }
         }
       }
-      if (!date){
-        const mNums = /(\d{4})[-/](\d{2})[-/](\d{2})|(\d{2})[-/](\d{2})[-/](\d{4})/.exec(raw);
-        if (mNums){
-          if (mNums[1]){
-            const [yyyy,mm,dd]=[mNums[1],mNums[2],mNums[3]];
-            date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
-            dateStr = `${yyyy}-${mm}-${dd}`;
-          } else {
-            const [mm,dd,yyyy]=[mNums[4],mNums[5],mNums[6]];
-            date = new Date(`${yyyy}-${mm}-${dd}T20:00:00`);
-            dateStr = `${yyyy}-${mm}-${dd}`;
-          }
-        }
-      }
       const name = raw.replace(/\s*\([^)]+\)\s*$/,'').trim() || 'Event';
       return { name, date, dateStr };
     }
@@ -270,7 +284,6 @@
     }
 
     async function fetchCSV(gid){ const r = await fetch(csvUrl(gid), {cache:'no-store'}); if(!r.ok) throw new Error('CSV '+gid); return parseCSV(await r.text()); }
-    async function fetchJSON(url){ try{ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) return null; return await r.json(); } catch { return null; } }
 
     async function loadEvents(){
       const rows = await fetchCSV(GID_EVENTS_ALL);
@@ -306,55 +319,7 @@
       return events;
     }
 
-    // Posters live in assets/images/posters/NN.ext (with fallback extensions)
-    function posterGuess(name){
-      const no = eventNumberFromName(name);
-      if (no) return withFallbacks(`assets/images/posters/${no}`);
-      // legacy fallback (if you keep any slug posters)
-      const base = `assets/images/events/${slugify(name)}`;
-      return withFallbacks(base);
-    }
-
-    function setHero(up){
-      const t = document.getElementById('heroTitle');
-      const d = document.getElementById('heroDate');
-      const p = document.getElementById('heroPoster');
-      if (!up){
-        t.textContent = 'No upcoming event scheduled';
-        d.textContent = '';
-        p.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Stay tuned for the next card'}));
-        document.getElementById('countdown').style.display='none';
-        return;
-      }
-      t.textContent = up.name;
-      d.textContent = toDateStr(up.date);
-
-      const g = posterGuess(up.name);
-      p.src = g.src;
-      if (g.onerr) p.setAttribute('onerror', g.onerr);
-      p.alt = `${up.name} poster`;
-
-      // Countdown
-      const cd = document.getElementById('countdown');
-      cd.style.display = '';
-      const dEl = document.getElementById('d');
-      const hEl = document.getElementById('h');
-      const mEl = document.getElementById('m');
-      const sEl = document.getElementById('s');
-
-      function tick(){
-        const now = new Date();
-        const diff = up.date - now;
-        if (diff <= 0){ dEl.textContent=hEl.textContent=mEl.textContent=sEl.textContent='0'; return; }
-        const sec = Math.floor(diff/1000);
-        dEl.textContent = Math.floor(sec/86400);
-        hEl.textContent = String(Math.floor((sec%86400)/3600)).padStart(2,'0');
-        mEl.textContent = String(Math.floor((sec%3600)/60)).padStart(2,'0');
-        sEl.textContent = String(sec%60).padStart(2,'0');
-      }
-      tick(); setInterval(tick, 1000);
-    }
-
+    // ===== UI builders =====
     function fightRow(f){
       const winnerA = f.winner && f.winner === f.a;
       const winnerB = f.winner && f.winner === f.b;
@@ -371,19 +336,6 @@
           </div>
         </div>
       `;
-    }
-
-    function renderSpotlight(up){
-      const card = document.getElementById('spotlightCard');
-      if (!up || !up.fights.length){ card.style.display='none'; return; }
-      card.style.display='';
-      const main = up.fights[up.fights.length - 1];
-      document.getElementById('meAImg').src = headshotPath(main.a);
-      document.getElementById('meBImg').src = headshotPath(main.b);
-      document.getElementById('meAName').textContent = main.a;
-      document.getElementById('meBName').textContent = main.b;
-      document.getElementById('meMeta').textContent = 'Five rounds · Five minutes · No judges · Ring only';
-      document.getElementById('upFightList').innerHTML = up.fights.map(fightRow).join('');
     }
 
     function averageRating(fights){
@@ -415,16 +367,15 @@
     function eventCard(ev, vodUrl){
       const avg = averageRating(ev.fights);
       const awards = awardsDetail(ev.fights);
-      const no = eventNumberFromName(ev.name);
-      const thumb = no ? withFallbacks(`assets/images/thumbs/${no}`) : withFallbacks(`assets/images/events/${slugify(ev.name)}`);
+      const t = thumbGuess(ev.name);
       const key = `${ev.name}||${ev.dateStr}`;
 
       return `
-        <article class="ev-card" data-key="${key}" tabindex="0">
-          <div class="ev-cover">
-            <img src="${thumb.src}" alt="${ev.name} thumbnail" ${thumb.onerr ? `onerror="${thumb.onerr}"` : ''}>
+        <article class="ev-card" data-key="${key}">
+          <div class="ev-cover" data-open-modal>
+            <img src="${t.src}" alt="${ev.name} cover" onerror="${t.onerr}">
           </div>
-          <div class="ev-body">
+          <div class="ev-body" data-open-modal>
             <div class="ev-title">${ev.name}</div>
             <div class="ev-date">${toDateStr(ev.date)}</div>
             <div class="ev-meta">
@@ -433,9 +384,8 @@
           </div>
           <div class="ev-actions">
             ${vodUrl ? `<a class="btn" href="${vodUrl}" target="_blank" rel="noopener">▶ Watch Replay</a>` : ''}
-            <button class="btn" data-card-toggle type="button" aria-expanded="false" aria-controls="det-${slugify(ev.name)}-${ev.dateStr}">Card</button>
+            <button class="btn" type="button" data-open-modal>Details</button>
           </div>
-          <div id="det-${slugify(ev.name)}-${ev.dateStr}" class="ev-details" hidden></div>
         </article>
       `;
     }
@@ -478,60 +428,129 @@
       input.addEventListener('input', apply);
     }
 
-    function wireCardToggles(events){
-      const host = document.getElementById('archive');
+    function wireModal(events, eventsJson){
+      const backdrop = document.getElementById('evBackdrop');
+      const posterEl = document.getElementById('evPoster');
+      const titleEl  = document.getElementById('evTitle');
+      const writeEl  = document.getElementById('evWriteup');
+      const cardGrid = document.getElementById('evCardGrid');
 
-      function buildDetails(ev){
-        return `
-          <div class="fight-grid">
-            ${ev.fights.map(fightRow).join('')}
-          </div>
-        `;
+      function open(ev){
+        titleEl.textContent = ev.name + ' — ' + toDateStr(ev.date);
+
+        const p = posterGuess(ev.name);
+        posterEl.src = p.src;
+        posterEl.alt = `${ev.name} poster`;
+        if (p.onerr) posterEl.setAttribute('onerror', p.onerr);
+
+        const key = ev.name.trim();
+        const w = eventsJson && eventsJson[key] && eventsJson[key].writeup;
+        writeEl.innerHTML = w ? w : `<p>No write-up for this event yet.</p>`;
+
+        cardGrid.innerHTML = ev.fights.map(fightRow).join('');
+
+        backdrop.classList.add('show');
+        backdrop.setAttribute('aria-hidden','false');
+        document.body.style.overflow = 'hidden';
       }
 
-      host.addEventListener('click', (e)=>{
-        const card = e.target.closest('.ev-card');
-        if (!card) return;
+      function close(){
+        backdrop.classList.remove('show');
+        backdrop.setAttribute('aria-hidden','true');
+        document.body.style.overflow = '';
+      }
 
-        if (e.target.matches('[data-card-toggle]') || e.target.closest('.ev-body') || e.target.closest('.ev-cover')) {
+      document.addEventListener('click', (e)=>{
+        if (e.target.closest('[data-close]')) close();
+        if (e.target === backdrop) close();
+        const openBtn = e.target.closest('[data-open-modal]');
+        if (openBtn){
+          const card = openBtn.closest('.ev-card');
+          if (!card) return;
           const key = card.getAttribute('data-key');
           const ev = events.find(x => `${x.name}||${x.dateStr}` === key);
-          if (!ev) return;
-
-          const details = card.querySelector('.ev-details');
-          const btn = card.querySelector('[data-card-toggle]');
-          const open = details.classList.toggle('open');
-          details.hidden = !open;
-          if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-          if (open && !details.hasChildNodes()) details.innerHTML = buildDetails(ev);
+          if (ev) open(ev);
         }
       });
+      document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') close(); });
+    }
 
-      host.addEventListener('keydown', (e)=>{
-        if (e.key === 'Enter'){
-          const card = e.target.closest('.ev-card');
-          if (!card) return;
-          const clickTarget = card.querySelector('[data-card-toggle]') || card;
-          clickTarget.click();
+    function setHero(up){
+      const t = document.getElementById('heroTitle');
+      const d = document.getElementById('heroDate');
+      const p = document.getElementById('heroPoster');
+      if (!up){
+        t.textContent = 'No upcoming event scheduled';
+        d.textContent = '';
+        p.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'Stay tuned for the next card'}));
+        document.getElementById('countdown').style.display='none';
+        return;
+      }
+      t.textContent = up.name;
+      d.textContent = toDateStr(up.date);
+
+      const {src,onerr} = posterGuess(up.name);
+      p.src = src;
+      if (onerr) p.setAttribute('onerror', onerr);
+
+      // Countdown
+      const cd = document.getElementById('countdown');
+      cd.style.display = '';
+      const dEl = document.getElementById('d');
+      const hEl = document.getElementById('h');
+      const mEl = document.getElementById('m');
+      const sEl = document.getElementById('s');
+
+      function tick(){
+        const now = new Date();
+        const diff = up.date - now;
+        if (diff <= 0){
+          dEl.textContent = '0'; hEl.textContent = '0'; mEl.textContent = '0'; sEl.textContent = '0';
+          return;
         }
-      });
+        const sec = Math.floor(diff/1000);
+        const days = Math.floor(sec/86400);
+        const hours = Math.floor((sec%86400)/3600);
+        const mins = Math.floor((sec%3600)/60);
+        const secs = sec%60;
+        dEl.textContent = days;
+        hEl.textContent = String(hours).padStart(2,'0');
+        mEl.textContent = String(mins).padStart(2,'0');
+        sEl.textContent = String(secs).padStart(2,'0');
+      }
+      tick();
+      setInterval(tick, 1000);
     }
 
     (async function(){
       try{
-        const [events, vods] = await Promise.all([loadEvents(), fetchJSON('assets/data/vods.json')]);
+        const [events, vods, eventsJson] = await Promise.all([
+          loadEvents(),
+          fetch('assets/data/vods.json').then(r=>r.ok?r.json():({})).catch(()=>({})),
+          fetch('assets/data/events.json').then(r=>r.ok?r.json():({})).catch(()=>({}))
+        ]);
 
-        const now = new Date();
-        now.setSeconds(0,0);
+        const now = new Date(); now.setSeconds(0,0);
         const future = events.filter(e => e.date && e.date >= now).sort((a,b)=> a.date - b.date);
         const upcoming = future[0] || null;
         const past = events.filter(e => e.date && e.date < now);
 
         setHero(upcoming);
-        renderSpotlight(upcoming);
+        // Spotlight (main event is last fight listed)
+        if (upcoming && upcoming.fights.length){
+          document.getElementById('spotlightCard').style.display='';
+          const main = upcoming.fights[upcoming.fights.length-1];
+          document.getElementById('meAImg').src = headshotPath(main.a);
+          document.getElementById('meBImg').src = headshotPath(main.b);
+          document.getElementById('meAName').textContent = main.a;
+          document.getElementById('meBName').textContent = main.b;
+          document.getElementById('meMeta').textContent = 'Five rounds · Five minutes · No judges · Ring only';
+          document.getElementById('upFightList').innerHTML = upcoming.fights.map(fightRow).join('');
+        }
+
         renderArchive(past, vods || {});
         wireFilter(past);
-        wireCardToggles(events);
+        wireModal(events, eventsJson);
       }catch(err){
         console.error(err);
         document.getElementById('heroTitle').textContent = 'Failed to load events';
@@ -547,6 +566,7 @@
         const mount = document.getElementById("navbar");
         if (mount) mount.innerHTML = html;
 
+        // Mobile menu toggle
         const btn = document.getElementById("menuBtn");
         const menu = document.getElementById("primaryMenu");
         if (btn && menu){
@@ -556,10 +576,11 @@
           });
         }
 
-        const path = location.pathname;
+        // Active link
+        const path = location.pathname.replace(/\/+$/,'');
         document.querySelectorAll("#primaryMenu a.item").forEach(a => {
           try {
-            const hrefPath = new URL(a.href, location.origin).pathname;
+            const hrefPath = new URL(a.href, location.origin).pathname.replace(/\/+$/,'');
             if (hrefPath === path) a.classList.add("active");
           } catch(e){}
         });
