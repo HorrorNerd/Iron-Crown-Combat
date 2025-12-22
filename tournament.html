@@ -61,6 +61,13 @@
     .noimg img.thumb { display:none; }
 
     .name { font-weight: 600; line-height: 1.15; }
+    .name .name-wrap { display:flex; align-items:flex-start; justify-content:space-between; gap:.45rem; }
+    .fighter-name { display:inline-block; }
+    .seed-badge {
+      font-size: .78em; font-weight: 700; color: var(--muted);
+      padding: .1rem .35rem; border: 1px solid var(--border);
+      border-radius: 6px; background: var(--bg-2); line-height: 1;
+    }
     .sub { color: var(--muted); font-size: .85em; }
 
     .match.winner {
@@ -200,13 +207,27 @@
       return null;
     }
 
+    function parseSeededName(name){
+      const raw = String(name || '').trim();
+      const m = raw.match(/^#?\s*(\d+)\s+(.*)$/);
+      if (m) return { seed: `#${m[1]}`, display: m[2] };
+      return { seed: null, display: raw };
+    }
+
     function matchHTML({name, isWinner, isA, imgUrl, isChampion}){
       const noImg = imgUrl ? '' : 'noimg';
       const crown = isChampion ? `<span class="badge-crown">👑 Champion</span>` : '';
+      const { seed, display } = parseSeededName(name);
+      const seedHTML = seed ? `<span class="seed-badge">${seed}</span>` : '';
       return `
         <div class="match ${isWinner ? 'winner':''} ${noImg} ${isA ? 'receives':''}">
           <img class="thumb" src="${imgUrl || ''}" alt="" onerror="this.closest('.match').classList.add('noimg')" />
-          <span class="name">${name}</span>
+          <span class="name">
+            <span class="name-wrap">
+              <span class="fighter-name">${display}</span>
+              ${seedHTML}
+            </span>
+          </span>
           ${crown}
         </div>
       `;
