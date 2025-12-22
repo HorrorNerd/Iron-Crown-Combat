@@ -13,6 +13,11 @@
         { "a": "#6 Brielle Fontaine",     "b": "#11 S’ri-Prai-Chaiya",    "winner": "a" },
         { "a": "#2 Sophia Rodriques",     "b": "#15 MommaSweet",          "winner": "a" },
         { "a": "#7 Tina Wilder",          "b": "#10 Natsume Tokonuto",    "winner": "a" }
+        { "a": "#5 Reiko Draven",         "b": "#12 Marisol Cruz",        "winner":  },
+        { "a": "#3 Abigail Jones",        "b": "#14 Jaymie Estrada",      "winner": "a" },
+        { "a": "#6 Brielle Fontaine",     "b": "#11 S’ri-Prai-Chaiya",    "winner":  },
+        { "a": "#2 Sophia Rodriques",     "b": "#15 MommaSweet",          "winner": },
+        { "a": "#7 Tina Wilder",          "b": "#10 Natsume Tokonuto",    "winner":  }ii
       ]
     }
   ]
