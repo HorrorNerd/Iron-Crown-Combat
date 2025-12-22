@@ -141,6 +141,11 @@
     document.getElementById('yr').textContent = new Date().getFullYear();
 
     const LIST_URL = 'assets/data/tournaments.json';
+    const DEFAULT_TOURNAMENTS = [
+      { slug:'iron-trial', name:'The Iron Trial', year:2025, published:true },
+      { slug:'king-of-the-crown', name:'King of the Crown', year:2024 },
+      { slug:'queen-of-the-crown', name:'Queen of the Crown', year:2025, published:true }
+    ];
     const DATA_URL = slug => `assets/data/tournaments/${slug}.json`;
     const FIGHTERS_URL = 'assets/fighters.json';
     const STORAGE_KEY = 'icc:lastTournament';
@@ -298,8 +303,12 @@
 
       // Load tournament list
       let list;
-      try { list = await fetchJSON(LIST_URL); }
-      catch { list = [{ slug:'iron-trial', name:'The Iron Trial', year:new Date().getFullYear() }]; }
+      try {
+        const loaded = await fetchJSON(LIST_URL);
+        list = Array.isArray(loaded) ? loaded : DEFAULT_TOURNAMENTS;
+      } catch {
+        list = DEFAULT_TOURNAMENTS;
+      }
 
       const sel = document.getElementById('t-select');
       sel.innerHTML = list.map(t => `<option value="${t.slug}">${t.name}${t.year ? ' ('+t.year+')':''}</option>`).join('');
