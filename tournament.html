@@ -60,7 +60,15 @@
     }
     .noimg img.thumb { display:none; }
 
-    .name { font-weight: 600; line-height: 1.15; }
+    .name { font-weight: 600; line-height: 1.15; position: relative; padding-right: 2.4rem; }
+    .name .name-wrap { display:flex; align-items:flex-start; gap:.35rem; }
+    .fighter-name { display:inline-block; }
+    .seed-badge {
+      position: absolute; top: 0; right: 0;
+      font-size: .72em; font-weight: 700; color: var(--muted);
+      padding: .1rem .35rem; border: 1px solid var(--border);
+      border-radius: 6px; background: var(--bg-2); line-height: 1;
+    }
     .sub { color: var(--muted); font-size: .85em; }
 
     .match.winner {
@@ -134,6 +142,11 @@
     document.getElementById('yr').textContent = new Date().getFullYear();
 
     const LIST_URL = 'assets/data/tournaments.json';
+    const DEFAULT_TOURNAMENTS = [
+      { slug:'iron-trial', name:'The Iron Trial', year:2025, published:true },
+      { slug:'king-of-the-crown', name:'King of the Crown', year:2024 },
+      { slug:'queen-of-the-crown', name:'Queen of the Crown', year:2025, published:true }
+    ];
     const DATA_URL = slug => `assets/data/tournaments/${slug}.json`;
     const FIGHTERS_URL = 'assets/fighters.json';
     const STORAGE_KEY = 'icc:lastTournament';
@@ -200,13 +213,27 @@
       return null;
     }
 
+    function parseSeededName(name){
+      const raw = String(name || '').trim();
+      const m = raw.match(/^#?\s*(\d+)\s+(.*)$/);
+      if (m) return { seed: `#${m[1]}`, display: m[2] };
+      return { seed: null, display: raw };
+    }
+
     function matchHTML({name, isWinner, isA, imgUrl, isChampion}){
       const noImg = imgUrl ? '' : 'noimg';
       const crown = isChampion ? `<span class="badge-crown">👑 Champion</span>` : '';
+      const { seed, display } = parseSeededName(name);
+      const seedHTML = seed ? `<span class="seed-badge">${seed}</span>` : '';
       return `
         <div class="match ${isWinner ? 'winner':''} ${noImg} ${isA ? 'receives':''}">
           <img class="thumb" src="${imgUrl || ''}" alt="" onerror="this.closest('.match').classList.add('noimg')" />
-          <span class="name">${name}</span>
+          <span class="name">
+            <span class="name-wrap">
+              <span class="fighter-name">${display}</span>
+              ${seedHTML}
+            </span>
+          </span>
           ${crown}
         </div>
       `;
@@ -277,8 +304,12 @@
 
       // Load tournament list
       let list;
-      try { list = await fetchJSON(LIST_URL); }
-      catch { list = [{ slug:'iron-trial', name:'The Iron Trial', year:new Date().getFullYear() }]; }
+      try {
+        const loaded = await fetchJSON(LIST_URL);
+        list = Array.isArray(loaded) ? loaded : DEFAULT_TOURNAMENTS;
+      } catch {
+        list = DEFAULT_TOURNAMENTS;
+      }
 
       const sel = document.getElementById('t-select');
       sel.innerHTML = list.map(t => `<option value="${t.slug}">${t.name}${t.year ? ' ('+t.year+')':''}</option>`).join('');
