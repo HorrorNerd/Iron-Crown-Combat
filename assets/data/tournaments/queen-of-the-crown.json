@@ -3,16 +3,38 @@
   "published": true,
   "rounds": [
     {
-      "name": "First Round",
+      "name": "Round of 16",
       "matches": [
-        { "a": "#1 Augg Action",          "b": "#16 Liang Qui",           "winner": "b" },
-        { "a": "#8 Patricia Mavis Stokes", "b": "#9 Hotarubi Kendo",      "winner": "a" },
-        { "a": "#4 Veronica Kane",        "b": "#13 Shabba Jay",          "winner": "b" },
-        { "a": "#5 Reiko Draven",         "b": "#12 Marisol Cruz",        "winner": "" },
-        { "a": "#3 Abigail Jones",        "b": "#14 Jaymie Estrada",      "winner": "a" },
-        { "a": "#6 Brielle Fontaine",     "b": "#11 S’ri-Prai-Chaiya",    "winner": "" },
-        { "a": "#2 Sophia Rodriques",     "b": "#15 MommaSweet",          "winner": "" },
-        { "a": "#7 Tina Wilder",          "b": "#10 Natsume Tokonuto",    "winner": "" }
+        { "a": "#1 Augg Action",           "b": "#16 Liang Qui",            "winner": "b" },
+        { "a": "#8 Patricia Mavis Stokes", "b": "#9 Hotarubi Kendo",        "winner": "a" },
+        { "a": "#4 Veronica Kane",         "b": "#13 Shabba Jay",           "winner": "b" },
+        { "a": "#5 Reiko Draven",          "b": "#12 Marisol Cruz",         "winner": "" },
+        { "a": "#3 Abigail Jones",         "b": "#14 Jaymie Estrada",       "winner": "a" },
+        { "a": "#6 Brielle Fontaine",      "b": "#11 S’ri-Prai-Chaiya",     "winner": "" },
+        { "a": "#2 Sophia Rodriques",      "b": "#15 MommaSweet",           "winner": "" },
+        { "a": "#7 Tina Wilder",           "b": "#10 Natsume Tokonuto",     "winner": "" }
+      ]
+    },
+    {
+      "name": "Quarterfinals",
+      "matches": [
+        { "a": "Liang Qui",                        "b": "Patricia Mavis Stokes",          "winner": "" },
+        { "a": "Shabba Jay",                       "b": "Winner of Round of 16 Match 4",  "winner": "" },
+        { "a": "Abigail Jones",                    "b": "Winner of Round of 16 Match 6",  "winner": "" },
+        { "a": "Winner of Round of 16 Match 7",    "b": "Winner of Round of 16 Match 8",  "winner": "" }
+      ]
+    },
+    {
+      "name": "Semifinals",
+      "matches": [
+        { "a": "Winner of Quarterfinal 1", "b": "Winner of Quarterfinal 2", "winner": "" },
+        { "a": "Winner of Quarterfinal 3", "b": "Winner of Quarterfinal 4", "winner": "" }
+      ]
+    },
+    {
+      "name": "Final",
+      "matches": [
+        { "a": "Winner of Semifinal 1", "b": "Winner of Semifinal 2", "winner": "" }
       ]
     }
   ]
