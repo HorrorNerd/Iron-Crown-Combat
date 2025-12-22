@@ -171,6 +171,95 @@ body {
 .prose { text-align: left; white-space: pre-wrap; line-height: 1.6; }
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
+/* ---- Hero ---- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 6vw, 4rem) 0 3rem;
+  isolation: isolate;
+}
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(229,105,21,.16), transparent 36%),
+    radial-gradient(circle at 80% 30%, rgba(212,175,55,.18), transparent 45%),
+    linear-gradient(135deg, #0c0d12, #0f1118);
+}
+.hero__bg-anim {
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(circle at 30% 60%, rgba(229,105,21,.22), transparent 40%),
+    radial-gradient(circle at 70% 40%, rgba(72,110,255,.16), transparent 42%);
+  filter: blur(36px);
+  animation: heroPulse 14s ease-in-out infinite;
+  opacity: .7;
+}
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(8,8,12,.82), rgba(8,8,12,.94));
+  pointer-events: none;
+}
+.hero__content {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: .8rem;
+  justify-items: center;
+  text-align: center;
+}
+.hero__content h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  letter-spacing: .02em;
+}
+.hero__content p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 760px;
+}
+.hero__actions {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  justify-content: center;
+}
+.hero .ring {
+  position: absolute;
+  inset: clamp(1rem, 4vw, 2.4rem);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 24px;
+  z-index: 2;
+}
+.btn.ghost {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.16);
+  color: var(--text);
+}
+.btn.ghost:hover {
+  border-color: var(--accent);
+  background: rgba(229,105,21,.12);
+  color: var(--text);
+}
+.btn.ghost:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px rgba(229,105,21,.5);
+}
+@keyframes heroPulse {
+  0% { transform: scale(1); opacity: .7; }
+  50% { transform: scale(1.08); opacity: .95; }
+  100% { transform: scale(1); opacity: .7; }
+}
+
 /* ---- Pagehead ---- */
 .pagehead { margin: 1.2rem 0; }
 .pagehead h1 { margin: 0; font-size: clamp(1.4rem, 2vw, 1.9rem); letter-spacing:.02em; }
