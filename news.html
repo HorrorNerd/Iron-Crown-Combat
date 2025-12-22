@@ -8,6 +8,10 @@
 
   <!-- Modal styles kept inline so this page works by itself -->
   <style>
+    .news-head { display:flex; flex-wrap:wrap; align-items:center; gap:.75rem; justify-content:space-between; }
+    .news-controls { display:flex; align-items:center; gap:.5rem; }
+    .news-controls label { font-size:.9rem; color: var(--muted); }
+    .news-controls select { background:var(--bg-2); color:inherit; border:1px solid var(--border); border-radius:12px; padding:.4rem .75rem; font:inherit; }
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 50; }
     .modal-backdrop.show { display: flex; }
     .modal { background: var(--bg-2); border: 1px solid var(--border); border-radius: 16px; max-width: min(800px, 92%); max-height: 85vh; overflow: auto; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
@@ -23,9 +27,18 @@
   <div id="navbar"></div>
 
   <main class="container">
-    <div class="pagehead"><h1>News</h1></div>
+    <div class="pagehead news-head">
+      <h1 style="margin:0;">News</h1>
+      <div class="news-controls">
+        <label for="news-sort">Sort</label>
+        <select id="news-sort" aria-label="Sort articles">
+          <option value="desc">Newest first</option>
+          <option value="asc">Oldest first</option>
+        </select>
+      </div>
+    </div>
 
-    <!-- List populated from Google Sheets (News tab) -->
+    <!-- List populated from local JSON -->
     <section class="grid grid-2" id="news-list">
       <div class="card">Loading news…</div>
     </section>
@@ -55,13 +68,10 @@
     // --- year ---
     document.getElementById('yr').textContent = new Date().getFullYear();
 
-    // --- NEWS (GViz JSON) ---
+    // --- NEWS (local JSON) ---
     (function(){
-      const SHEET_ID = '1l8KRwK2D3Uyc6WTqqc6KO95nBqtfJ2WAnQSu6zyFicU';
-      const GID_NEWS = '1273524900'; // News tab
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID_NEWS}`;
-
       const list   = document.getElementById('news-list');
+      const sort   = document.getElementById('news-sort');
       const modal  = document.getElementById('news-modal');
       const mTitle = document.getElementById('news-modal-title');
       const mDate  = document.getElementById('news-modal-date');
@@ -69,20 +79,12 @@
 
       let NEWS = [];
 
-      function parseGViz(text){
-        const start = text.indexOf('{');
-        const end   = text.lastIndexOf('}');
-        const json  = JSON.parse(text.slice(start, end + 1));
-        const cols  = json.table.cols.map(c => c.label || c.id);
-        return (json.table.rows || []).map(r => {
-          const obj = {};
-          cols.forEach((label, i) => {
-            const cell = r.c[i];
-            obj[label] = cell ? cell.v : '';
-          });
-          return obj;
-        });
-      }
+      const dateFmt = new Intl.DateTimeFormat('en-US', { month:'short', day:'numeric', year:'numeric' });
+      const normalizeDate = v => {
+        if (!v) return null;
+        const d = new Date(v);
+        return Number.isNaN(d.getTime()) ? null : d;
+      };
 
       function pFormat(article){
         if (!article) return '';
@@ -94,11 +96,14 @@
       }
 
       function openModal(idx){
-        const row = NEWS[idx];
+        const row = NEWS[idx] || NEWS.find(n => n.id === idx);
         if (!row) return;
-        mTitle.textContent = row['Title'] || 'Update';
-        mDate.textContent  = row['Date']  || '';
-        mBody.innerHTML    = pFormat(row['Article'] || '');
+        const title = row.title || row.Title || 'Update';
+        const rawDate = row.date || row.Date;
+        const parsed = normalizeDate(rawDate);
+        mTitle.textContent = title;
+        mDate.textContent  = parsed ? dateFmt.format(parsed) : (rawDate || '');
+        mBody.innerHTML    = pFormat(row.body || row.Article || '');
         modal.classList.add('show');
         modal.setAttribute('aria-hidden','false');
         document.body.style.overflow = 'hidden';
@@ -117,25 +122,36 @@
       });
       document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeModal(); });
 
+      function render(){
+        if (!list) return;
+        const enriched = NEWS.map((row, i) => ({ ...row, _idx: i }));
+        const sorted = enriched.sort((a,b)=>{
+          const aDate = normalizeDate(a.date || a.Date)?.getTime() || 0;
+          const bDate = normalizeDate(b.date || b.Date)?.getTime() || 0;
+          return (sort?.value || 'desc') === 'asc' ? aDate - bDate : bDate - aDate;
+        });
+        list.innerHTML = sorted.map(row => {
+          const title = row.title || row.Title || 'Update';
+          const rawDate = row.date || row.Date;
+          const parsed = normalizeDate(rawDate);
+          const pretty = parsed ? dateFmt.format(parsed) : (rawDate || '');
+          return `
+            <article class="card">
+              <h3 style="margin-bottom:.25rem">${title}</h3>
+              ${pretty ? `<div class="meta">${pretty}</div>` : ''}
+              <div style="margin-top:.5rem">
+                <a class="btn" href="javascript:void(0)" data-news-open="${row._idx}">Read more</a>
+              </div>
+            </article>`;
+        }).join('');
+      }
+
       async function loadNews(){
         try{
-          const res  = await fetch(url, {cache:'no-store'});
-          const text = await res.text();
-          NEWS = parseGViz(text);
-
-          // Build cards: Title, Date under it, Read more
-          list.innerHTML = NEWS.map((row, i) => {
-            const title = row['Title'] || 'Update';
-            const date  = row['Date']  || '';
-            return `
-              <article class="card">
-                <h3 style="margin-bottom:.25rem">${title}</h3>
-                ${date ? `<div class="meta">${date}</div>` : ''}
-                <div style="margin-top:.5rem">
-                  <a class="btn" href="javascript:void(0)" data-news-open="${i}">Read more</a>
-                </div>
-              </article>`;
-          }).join('');
+          const res  = await fetch('assets/data/news.json', {cache:'no-store'});
+          const data = await res.json();
+          NEWS = Array.isArray(data) ? data : (data.news || []);
+          render();
         } catch (err){
           console.error(err);
           list.innerHTML = `<div class="card">Failed to load news.</div>`;
@@ -143,6 +159,9 @@
       }
 
       loadNews();
+      if (sort){
+        sort.addEventListener('change', render);
+      }
     })();
   </script>
 
