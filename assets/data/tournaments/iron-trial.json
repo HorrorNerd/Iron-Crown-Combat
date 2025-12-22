@@ -1,5 +1,7 @@
 {
   "name": "The Iron Trial",
+  "champion": "Augg Action",
+  "published": true,
   "rounds": [
     {
       "name": "Quarterfinals",
@@ -14,13 +16,13 @@
       "name": "Semifinals",
       "matches": [
         { "a": "Abigail Jones", "b": "Rich Action", "winner": "a" },
-        { "a": "Sophia Rodriques", "b": "Augg Action", "winner": null }
+        { "a": "Sophia Rodriques", "b": "Augg Action", "winner": "b" }
       ]
     },
     {
       "name": "Final",
       "matches": [
-        { "a": "Abigail Jones", "b": "Winner of Sophia Rodriques / Augg Action", "winner": null }
+        { "a": "Abigail Jones", "b": "Augg Action", "winner": "b" }
       ]
     }
   ]
