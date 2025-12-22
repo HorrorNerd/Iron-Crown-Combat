@@ -186,6 +186,12 @@
 
   // ===== NEWS with modal =====
   let NEWS_CACHE = [];
+  const newsDateFmt = new Intl.DateTimeFormat('en-US', { month:'short', day:'numeric', year:'numeric' });
+  const normalizeDate = v => {
+    if (!v) return null;
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
   function formatArticle(text){
     if (!text) return '';
     // Split on blank lines to paragraphs; keep single newlines as breaks
@@ -199,9 +205,11 @@
     const b = document.getElementById('news-modal-body');
     const row = NEWS_CACHE[idx];
     if (!row) return;
-    t.textContent = row['Title'] || 'Update';
-    d.textContent = row['Date']  || '';
-    b.innerHTML   = formatArticle(row['Article'] || '');
+    const rawDate = row.date || row.Date || '';
+    const parsed = normalizeDate(rawDate);
+    t.textContent = row.title || row.Title || 'Update';
+    d.textContent = parsed ? newsDateFmt.format(parsed) : rawDate;
+    b.innerHTML   = formatArticle(row.body || row.Article || '');
     m.classList.add('show');
     m.setAttribute('aria-hidden','false');
     document.body.style.overflow = 'hidden';
@@ -226,17 +234,22 @@
     const list = document.getElementById('news-list');
     if (!list) return;
     try{
-      const rows = await fetchCSV(GID_NEWS);
+      const res  = await fetch('assets/data/news.json', { cache:'no-store' });
+      const data = await res.json();
+      const rows = Array.isArray(data) ? data : (data.news || []);
       NEWS_CACHE = rows;
-      list.innerHTML = rows.map((r,i)=>{
-        const date  = r['Date']  || '';
-        const title = r['Title'] || 'Update';
+      list.innerHTML = rows
+        .map((r,i)=>{
+          const rawDate = r.date || r.Date || '';
+          const parsed = normalizeDate(rawDate);
+          const pretty = parsed ? newsDateFmt.format(parsed) : rawDate;
+          const title = r.title || r.Title || 'Update';
         return `
           <article class="card">
             <h3 style="margin-bottom:.2rem">
               <button class="btn" style="padding:.35rem .7rem;border-radius:10px" data-news-idx="${i}" aria-haspopup="dialog">${title}</button>
             </h3>
-            ${date ? `<div class="meta">${date}</div>` : ''}
+            ${pretty ? `<div class="meta">${pretty}</div>` : ''}
           </article>`;
       }).join('');
     } catch (e){
