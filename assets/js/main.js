@@ -53,8 +53,8 @@
   async function loadRankings(){
     const champBox   = document.getElementById('champion-box');
     const moneyBody  = document.getElementById('earnings-body');
-    const winsBody   = document.getElementById('wins-body');
-    if (!champBox && !moneyBody && !winsBody) return;
+    const recordBody = document.getElementById('record-body');
+    if (!champBox && !moneyBody && !recordBody) return;
 
     try {
       // Fighter Tracker columns: Fighter, Wins, Losses, Draws, Total Fights, Gender, Earnings, Bio, Image, Gym, Win %
@@ -76,7 +76,9 @@
       }
 
       if (moneyBody){
-        const byMoney = [...rows].sort((a,b)=> toNumber(b['Earnings']) - toNumber(a['Earnings']));
+        const byMoney = [...rows]
+          .sort((a,b)=> toNumber(b['Earnings']) - toNumber(a['Earnings']))
+          .slice(0, 10);
         moneyBody.innerHTML = byMoney.map((r,i)=>`
           <tr>
             <td>${i+1}</td>
@@ -86,19 +88,29 @@
           </tr>`).join('');
       }
 
-      if (winsBody){
-        const byWins = [...rows].sort((a,b)=> toNumber(b['Wins']) - toNumber(a['Wins']));
-        winsBody.innerHTML = byWins.map((r,i)=>`
+      if (recordBody){
+        const withRecord = rows.map(r=>{
+          const wins = toNumber(r['Wins']);
+          const losses = toNumber(r['Losses']);
+          const total = wins + losses;
+          const pct = total ? (wins / total) * 100 : 0;
+          return { ...r, wins, losses, pct };
+        });
+        const byRecord = withRecord
+          .sort((a,b)=> b.pct !== a.pct ? b.pct - a.pct : b.wins - a.wins)
+          .slice(0, 10);
+        recordBody.innerHTML = byRecord.map((r,i)=>`
           <tr>
             <td>${i+1}</td>
             <td>${r['Fighter']||''}</td>
             <td>${r['Gym']||''}</td>
-            <td>${toNumber(r['Wins'])}</td>
+            <td>${r.wins}–${r.losses}</td>
+            <td>${r.pct.toFixed(1)}%</td>
           </tr>`).join('');
       }
     } catch (e){
       if (moneyBody) moneyBody.innerHTML = `<tr><td colspan="4">Failed to load earnings.</td></tr>`;
-      if (winsBody)  winsBody.innerHTML  = `<tr><td colspan="4">Failed to load wins.</td></tr>`;
+      if (recordBody)  recordBody.innerHTML  = `<tr><td colspan="5">Failed to load records.</td></tr>`;
       console.error(e);
     }
   }
