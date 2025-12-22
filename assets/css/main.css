@@ -339,6 +339,61 @@ body {
 }
 
 /* ===============================
+   News strip
+   =============================== */
+.strip {
+  margin: 2rem auto 0;
+  padding: 1.4rem 0 0;
+  border-top: 1px solid var(--border);
+}
+.strip-head {
+  display: grid;
+  gap: .3rem;
+  justify-items: center;
+  margin-bottom: .9rem;
+}
+.strip-head h2 { margin: 0; letter-spacing: .01em; }
+.strip-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: .8rem;
+  align-items: stretch;
+}
+.strip-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-2);
+  color: var(--text);
+  text-decoration: none;
+  text-align: left;
+  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background .18s ease, color .18s ease;
+}
+.strip-card:hover {
+  border-color: var(--accent);
+  background: var(--bg);
+  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+  transform: translateY(-1px);
+}
+.strip-card:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px rgba(229,105,21,.5);
+}
+.strip-text { display: grid; gap: .15rem; }
+.strip-text h3 { margin: 0; font-size: 1.05rem; letter-spacing: .01em; }
+.strip-arrow {
+  font-size: 1.25rem;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ===============================
    Footer
    =============================== */
 .footer-cta {
@@ -414,6 +469,11 @@ body {
 @media (max-width: 380px){
   .modal-left .fullpic { max-height: 38vh; }
   .badge { font-size: .8em; }
+}
+@media (max-width: 640px){
+  .strip { padding-top: 1.1rem; }
+  .strip-items { grid-template-columns: 1fr; gap: 1rem; }
+  .strip-card { padding: 1rem 1.1rem; }
 }
 /* Clamp navbar logo size everywhere, even if pages have global img rules */
 header.header .logo img.nav-logo {
