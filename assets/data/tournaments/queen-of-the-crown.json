@@ -1,0 +1,19 @@
+{
+  "name": "Queen of the Crown",
+  "published": true,
+  "rounds": [
+    {
+      "name": "First Round",
+      "matches": [
+        { "a": "#1 Augg Action",          "b": "#16 Liang Qui",           "winner": "b" },
+        { "a": "#8 Patricia Mavis Stokes", "b": "#9 Hotarubi Kendo",      "winner": "a" },
+        { "a": "#4 Veronica Kane",        "b": "#13 Shabba Jay",          "winner": "b" },
+        { "a": "#5 Reiko Draven",         "b": "#12 Marisol Cruz",        "winner": "" },
+        { "a": "#3 Abigail Jones",        "b": "#14 Jaymie Estrada",      "winner": "a" },
+        { "a": "#6 Brielle Fontaine",     "b": "#11 S’ri-Prai-Chaiya",    "winner": "" },
+        { "a": "#2 Sophia Rodriques",     "b": "#15 MommaSweet",          "winner": "" },
+        { "a": "#7 Tina Wilder",          "b": "#10 Natsume Tokonuto",    "winner": "" }
+      ]
+    }
+  ]
+}
