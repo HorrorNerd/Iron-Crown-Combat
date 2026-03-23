@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PapaSweet: Rescue Run</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#181c22; --panel2:#20252d; --text:#eceff4; --muted:#a7b0be;
+    --accent:#5ec97d; --danger:#d96b6b; --gold:#d7ba67; --blue:#70a7ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:linear-gradient(180deg,#0c0e12,#121722); color:var(--text)}
+  .wrap{max-width:1300px; margin:0 auto; padding:16px}
+  h1{margin:0 0 6px; font-size:28px}
+  .sub{color:var(--muted); margin-bottom:14px}
+  .layout{display:grid; grid-template-columns: 1fr 340px; gap:14px}
+  .panel{background:rgba(24,28,34,.96); border:1px solid #2a313c; border-radius:14px; box-shadow:0 12px 30px rgba(0,0,0,.25)}
+  #gameWrap{padding:14px}
+  canvas{display:block; width:100%; max-width:900px; aspect-ratio:1/1; background:#0b0d10; border-radius:12px; border:1px solid #313946; image-rendering: pixelated; margin:auto}
+  .hud{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-bottom:12px}
+  .stat{background:var(--panel2); padding:10px 12px; border-radius:10px; border:1px solid #303844; min-height:58px}
+  .stat .k{font-size:12px; color:var(--muted)}
+  .stat .v{font-size:18px; font-weight:700}
+  .right{padding:14px; display:flex; flex-direction:column; gap:12px}
+  .card{background:var(--panel2); border:1px solid #303844; border-radius:12px; padding:12px}
+  .card h2{margin:0 0 8px; font-size:16px}
+  .buttons{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
+  button{border:0; cursor:pointer; border-radius:10px; padding:10px 12px; background:#2a3341; color:var(--text); font-weight:700}
+  button:hover{filter:brightness(1.08)}
+  button.primary{background:linear-gradient(180deg,#62d684,#45b96a); color:#09110c}
+  button.warn{background:linear-gradient(180deg,#f0c86a,#d7a640); color:#1c1302}
+  button.danger{background:linear-gradient(180deg,#e07b7b,#c75656); color:#190505}
+  .log{height:260px; overflow:auto; font-size:14px; line-height:1.35; background:#11151b; border-radius:10px; padding:10px; border:1px solid #2b3340}
+  .log p{margin:0 0 8px}
+  .small{font-size:13px; color:var(--muted)}
+  .legend{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; font-size:13px}
+  .legend span{display:flex; align-items:center; gap:8px}
+  .dot{display:inline-block; width:14px; height:14px; border-radius:4px}
+  .controls ul{margin:8px 0 0 16px; padding:0}
+  .banner{padding:10px 12px; border-radius:10px; font-weight:700; display:none}
+  .banner.show{display:block}
+  .good{background:rgba(94,201,125,.15); border:1px solid rgba(94,201,125,.45)}
+  .bad{background:rgba(217,107,107,.15); border:1px solid rgba(217,107,107,.45)}
+  .gold{background:rgba(215,186,103,.14); border:1px solid rgba(215,186,103,.42)}
+  @media (max-width: 980px){
+    .layout{grid-template-columns:1fr}
+    .hud{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>PapaSweet: Rescue Run</h1>
+  <div class="sub">A humorous modern-society roguelike. Rescue MommaSweet, survive the city, and maybe reform a few gang members along the way.</div>
+  <div class="layout">
+    <div class="panel" id="gameWrap">
+      <div class="hud">
+        <div class="stat"><div class="k">Health</div><div class="v" id="hpStat">0 / 0</div></div>
+        <div class="stat"><div class="k">Money</div><div class="v" id="moneyStat">$0</div></div>
+        <div class="stat"><div class="k">Day / Clues</div><div class="v" id="dayStat">1 / 0</div></div>
+        <div class="stat"><div class="k">Weapon</div><div class="v" id="weaponStat">Bare Hands</div></div>
+      </div>
+      <canvas id="game" width="960" height="960" aria-label="game canvas"></canvas>
+    </div>
+
+    <div class="panel right">
+      <div id="statusBanner" class="banner"></div>
+
+      <div class="card">
+        <h2>Story</h2>
+        <div class="small">
+          MommaSweet defeated the villain inside a video game. He couldn't beat her there, so he reached into the real world for revenge.
+          Now PapaSweet is roaming the city, making money, gathering gear, visiting churches for strength, and chasing clues to the lair of <strong id="villainName">Dr. Glitchgrave</strong>.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Actions</h2>
+        <div class="buttons">
+          <button class="primary" id="newRunBtn">New Run</button>
+          <button id="loadBtn">Load Church Save</button>
+          <button id="restBtn">Rest / Use Tile</button>
+          <button id="talkBtn">Talk / Gospel</button>
+          <button id="missionBtn">Take Mission</button>
+          <button class="warn" id="helpBtn">Show Help</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Build</h2>
+        <div class="small" id="buildStats"></div>
+      </div>
+
+      <div class="card">
+        <h2>Legend</h2>
+        <div class="legend">
+          <span><i class="dot" style="background:#ffffff"></i>You</span>
+          <span><i class="dot" style="background:#ff7a7a"></i>Gang</span>
+          <span><i class="dot" style="background:#ffd166"></i>Shop</span>
+          <span><i class="dot" style="background:#81c784"></i>Church</span>
+          <span><i class="dot" style="background:#66b3ff"></i>Job</span>
+          <span><i class="dot" style="background:#c9a3ff"></i>NPC</span>
+          <span><i class="dot" style="background:#f28482"></i>Boss Lair</span>
+          <span><i class="dot" style="background:#808b96"></i>Building</span>
+        </div>
+      </div>
+
+      <div class="card controls">
+        <h2>Controls</h2>
+        <div class="small">Move with <strong>WASD</strong> or <strong>arrow keys</strong>. Walk into enemies to fight. Stand on a tile and press the action buttons or hotkeys.</div>
+        <ul class="small">
+          <li><strong>E</strong> rest / use current tile</li>
+          <li><strong>T</strong> talk / Gospel attempt</li>
+          <li><strong>M</strong> take mission</li>
+          <li><strong>N</strong> start a new run</li>
+          <li><strong>L</strong> load your last church save</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Run Log</h2>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const tileSize = 40;
+  const size = 24;
+  const saveKey = 'papasweet_rescue_run_save_v1';
+
+  const el = {
+    hp: document.getElementById('hpStat'),
+    money: document.getElementById('moneyStat'),
+    day: document.getElementById('dayStat'),
+    weapon: document.getElementById('weaponStat'),
+    log: document.getElementById('log'),
+    build: document.getElementById('buildStats'),
+    banner: document.getElementById('statusBanner'),
+    villainName: document.getElementById('villainName')
+  };
+
+  const villains = ['Dr. Glitchgrave', 'The Respawn Warden', 'Mr. Continue?', 'Pixel Vex', 'Lord Lagspike'];
+  const regulars = [
+    {name:'Bram', tags:['female','sharp','practical']},
+    {name:'Diamond', tags:['female','confident','hustler']},
+    {name:'Snowdriven', tags:['male','chill','observant']},
+    {name:'Robert', tags:['Irish','male','storyteller']},
+    {name:'Georgiaboy', tags:['male','friendly','local']},
+    {name:'Storming Normin', tags:['male','stormy','bold']},
+    {name:'Glorious Caleb', tags:['male','optimistic','dramatic']}
+  ];
+
+  const itemPools = {
+    funnyWeapons: [
+      {name:'Tube Sock of Justice', atk:[2,4], price:[15,30]},
+      {name:'Coupon Blaster', atk:[3,5], price:[18,34]},
+      {name:'Blessed Flip-Flop', atk:[2,5], price:[12,26]},
+      {name:'Keyboard Nunchucks', atk:[3,6], price:[22,40]},
+      {name:'Porch Chair Leg', atk:[4,7], price:[26,44]}
+    ],
+    realWeapons: [
+      {name:'Pocket Knife', atk:[4,7], price:[35,60]},
+      {name:'Bat', atk:[5,8], price:[40,70]},
+      {name:'Crowbar', atk:[6,9], price:[55,88]},
+      {name:'Old Revolver', atk:[7,11], price:[80,120]},
+      {name:'Shotgun', atk:[10,15], price:[120,170]}
+    ],
+    foods: [
+      {name:'Gas Station Burrito', heal:[5,9], price:[8,14]},
+      {name:'Chicken Box', heal:[10,15], price:[15,22]},
+      {name:'Sweet Tea', heal:[4,7], price:[6,10]},
+      {name:'Trail Mix', heal:[6,10], price:[9,15]},
+      {name:'Church Potluck Plate', heal:[12,18], price:[18,24]}
+    ],
+    buffs: [
+      {name:'Encouraging Verse', stat:'spirit', amt:[1,2]},
+      {name:'Good Walking Shoes', stat:'agility', amt:[1,2]},
+      {name:'Confidence Boost', stat:'speech', amt:[1,2]},
+      {name:'Range Time', stat:'attack', amt:[1,2]}
+    ]
+  };
+
+  const colors = {
+    road:'#1b2027', lot:'#242b34', wall:'#6b7280', player:'#ffffff', enemy:'#ff7a7a',
+    shop:'#ffd166', church:'#81c784', mission:'#66b3ff', npc:'#c9a3ff', lair:'#f28482',
+    clue:'#ffdf91', park:'#214127'
+  };
+
+  let game = null;
+
+  function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function chance(n){ return Math.random() < n; }
+  function shuffle(arr){ return [...arr].sort(() => Math.random()-0.5); }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+  function createRun() {
+    const villain = pick(villains);
+    const npcRoles = shuffle(regulars).map((r, i) => {
+      const roles = ['citizen', 'shopkeeper', 'mission giver', 'church volunteer', 'street informant'];
+      return {...r, role: roles[i % roles.length]};
+    });
+
+    const grid = Array.from({length:size}, () => Array.from({length:size}, () => ({type:'road'})));
+
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        if(x===0 || y===0 || x===size-1 || y===size-1) grid[y][x] = {type:'wall'};
+        else if(x % 4 !== 0 && y % 4 !== 0 && chance(0.55)) grid[y][x] = {type:'building'};
+      }
+    }
+
+    for(let i=2;i<size-2;i+=4){
+      for(let x=1;x<size-1;x++) grid[i][x] = {type:'road'};
+      for(let y=1;y<size-1;y++) grid[y][i] = {type:'road'};
+    }
+
+    for(let i=0;i<18;i++){
+      let x=rnd(1,size-2), y=rnd(1,size-2);
+      if(grid[y][x].type === 'road') grid[y][x] = {type:'park'};
+    }
+
+    const specials = [];
+    function placeTile(type, count){
+      let placed = 0;
+      while(placed < count){
+        const x=rnd(1,size-2), y=rnd(1,size-2);
+        if(grid[y][x].type === 'road' && !specials.some(s=>s.x===x && s.y===y)){
+          specials.push({x,y,type});
+          placed++;
+        }
+      }
+    }
+    placeTile('church', 3);
+    placeTile('shop', 4);
+    placeTile('mission', 4);
+    placeTile('npc', 7);
+    placeTile('clue', 5);
+
+    const lair = (() => {
+      while(true){
+        const x=rnd(size-6,size-3), y=rnd(size-6,size-3);
+        if(grid[y][x].type === 'road' && !specials.some(s=>s.x===x&&s.y===y)) return {x,y,type:'lair'};
+      }
+    })();
+    specials.push(lair);
+
+    const enemies = [];
+    const enemyCount = rnd(16,24);
+    for(let i=0;i<enemyCount;i++){
+      while(true){
+        const x=rnd(1,size-2), y=rnd(1,size-2);
+        if(grid[y][x].type === 'road' && !specials.some(s=>s.x===x&&s.y===y) && !enemies.some(e=>e.x===x&&e.y===y) && !(x===1&&y===1)){
+          enemies.push(makeEnemy(x,y));
+          break;
+        }
+      }
+    }
+
+    return {
+      villain,
+      grid,
+      specials,
+      enemies,
+      discoveredLair: false,
+      clues: 0,
+      day: 1,
+      turns: 0,
+      ended: false,
+      win: false,
+      player: {
+        name:'PapaSweet',
+        x:1, y:1, hp: 38, maxHp: 38,
+        money: 30,
+        attack: 4, defense: 2, speech: 3, spirit: 2, agility:2,
+        food: [],
+        buffs: [],
+        weapon: {name:'Bare Hands', atk:0, realism:'real'},
+        armor: {name:'Tough Hoodie', def:0},
+        mission: null,
+        inventory: []
+      },
+      shops: {},
+      npcRoles,
+      saveSpot: null
+    };
+  }
+
+  function makeEnemy(x,y){
+    const gangNames = ['Parking Lot Kings','Bluetooth Boys','Coupon Cartel','Night Shift Ninjas','Southside Wi-Fi','The Broken Controllers'];
+    return {
+      x,y,
+      name: pick(gangNames),
+      hp: rnd(10,20),
+      maxHp: 20,
+      atk: rnd(3,7),
+      def: rnd(0,3),
+      speechResist: rnd(1,6),
+      reward: rnd(8,25),
+      drops: chance(0.55)
+    };
+  }
+
+  function buildShopStock(){
+    const stock = [];
+    const weaponPool = [...itemPools.funnyWeapons, ...itemPools.realWeapons];
+    shuffle(weaponPool).slice(0, 3).forEach(w => {
+      stock.push({
+        type:'weapon',
+        name:w.name,
+        atk:rnd(...w.atk),
+        price:rnd(...w.price)
+      });
+    });
+    shuffle(itemPools.foods).slice(0, 3).forEach(f => {
+      stock.push({
+        type:'food',
+        name:f.name,
+        heal:rnd(...f.heal),
+        price:rnd(...f.price)
+      });
+    });
+    shuffle(itemPools.buffs).slice(0,2).forEach(b => {
+      stock.push({
+        type:'buff',
+        name:b.name,
+        stat:b.stat,
+        amt:rnd(...b.amt),
+        price:rnd(20,40)
+      });
+    });
+    return stock;
+  }
+
+  function log(msg){
+    const p = document.createElement('p');
+    p.innerHTML = msg;
+    el.log.prepend(p);
+  }
+
+  function banner(msg, kind='good'){
+    el.banner.className = `banner show ${kind}`;
+    el.banner.textContent = msg;
+    clearTimeout(banner._t);
+    banner._t = setTimeout(() => el.banner.className = 'banner', 2200);
+  }
+
+  function specialAt(x,y){
+    return game.specials.find(s=>s.x===x&&s.y===y);
+  }
+  function enemyAt(x,y){
+    return game.enemies.find(e=>e.x===x&&e.y===y);
+  }
+
+  function render(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        const tile = game.grid[y][x];
+        let color = colors.road;
+        if(tile.type === 'building') color = colors.lot;
+        if(tile.type === 'wall') color = '#4b5563';
+        if(tile.type === 'park') color = colors.park;
+        ctx.fillStyle = color;
+        ctx.fillRect(x*tileSize, y*tileSize, tileSize-1, tileSize-1);
+      }
+    }
+
+    for(const s of game.specials){
+      if(s.type==='lair' && !game.discoveredLair) continue;
+      const map = {church:colors.church, shop:colors.shop, mission:colors.mission, npc:colors.npc, lair:colors.lair, clue:colors.clue};
+      ctx.fillStyle = map[s.type] || '#fff';
+      roundRect(ctx, s.x*tileSize+7, s.y*tileSize+7, tileSize-14, tileSize-14, 8, true, false);
+      ctx.fillStyle = '#111';
+      ctx.font = 'bold 15px system-ui';
+      ctx.textAlign = 'center';
+      const label = {church:'✝', shop:'$', mission:'!', npc:'?', lair:'B', clue:'*'}[s.type] || '?';
+      ctx.fillText(label, s.x*tileSize + tileSize/2, s.y*tileSize + 25);
+    }
+
+    for(const e of game.enemies){
+      ctx.fillStyle = colors.enemy;
+      roundRect(ctx, e.x*tileSize+6, e.y*tileSize+6, tileSize-12, tileSize-12, 8, true, false);
+      ctx.fillStyle = '#2d0c0c';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('G', e.x*tileSize + tileSize/2, e.y*tileSize + 25);
+    }
+
+    ctx.fillStyle = colors.player;
+    roundRect(ctx, game.player.x*tileSize+5, game.player.y*tileSize+5, tileSize-10, tileSize-10, 8, true, false);
+    ctx.fillStyle = '#111';
+    ctx.font = 'bold 14px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('P', game.player.x*tileSize + tileSize/2, game.player.y*tileSize + 25);
+
+    updateHud();
+  }
+
+  function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+    if (typeof radius === 'number') radius = {tl: radius, tr: radius, br: radius, bl: radius};
+    ctx.beginPath();
+    ctx.moveTo(x + radius.tl, y);
+    ctx.lineTo(x + width - radius.tr, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+    ctx.lineTo(x + width, y + height - radius.br);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+    ctx.lineTo(x + radius.bl, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+    ctx.lineTo(x, y + radius.tl);
+    ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  function updateHud(){
+    const p = game.player;
+    el.hp.textContent = `${p.hp} / ${p.maxHp}`;
+    el.money.textContent = `$${p.money}`;
+    el.day.textContent = `${game.day} / ${game.clues}`;
+    el.weapon.textContent = `${p.weapon.name} (+${p.weapon.atk})`;
+    el.build.innerHTML = `
+      Attack <strong>${p.attack}</strong> · Defense <strong>${p.defense}</strong> · Speech <strong>${p.speech}</strong> · Spirit <strong>${p.spirit}</strong> · Agility <strong>${p.agility}</strong><br>
+      Food <strong>${p.food.length}</strong> · Inventory <strong>${p.inventory.length}</strong> · Mission <strong>${p.mission ? p.mission.name : 'None'}</strong>
+    `;
+    el.villainName.textContent = game.villain;
+  }
+
+  function tilePassable(x,y){
+    const tile = game.grid[y]?.[x];
+    return tile && tile.type !== 'wall' && tile.type !== 'building';
+  }
+
+  function move(dx,dy){
+    if(game.ended) return;
+    const nx = game.player.x + dx;
+    const ny = game.player.y + dy;
+    if(!tilePassable(nx,ny)) {
+      banner('Blocked.', 'bad');
+      return;
+    }
+    const e = enemyAt(nx,ny);
+    if(e){
+      fight(e);
+      endTurn();
+      return;
+    }
+    game.player.x = nx;
+    game.player.y = ny;
+    const sp = specialAt(nx,ny);
+    if(sp){
+      if(sp.type==='clue'){
+        game.clues += 1;
+        game.specials = game.specials.filter(s => !(s.x===sp.x && s.y===sp.y && s.type==='clue'));
+        log(`You found a clue. ${game.villain} is getting nervous.`);
+        if(game.clues >= 4){
+          game.discoveredLair = true;
+          banner('Boss lair discovered.', 'gold');
+          log(`Enough clues point to the lair. The boss hideout is now visible on the map.`);
+        }
+      } else if (sp.type==='lair' && game.discoveredLair){
+        bossFight();
+      }
+    }
+    endTurn();
+  }
+
+  function fight(enemy){
+    const p = game.player;
+    const playerHit = Math.max(1, rnd(1,6) + p.attack + p.weapon.atk - enemy.def);
+    enemy.hp -= playerHit;
+    log(`You fought <strong>${enemy.name}</strong> and dealt <strong>${playerHit}</strong>.`);
+    if(enemy.hp <= 0){
+      p.money += enemy.reward;
+      log(`${enemy.name} folded. You collected <strong>$${enemy.reward}</strong>.`);
+      if(enemy.drops && chance(0.4)){
+        const food = {type:'food', name:pick(itemPools.foods).name, heal:rnd(5,12), price:0};
+        p.food.push(food);
+        log(`They dropped <strong>${food.name}</strong>.`);
+      }
+      game.enemies = game.enemies.filter(e => e !== enemy);
+      if(p.mission && p.mission.type === 'clear' && !p.mission.done){
+        p.mission.progress++;
+        if(p.mission.progress >= p.mission.goal){
+          p.mission.done = true;
+          log(`Mission complete: <strong>${p.mission.name}</strong>. Turn it in on a blue job tile.`);
+          banner('Mission complete.', 'good');
+        }
+      }
+      return;
+    }
+    const enemyHit = Math.max(1, rnd(1,5) + enemy.atk - (p.defense + p.armor.def));
+    p.hp -= enemyHit;
+    log(`${enemy.name} hit back for <strong>${enemyHit}</strong>.`);
+    if(p.hp <= 0) loseRun('PapaSweet was overwhelmed before he could rescue MommaSweet.');
+  }
+
+  function bossFight(){
+    const p = game.player;
+    let bossHp = 28 + game.day * 2 + game.clues * 3;
+    log(`<strong>${game.villain}</strong> appears with a speech about revenge, bad patch notes, and unfinished business.`);
+    while(bossHp > 0 && p.hp > 0){
+      const ph = Math.max(2, rnd(2,8) + p.attack + p.weapon.atk + Math.floor(p.spirit/2));
+      bossHp -= ph;
+      log(`You hit ${game.villain} for <strong>${ph}</strong>.`);
+      if(bossHp <= 0) break;
+      const bh = Math.max(2, rnd(3,8) + game.day + 2 - (p.defense + p.armor.def));
+      p.hp -= bh;
+      log(`${game.villain} struck back for <strong>${bh}</strong>.`);
+    }
+    if(p.hp <= 0) loseRun(`${game.villain} won this round. MommaSweet is still out there.`);
+    else {
+      game.ended = true;
+      game.win = true;
+      banner('MommaSweet rescued!', 'good');
+      log(`<strong>You rescued MommaSweet.</strong> She handled the villain's monologue better than you did, then helped wrap up the job. The city is safe. For now.`);
+      render();
+    }
+  }
+
+  function tryTalk(){
+    if(game.ended) return;
+    const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+    for(const [dx,dy] of dirs){
+      const e = enemyAt(game.player.x+dx, game.player.y+dy);
+      if(e){
+        const roll = rnd(1,8) + game.player.speech + game.player.spirit;
+        const target = 6 + e.speechResist;
+        if(roll >= target){
+          game.enemies = game.enemies.filter(x => x !== e);
+          const gift = chance(0.55) ? {kind:'money', amt:rnd(12,35)} : {kind:'item', item:{type:'food', name:'Second Chance Sandwich', heal:rnd(8,15), price:0}};
+          log(`You shared the Gospel with <strong>${e.name}</strong>. They saw the error of their ways and left gang life behind.`);
+          if(gift.kind === 'money'){
+            game.player.money += gift.amt;
+            log(`The now-reformed citizen pressed <strong>$${gift.amt}</strong> into your hand.`);
+          } else {
+            game.player.food.push(gift.item);
+            log(`The reformed citizen gave you <strong>${gift.item.name}</strong>.`);
+          }
+          const stat = pick(['speech','spirit','defense']);
+          game.player[stat] += 1;
+          banner('A life changed.', 'good');
+          endTurn();
+          return;
+        } else {
+          log(`Your words reached ${e.name}, but not enough. They mocked your sermon and stayed hostile.`);
+          banner('They were not ready.', 'bad');
+          endTurn();
+          return;
+        }
+      }
+    }
+    const sp = specialAt(game.player.x, game.player.y);
+    if(sp && sp.type === 'npc'){
+      const role = pick(game.npcRoles);
+      if(chance(0.5)){
+        const tip = rnd(8,22);
+        game.player.money += tip;
+        log(`<strong>${role.name}</strong> (${role.role}) liked your message and donated <strong>$${tip}</strong> to the rescue effort.`);
+      } else {
+        game.player.spirit += 1;
+        game.player.speech += chance(0.4) ? 1 : 0;
+        log(`<strong>${role.name}</strong> encouraged you. Your spirit grew.`);
+      }
+      endTurn();
+      return;
+    }
+    banner('No one nearby to talk to.', 'bad');
+  }
+
+  function useTile(){
+    if(game.ended) return;
+    const sp = specialAt(game.player.x, game.player.y);
+    if(!sp){
+      if(game.player.food.length){
+        const food = game.player.food.shift();
+        game.player.hp = clamp(game.player.hp + food.heal, 0, game.player.maxHp);
+        log(`You ate <strong>${food.name}</strong> and recovered <strong>${food.heal}</strong> HP.`);
+        endTurn();
+      } else {
+        banner('Nothing useful here.', 'bad');
+      }
+      return;
+    }
+
+    if(sp.type === 'church'){
+      if(game.player.mission && game.player.mission.type === 'charity' && !game.player.mission.done && game.player.food.length){
+        game.player.food.shift();
+        game.player.mission.done = true;
+        log(`You donated food to the church pantry. Mission ready to turn in on a blue job tile.`);
+      }
+      game.player.hp = game.player.maxHp;
+      game.player.spirit += 1;
+      if(chance(0.5)) game.player.defense += 1;
+      saveAtChurch();
+      log(`You rested at church, recovered fully, and received a quiet strength boost.`);
+      banner('Saved at church.', 'good');
+      endTurn(true);
+      return;
+    }
+
+    if(sp.type === 'shop'){
+      shopMenu(sp.x + ',' + sp.y);
+      return;
+    }
+
+    if(sp.type === 'mission'){
+      turnInMission();
+      return;
+    }
+
+    if(sp.type === 'npc'){
+      const role = pick(game.npcRoles);
+      const perks = [
+        () => { game.player.money += 20; log(`${role.name} slipped you <strong>$20</strong> and said, For the cause.`); },
+        () => { game.player.food.push({type:'food', name:'Community Chili Cup', heal:12, price:0}); log(`${role.name} handed you a <strong>Community Chili Cup</strong>.`); },
+        () => { game.clues += 1; if(game.clues>=4) game.discoveredLair = true; log(`${role.name} gave you a clue about ${game.villain}.`); },
+        () => { game.player.attack += 1; log(`${role.name} shared a very questionable self-defense tip. Attack +1.`); }
+      ];
+      pick(perks)();
+      endTurn();
+      return;
+    }
+
+    if(sp.type === 'lair'){
+      if(game.discoveredLair) bossFight();
+      else banner('You sense something here, but you need more clues.', 'gold');
+    }
+  }
+
+  function shopMenu(id){
+    if(!game.shops[id]) game.shops[id] = buildShopStock();
+    const stock = game.shops[id];
+    let text = `Welcome to the store.\nYour money: $${game.player.money}\n\n`;
+    stock.forEach((it, i) => {
+      const desc = it.type === 'weapon' ? `ATK +${it.atk}` :
+                   it.type === 'food' ? `Heal ${it.heal}` :
+                   `${it.stat} +${it.amt}`;
+      text += `${i+1}. ${it.name} — $${it.price} (${desc})\n`;
+    });
+    text += `\nType the number to buy. Cancel to leave.`;
+    const choice = prompt(text);
+    const idx = Number(choice) - 1;
+    const it = stock[idx];
+    if(!it) return;
+    if(game.player.money < it.price){
+      banner('Not enough money.', 'bad');
+      return;
+    }
+    game.player.money -= it.price;
+    if(it.type === 'weapon'){
+      game.player.weapon = {name:it.name, atk:it.atk};
+      log(`You bought <strong>${it.name}</strong>.`);
+    } else if(it.type === 'food'){
+      game.player.food.push(it);
+      log(`You bought <strong>${it.name}</strong>.`);
+    } else {
+      game.player[it.stat] += it.amt;
+      game.player.buffs.push(it);
+      log(`You bought <strong>${it.name}</strong>. ${it.stat} +${it.amt}.`);
+    }
+    stock.splice(idx, 1);
+    endTurn();
+  }
+
+  function generateMission(){
+    const types = [
+      {
+        type:'clear',
+        name:'Clean Up the Block',
+        desc:'Defeat gang members for a neighborhood reward.',
+        goal:rnd(2,4),
+        reward:rnd(35,70),
+        progress:0, done:false
+      },
+      {
+        type:'delivery',
+        name:'Urgent Grocery Run',
+        desc:'Make it to another mission tile in time.',
+        goal:rnd(12,18),
+        reward:rnd(28,56),
+        progress:0, done:false,
+        startTurn: game.turns
+      },
+      {
+        type:'charity',
+        name:'Help the Church Pantry',
+        desc:'Donate one food item at a church.',
+        goal:1, reward:rnd(24,50), progress:0, done:false
+      }
+    ];
+    return pick(types);
+  }
+
+  function takeMission(){
+    if(game.ended) return;
+    const sp = specialAt(game.player.x, game.player.y);
+    if(!sp || sp.type !== 'mission'){
+      banner('Stand on a blue job tile.', 'bad');
+      return;
+    }
+    if(game.player.mission && !game.player.mission.done){
+      banner('Finish your current mission first.', 'gold');
+      return;
+    }
+    game.player.mission = generateMission();
+    log(`New mission: <strong>${game.player.mission.name}</strong> — ${game.player.mission.desc}`);
+    endTurn();
+  }
+
+  function turnInMission(){
+    const p = game.player;
+    if(!p.mission){
+      log(`The job board reads: No active mission. Press Take Mission if you want some work.`);
+      return;
+    }
+
+    if(p.mission.type === 'delivery' && !p.mission.done){
+      const within = game.turns - p.mission.startTurn <= p.mission.goal;
+      if(within && specialAt(p.x,p.y)?.type === 'mission'){
+        p.mission.done = true;
+      }
+    }
+
+    if(p.mission.done){
+      p.money += p.mission.reward;
+      game.clues += chance(0.6) ? 1 : 0;
+      if(game.clues >= 4) game.discoveredLair = true;
+      log(`Mission turned in. Reward: <strong>$${p.mission.reward}</strong>.`);
+      banner('Paid.', 'good');
+      p.mission = null;
+      endTurn();
+    } else {
+      banner('Mission not complete yet.', 'bad');
+    }
+  }
+
+  function endTurn(rested=false){
+    game.turns++;
+    if(game.turns % 18 === 0 && !rested){
+      game.day++;
+      log(`<strong>Day ${game.day}</strong> begins. The city feels meaner.`);
+      spawnEnemies(rnd(2,4));
+    }
+
+    const m = game.player.mission;
+    if(m && m.type === 'delivery' && !m.done){
+      const elapsed = game.turns - m.startTurn;
+      if(elapsed > m.goal){
+        log(`You failed the delivery. Somewhere, ice cream melted.`);
+        game.player.mission = null;
+      }
+    }
+
+    for(const e of game.enemies){
+      if(chance(0.55)){
+        const dirs = shuffle([[1,0],[-1,0],[0,1],[0,-1]]);
+        for(const [dx,dy] of dirs){
+          const nx=e.x+dx, ny=e.y+dy;
+          if(tilePassable(nx,ny) && !enemyAt(nx,ny) && !(game.player.x===nx && game.player.y===ny) && !(specialAt(nx,ny)?.type === 'lair')){
+            e.x = nx; e.y = ny; break;
+          }
+        }
+      }
+      if(Math.abs(e.x-game.player.x)+Math.abs(e.y-game.player.y)===1 && chance(0.18)){
+        const chip = Math.max(1, rnd(1,3) + e.atk - game.player.defense);
+        game.player.hp -= chip;
+        log(`${e.name} took a cheap shot for <strong>${chip}</strong>.`);
+        if(game.player.hp <= 0){ loseRun('PapaSweet got jumped in the street.'); return; }
+      }
+    }
+    render();
+  }
+
+  function spawnEnemies(n){
+    for(let i=0;i<n;i++){
+      let tries=0;
+      while(tries++ < 50){
+        const x=rnd(1,size-2), y=rnd(1,size-2);
+        if(tilePassable(x,y) && !specialAt(x,y) && !enemyAt(x,y) && !(game.player.x===x&&game.player.y===y)){
+          game.enemies.push(makeEnemy(x,y));
+          break;
+        }
+      }
+    }
+  }
+
+  function saveAtChurch(){
+    game.saveSpot = {x:game.player.x, y:game.player.y};
+    localStorage.setItem(saveKey, JSON.stringify(game));
+  }
+
+  function loadRun(){
+    const raw = localStorage.getItem(saveKey);
+    if(!raw){
+      banner('No church save found.', 'bad');
+      return;
+    }
+    try {
+      game = JSON.parse(raw);
+      el.log.innerHTML = '';
+      log(`Church save loaded. You stepped back into the city with purpose.`);
+      render();
+    } catch {
+      banner('Save data failed to load.', 'bad');
+    }
+  }
+
+  function loseRun(reason){
+    game.ended = true;
+    game.win = false;
+    banner('Run over.', 'bad');
+    log(`<strong>Run over.</strong> ${reason}`);
+    render();
+  }
+
+  function bind(){
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      if(['arrowup','w'].includes(k)){ e.preventDefault(); move(0,-1); }
+      else if(['arrowdown','s'].includes(k)){ e.preventDefault(); move(0,1); }
+      else if(['arrowleft','a'].includes(k)){ e.preventDefault(); move(-1,0); }
+      else if(['arrowright','d'].includes(k)){ e.preventDefault(); move(1,0); }
+      else if(k==='e'){ useTile(); }
+      else if(k==='t'){ tryTalk(); }
+      else if(k==='m'){ takeMission(); }
+      else if(k==='n'){ startNew(); }
+      else if(k==='l'){ loadRun(); }
+    });
+    document.getElementById('newRunBtn').onclick = startNew;
+    document.getElementById('loadBtn').onclick = loadRun;
+    document.getElementById('restBtn').onclick = useTile;
+    document.getElementById('talkBtn').onclick = tryTalk;
+    document.getElementById('missionBtn').onclick = takeMission;
+    document.getElementById('helpBtn').onclick = () => {
+      alert(`Goal:\nRescue MommaSweet by gathering clues and defeating the villain.\n\nTips:\n- Visit churches to rest, save, and gain stat boosts.\n- Stand on blue tiles to take missions and earn money.\n- Stand on yellow tiles to shop for gear and food.\n- If your speech and spirit are solid, use Talk/Gospel near gang members to reform them instead of fighting.\n- Find 4 clues to reveal the boss lair.\n- Every new run reshuffles enemies, items, NPC roles, and shop stock.`);
+    };
+  }
+
+  function startNew(){
+    game = createRun();
+    el.log.innerHTML = '';
+    log(`<strong>New run started.</strong> PapaSweet hit the streets to rescue MommaSweet from ${game.villain}.`);
+    log(`The regulars are out there somewhere: ${game.npcRoles.map(n => `${n.name} (${n.role})`).join(', ')}.`);
+    render();
+  }
+
+  bind();
+  startNew();
+})();
+</script>
+</body>
+</html>
